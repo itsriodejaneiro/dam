@@ -14,7 +14,14 @@
 	} from '$lib/components';
 	import { auth, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
-	import { fitCamera, fullCamera, phaseColor, stepHighlight, stepNumbers } from '$lib/journey';
+	import {
+		fitCamera,
+		fullCamera,
+		liveHighlight,
+		phaseColor,
+		stepHighlight,
+		stepNumbers
+	} from '$lib/journey';
 	import type { JourneyInput, StepInput } from '$lib/services/journeys';
 	import type {
 		CameraState,
@@ -158,6 +165,8 @@
 			steps = stepRecords.map(draftOf);
 			knownStepIds = new Set(stepRecords.map((s) => s.id));
 			graph = await journeys.getJourneyGraph(journey.map);
+			// Before the saved key: what left the map goes with the next Save, and is no edit.
+			for (const s of steps) Object.assign(s, liveHighlight(s, graph));
 			savedKey = JSON.stringify([journeyPayload(), stepsPayload()]);
 			selectStep(steps[0]?.id ?? null);
 		} catch {

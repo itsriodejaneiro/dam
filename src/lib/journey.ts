@@ -6,6 +6,7 @@ import type {
 	CameraState,
 	GraphHighlight,
 	Journey,
+	JourneyGraphData,
 	JourneyStep,
 	PhaseTransition,
 	VisNode
@@ -74,10 +75,26 @@ export function fitCamera(nodeIds: string[], nodes: VisNode[], types: NodeType[]
 	};
 }
 
+type StepHighlight = Pick<JourneyStep, 'highlight_nodes' | 'highlight_edges'>;
+
+/**
+ * A step's choices that are still on the graph. A node taken off a map, and its
+ * connections, stay in the step's record, and would dim the graph around nothing.
+ */
+export function liveHighlight(
+	step: StepHighlight,
+	graph: Pick<JourneyGraphData, 'nodes' | 'edges'>
+): StepHighlight {
+	const nodes = new Set(graph.nodes.map((n) => n.id));
+	const edges = new Set(graph.edges.map((e) => e.id));
+	return {
+		highlight_nodes: step.highlight_nodes.filter((id) => nodes.has(id)),
+		highlight_edges: step.highlight_edges.filter((id) => edges.has(id))
+	};
+}
+
 /** What a step lights up; null when it chooses nothing, and the whole graph shows. */
-export function stepHighlight(
-	step: Pick<JourneyStep, 'highlight_nodes' | 'highlight_edges'>
-): GraphHighlight | null {
+export function stepHighlight(step: StepHighlight): GraphHighlight | null {
 	if (step.highlight_nodes.length === 0 && step.highlight_edges.length === 0) return null;
 	return { nodes: new Set(step.highlight_nodes), edges: new Set(step.highlight_edges) };
 }
