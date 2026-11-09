@@ -7,6 +7,8 @@ services:
       - image
 
   dam-pocketbase:
+    # A forgotten container stays down when the Docker engine comes back, and frees its port.
+    restart: "no"
     # Each checkout publishes the port of its own .env, on loopback only.
     ports:
       - 127.0.0.1:${PB_PORT:?set PB_PORT in .env}:8090
