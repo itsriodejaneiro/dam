@@ -277,7 +277,8 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 			{ name: 'locale', type: 'text', required: true },
 			{ name: 'label', type: 'text', required: true },
 			{ name: 'label_full', type: 'text' },
-			{ name: 'description', type: 'editor' }
+			// One locale's share of a journey step's `body`, which holds all four.
+			{ name: 'description', type: 'editor', maxSize: 125000 }
 		],
 		indexes: ['CREATE UNIQUE INDEX idx_node_translations_pair ON node_translations (node, locale)']
 	});

@@ -157,3 +157,21 @@ test('a hostile input stays linear', () => {
 		assert.ok(performance.now() - started < 2000, piece);
 	}
 });
+
+test('pieces that open one tag and close another stay linear', () => {
+	for (const [opening, closing] of [
+		['<p>', '</li>'],
+		['<ul><li>', '</a>'],
+		['<b><i>', '</u>']
+	]) {
+		const started = performance.now();
+		sanitizeHtml(opening.repeat(62000) + closing.repeat(62000));
+		assert.ok(performance.now() - started < 2000, opening + closing);
+	}
+});
+
+test('a closing tag closes what is open inside it, and only a tag that is open', () => {
+	assert.equal(sanitizeHtml('<p><b><i>a</p>b</i></b>'), '<p><b><i>a</i></b></p>b');
+	assert.equal(sanitizeHtml('<b>a<b>c</b>d</b>e</b>'), '<b>a<b>c</b>d</b>e');
+	assert.equal(sanitizeHtml('<p>a</br>b</p>'), '<p>ab</p>');
+});

@@ -168,6 +168,14 @@ export function sanitizeHtml(input: unknown): string {
 	if (typeof input !== 'string') return '';
 	let output = '';
 	const open: string[] = [];
+	// How many of each tag are in `open`, so that a closing tag never searches it.
+	const depth = new Map<string, number>();
+	const closeLast = (): string => {
+		const name = open.pop() as string;
+		depth.set(name, (depth.get(name) as number) - 1);
+		output += `</${name}>`;
+		return name;
+	};
 	let i = 0;
 	while (i < input.length) {
 		const lt = input.indexOf('<', i);
@@ -200,15 +208,17 @@ export function sanitizeHtml(input: unknown): string {
 		if (!ALLOWED_TAGS.has(tag.name)) continue;
 
 		if (tag.closing) {
-			const at = open.lastIndexOf(tag.name);
-			if (at !== -1) while (open.length > at) output += `</${open.pop()}>`;
+			if (depth.get(tag.name)) while (closeLast() !== tag.name);
 			continue;
 		}
 		const opening = openingTag(tag);
 		if (!opening) continue;
 		output += opening;
-		if (tag.name !== 'br') open.push(tag.name);
+		if (tag.name !== 'br') {
+			open.push(tag.name);
+			depth.set(tag.name, (depth.get(tag.name) ?? 0) + 1);
+		}
 	}
-	while (open.length > 0) output += `</${open.pop()}>`;
+	while (open.length > 0) closeLast();
 	return output;
 }
