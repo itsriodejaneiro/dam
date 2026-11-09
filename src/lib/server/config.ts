@@ -1,23 +1,34 @@
-/* The project's configuration state (server-side). Checks whether PocketBase
-   already has the schema. Caches a positive result: once configured, always
-   configured (the schema does not vanish on its own). While not configured, it
-   re-checks on every request (a transient first-boot state). */
+/* The project's configuration state (server-side): whether PocketBase has the schema.
+
+   False means one thing: PocketBase answered that there is no schema. Anything else that
+   gets in the way of asking (a wrong superuser password, PocketBase down) serves the site,
+   since reading the map needs neither, and goes to the log.
+
+   Serving is cached for a minute, so a schema dropped from outside reopens the setup within
+   that minute, and a bad password costs one attempt a minute, well under the login's rate
+   limit. "No schema" is never cached: it ends the moment /setup runs. */
 
 import { getSuperuserClient } from '$lib/services/pb.server';
 import { isConfigured } from './setup';
 
-let cached: boolean | null = null;
+const TTL_MS = 60_000;
 
-/** True if the project already has a schema in PocketBase. */
+let servingUntil = 0;
+
+/** False only when PocketBase says the project has no schema. Never throws. */
 export async function projectConfigured(): Promise<boolean> {
-	if (cached === true) return true;
-	const pb = await getSuperuserClient();
-	const ok = await isConfigured(pb);
-	if (ok) cached = true;
-	return ok;
+	if (Date.now() < servingUntil) return true;
+	let configured = true;
+	try {
+		configured = await isConfigured(await getSuperuserClient());
+	} catch (err) {
+		console.error('[config] cannot check the schema, serving the site:', err);
+	}
+	if (configured) servingUntil = Date.now() + TTL_MS;
+	return configured;
 }
 
 /** Resets the cache (call after running the setup). */
 export function resetConfigCache(): void {
-	cached = null;
+	servingUntil = 0;
 }
