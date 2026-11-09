@@ -7,6 +7,7 @@
 
 import PocketBase, { type RecordModel } from 'pocketbase';
 import { env } from '$env/dynamic/public';
+import { serverPbUrl } from '$lib/services/pb.server';
 import { LOCALE_CODES, type MessageKey } from '$lib/i18n/messages';
 import {
 	DEFAULT_SETTINGS,
@@ -28,7 +29,7 @@ let inFlight: Promise<DeploySettings> | null = null;
 /** Bumped on invalidation, so a read begun before a save never caches the old record. */
 let generation = 0;
 
-function fromRecord(pb: PocketBase, record: RecordModel): DeploySettings {
+function fromRecord(record: RecordModel): DeploySettings {
 	const locales: string[] =
 		Array.isArray(record.locales) && record.locales.length > 0
 			? record.locales
@@ -38,7 +39,8 @@ function fromRecord(pb: PocketBase, record: RecordModel): DeploySettings {
 		locales,
 		defaultLocale: locales.includes(record.default_locale) ? record.default_locale : locales[0],
 		theme: isPack(record.theme) ? record.theme : DEFAULT_SETTINGS.theme,
-		logo: record.logo ? pb.files.getURL(record, record.logo) : null,
+		// the browser loads it, so the public URL
+		logo: record.logo ? new PocketBase(env.PUBLIC_POCKETBASE_URL).files.getURL(record, record.logo) : null,
 		flag: record.flag || null,
 		journeys: record.journeys !== false
 	};
@@ -49,12 +51,12 @@ async function read(): Promise<DeploySettings> {
 	let value = DEFAULT_SETTINGS;
 	let ttl = RETRY_MS;
 	try {
-		const pb = new PocketBase(env.PUBLIC_POCKETBASE_URL);
+		const pb = new PocketBase(serverPbUrl());
 		const record = await pb.collection('settings').getFirstListItem('', {
 			requestKey: null,
 			signal: AbortSignal.timeout(READ_TIMEOUT_MS)
 		});
-		value = fromRecord(pb, record);
+		value = fromRecord(record);
 		ttl = TTL_MS;
 	} catch {
 		/* no PocketBase or no record yet: the defaults */

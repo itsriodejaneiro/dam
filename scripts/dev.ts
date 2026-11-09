@@ -4,7 +4,7 @@
 //
 // Everything that separates one checkout from another (Compose project, ports) comes from
 // its .env, which is what lets several `bun run dev` run side by side.
-import { copyFileSync, existsSync, readFileSync } from 'node:fs';
+import { appendFileSync, copyFileSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseEnv } from 'node:util';
@@ -41,6 +41,13 @@ const { PB_PORT, PUBLIC_POCKETBASE_URL: PB_URL, PB_ADMIN_URL, APP_URL } = proces
 const { PB_SUPERUSER_EMAIL: EMAIL, PB_SUPERUSER_PASSWORD: PASSWORD } = process.env;
 if (!PB_PORT || !PB_URL || !APP_URL) die('.env lacks PB_PORT, PUBLIC_POCKETBASE_URL or APP_URL (see .env.example)');
 const APP_PORT = Number(new URL(APP_URL).port) || 5173;
+
+// compose.yaml requires ORIGIN on every command, `logs` included, and a checkout's .env may lack it.
+if (!process.env.ORIGIN) {
+	appendFileSync(ENV, `ORIGIN=${APP_URL}\n`);
+	process.env.ORIGIN = APP_URL;
+	console.log('✓ ORIGIN added to .env');
+}
 
 // --- Docker -----------------------------------------------------------------
 const INSTALL = 'Docker is required: Docker Desktop, Docker Engine, or on macOS `brew install colima docker docker-compose`';
