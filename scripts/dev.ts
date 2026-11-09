@@ -71,7 +71,8 @@ if (!Bun.spawnSync(['docker', 'info'], quiet).success) {
 	if ((await colima.exited) !== 0) die('`colima start` failed');
 }
 
-const compose = (...args: string[]) => Bun.spawn([...COMPOSE, ...args], { cwd: ROOT, ...loud }).exited;
+// `env` by name: left out, a child gets the environment from before this script changed it.
+const compose = (...args: string[]) => Bun.spawn([...COMPOSE, ...args], { cwd: ROOT, env: process.env, ...loud }).exited;
 
 // --- Ports ------------------------------------------------------------------
 /** Someone answers on the port? Connects rather than listens, so it also sees a process on `::1` only. */
@@ -111,6 +112,11 @@ process.on('SIGTERM', () => void stop());
 
 // --- PocketBase -------------------------------------------------------------
 console.log('▸ PocketBase');
+// compose.yaml puts this on the image's tag: a changed entrypoint is a tag no image has
+// yet, so `up` builds it and replaces the container of every checkout that runs this.
+const imageHash = new Bun.CryptoHasher('sha256');
+for (const file of ['pocketbase/Dockerfile', 'pocketbase/entrypoint.sh']) imageHash.update(readFileSync(join(ROOT, file)));
+process.env.PB_IMAGE_SUFFIX = `-${imageHash.digest('hex').slice(0, 8)}`;
 if ((await compose('up', '-d')) !== 0) await stop(1);
 
 async function waitForPb(attempts = 120): Promise<boolean> {

@@ -9,9 +9,11 @@ services:
   # two databases. Two DAM deploys share this name there, so the app calls the alias
   # below instead.
   dam-pocketbase:
-    # One image for every checkout, so a new worktree builds nothing. The tag carries
-    # the version, so moving the pin builds again and an unchanged one works offline.
-    image: dam-pocketbase:0.39.7
+    # One image for every checkout with the same build files, so a new worktree builds
+    # nothing. The tag carries the version, so moving the pin builds again and an unchanged
+    # one works offline; `bun run dev` adds a hash of the Dockerfile and the entrypoint,
+    # since `up` keeps any image it finds under the tag.
+    image: dam-pocketbase:0.39.7${PB_IMAGE_SUFFIX:-}
     build:
       context: .
       dockerfile: pocketbase/Dockerfile
