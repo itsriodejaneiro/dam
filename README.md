@@ -4,6 +4,8 @@ The Digital Assets Map (DAM) is an interactive map of a country's digital infras
 
 Each deployment runs its own app and its own PocketBase. A country is configuration and content, kept in that PocketBase and edited in the app.
 
+**The manual:** <https://itsriodejaneiro.github.io/dam/>
+
 ## Stack
 
 - **SvelteKit** (Svelte 5 runes, TypeScript)

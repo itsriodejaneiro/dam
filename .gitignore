@@ -31,3 +31,8 @@ vite.config.ts.timestamp-*
 
 # Temporary files
 tmp
+
+# The manual
+docs/.vitepress/dist
+docs/.vitepress/cache
+e2e/shots/results
