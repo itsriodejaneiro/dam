@@ -13,6 +13,7 @@ import {
 	DEFAULT_SETTINGS,
 	LOGO_MAX_BYTES,
 	LOGO_TYPES,
+	storedName,
 	type DeploySettings
 } from '$lib/settings';
 import { isPack } from '$lib/theme';
@@ -40,7 +41,7 @@ function fromRecord(record: RecordModel): DeploySettings {
 	const known = knownLocales(record.locales);
 	const locales = known.length > 0 ? known : DEFAULT_SETTINGS.locales;
 	return {
-		name: (record.name as Record<string, string> | null) ?? {},
+		name: storedName(record.name),
 		locales,
 		defaultLocale: locales.includes(record.default_locale) ? record.default_locale : locales[0],
 		theme: isPack(record.theme) ? record.theme : DEFAULT_SETTINGS.theme,

@@ -4,6 +4,7 @@
    the record. Relative imports only: the CLI runs outside Vite. */
 
 import { flagUrl } from './flag';
+import { LOCALE_CODES } from './i18n/messages';
 import { DEFAULT_PACK, type ThemePack } from './theme';
 
 export const DEFAULT_NAME = 'Digital Assets Map';
@@ -36,6 +37,19 @@ export const DEFAULT_SETTINGS: DeploySettings = {
 	flag: null,
 	journeys: true
 };
+
+/** The stored name, text under known locale codes only. An admin account writes this record
+    over the REST API, where the settings form never runs, and any other value fails every
+    page: a number breaks the texts built from it and a `__proto__` key the page's data. */
+export function storedName(stored: unknown): Record<string, string> {
+	const name: Record<string, string> = {};
+	if (typeof stored !== 'object' || stored === null) return name;
+	for (const code of LOCALE_CODES) {
+		const value = (stored as Record<string, unknown>)[code];
+		if (typeof value === 'string') name[code] = value;
+	}
+	return name;
+}
 
 /** The name that fills "of {0}" texts. Null when the deploy names no place of its own:
     blank, or still the product's name, and the texts take their generic form. */
