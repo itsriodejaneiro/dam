@@ -8,6 +8,10 @@ export const load: PageLoad = async ({ parent }) => {
 	return {
 		titleKey: 'journeys.title',
 		subtitleKey: 'nav.journeys',
-		journeys: await journeys.getPublishedJourneys()
+		// PocketBase down or without its schema: the page serves, as the map pages do.
+		journeys: await journeys.getPublishedJourneys().catch((err) => {
+			console.error('[journeys] cannot read the list, showing it empty:', err);
+			return [];
+		})
 	};
 };
