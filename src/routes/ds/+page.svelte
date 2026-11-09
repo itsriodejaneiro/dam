@@ -3,10 +3,11 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle } from '$lib/components';
-	import type { DocumentState, PhaseTransition, JourneyDocument } from '$lib/types/journey';
-	import { auth } from '$lib/services';
-	import { m } from '$lib/i18n';
+	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph } from '$lib/components';
+	import type { DocumentState, GraphHighlight, PhaseTransition, JourneyDocument, VisEdge, VisNode } from '$lib/types/journey';
+	import { fullCamera, laneCenter } from '$lib/journey';
+	import { auth, type NodeType } from '$lib/services';
+	import { m, type Localized } from '$lib/i18n';
 
 	$effect(() => {
 		if (browser && !auth.isLoggedIn) goto('/login');
@@ -65,6 +66,83 @@
 		{ id: 'title-prov', label: { pt: 'Título provisório', en: 'Provisional title', fr: 'Titre foncier prov.', es: 'Título provisional' }, abbrev: { pt: 'Título prov.', en: 'Prov. title', fr: 'Titre prov.', es: 'Título prov.' }, unlockedAt: 'step-04' },
 		{ id: 'permit-c', label: { pt: 'Alvará de Construção', en: 'Construction Permit', fr: 'Permis de construire', es: 'Permiso de construcción' }, abbrev: { pt: 'Alvará C.', en: 'Const. P.', fr: 'Permis C.', es: 'Permiso C.' }, unlockedAt: 'step-05' },
 	];
+
+	// JourneyGraph mock: records in the shape the graph reads, at fixed positions, in the 4 languages.
+	const mockRecord = (id: string) => ({ id, collectionId: 'ds', collectionName: 'ds' });
+	const mockType = (id: string, layer_order: number, color_slot: number, label: Localized): NodeType => ({
+		...mockRecord(id),
+		slug: id,
+		layer_order,
+		color_slot,
+		base_size: 10,
+		expand: {
+			node_type_translations_via_node_type: Object.entries(label).map(([locale, text]) => ({
+				...mockRecord(`${id}-${locale}`),
+				node_type: id,
+				locale,
+				label: text,
+				label_plural: text
+			}))
+		}
+	});
+	const mockAgencies = mockType('agency', 1, 8, { pt: 'Órgãos', en: 'Agencies', fr: 'Organismes', es: 'Organismos' });
+	const mockHosting = mockType('hosting', 2, 6, { pt: 'Hospedagem', en: 'Hosting', fr: 'Hébergement', es: 'Alojamiento' });
+	const mockServices = mockType('service', 3, 1, { pt: 'Serviços', en: 'Services', fr: 'Services', es: 'Servicios' });
+	const mockTypes = [mockAgencies, mockHosting, mockServices];
+	const mockLinks = [
+		['regulator', 'registry'],
+		['regulator', 'dns'],
+		['regulator', 'data-center'],
+		['registry', 'data-center'],
+		['registry', 'cloud'],
+		['dns', 'data-center'],
+		['dns', 'portal'],
+		['data-center', 'portal'],
+		['data-center', 'payments'],
+		['cloud', 'payments']
+	];
+	const mockNode = (id: string, type: NodeType, x: number, label: Localized): VisNode => ({
+		id,
+		type,
+		x,
+		y: laneCenter(type.layer_order),
+		degree: mockLinks.filter((link) => link.includes(id)).length,
+		raw: {
+			...mockRecord(id),
+			type: type.id,
+			links: [],
+			order: 0,
+			weight_override: null,
+			expand: {
+				node_translations_via_node: Object.entries(label).map(([locale, text]) => ({
+					...mockRecord(`${id}-${locale}`),
+					node: id,
+					locale,
+					label: text,
+					label_full: '',
+					description: ''
+				}))
+			}
+		}
+	});
+	const mockNodes = [
+		mockNode('regulator', mockAgencies, 420, { pt: 'Regulador', en: 'Regulator', fr: 'Régulateur', es: 'Regulador' }),
+		mockNode('registry', mockAgencies, 860, { pt: 'Registro', en: 'Registry', fr: 'Registre', es: 'Registro' }),
+		mockNode('dns', mockHosting, 280, { pt: 'DNS', en: 'DNS', fr: 'DNS', es: 'DNS' }),
+		mockNode('data-center', mockHosting, 640, { pt: 'Data center', en: 'Data center', fr: 'Centre de données', es: 'Centro de datos' }),
+		mockNode('cloud', mockHosting, 1000, { pt: 'Nuvem', en: 'Cloud', fr: 'Cloud', es: 'Nube' }),
+		mockNode('portal', mockServices, 460, { pt: 'Portal', en: 'Portal', fr: 'Portail', es: 'Portal' }),
+		mockNode('payments', mockServices, 820, { pt: 'Pagamentos', en: 'Payments', fr: 'Paiements', es: 'Pagos' })
+	];
+	const mockEdges: VisEdge[] = mockLinks.map(([source, target]) => ({
+		id: `${source}-${target}`,
+		source: mockNodes.find((n) => n.id === source)!,
+		target: mockNodes.find((n) => n.id === target)!
+	}));
+	const mockHighlight: GraphHighlight = {
+		nodes: new Set(['regulator', 'data-center', 'portal']),
+		edges: new Set(['regulator-data-center', 'data-center-portal'])
+	};
 
 	let rteContent = $state(m('ds.editor_content'));
 </script>
@@ -242,6 +320,20 @@
 						<Tag colorSlot={2}>{m('ds.tag_credential')} (7)</Tag>
 						<Tag colorSlot={1}>{m('ds.tag_service')} (12)</Tag>
 					</div>
+				</div>
+			</div>
+
+			<div class="comp-card span-2">
+				<h3>JourneyGraph</h3>
+				<!-- The graph takes its parent's full height; the card's would count the heading too. -->
+				<div>
+					<JourneyGraph
+						nodes={mockNodes}
+						edges={mockEdges}
+						types={mockTypes}
+						camera={fullCamera(mockTypes)}
+						highlight={mockHighlight}
+					/>
 				</div>
 			</div>
 		</div>
@@ -433,5 +525,6 @@
 		.section-head, .hero { grid-template-columns: 1fr; gap: 0.5rem; }
 		.palette-arc { grid-template-columns: repeat(2, 1fr); }
 		.comp-grid { grid-template-columns: 1fr; }
+		.comp-card.span-2 { grid-column: auto; }
 	}
 </style>
