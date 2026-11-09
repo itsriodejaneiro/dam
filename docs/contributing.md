@@ -36,3 +36,11 @@ bun run shots    # in another; once per machine: bunx playwright install chromiu
 `bun run shots` runs against an empty database, or one it created itself. It goes through the setup wizard and erases what the stack holds, and it refuses a database with someone else's project: `bun run db:reset --yes` empties that one.
 
 Commit the pictures that changed with the page that describes them.
+
+## Releases
+
+A release is a tag `vX.Y.Z` on `main`, with its entry in `CHANGELOG.md` and a GitHub Release. The commits since the last release set the version: a `feat` is a minor, a `fix` a patch, and a breaking change (`feat!:` or a `BREAKING CHANGE:` footer) a major. `package.json` holds the version, and the screens show it.
+
+The maintainers cut the releases. A pull request leaves the version and `CHANGELOG.md` as they are: its commit messages become the lines of the changelog.
+
+A deployment pins a tag: run `git checkout v0.1.0` before you build, and move to the next tag to update, after you read its entry in `CHANGELOG.md`. `main` moves between releases.
