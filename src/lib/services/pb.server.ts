@@ -3,7 +3,11 @@ import { env as publicEnv } from '$env/dynamic/public';
 import { env } from '$env/dynamic/private';
 
 /** Where the server reaches PocketBase: PB_URL in a deploy, the browser's URL otherwise. */
-export const serverPbUrl = (): string => env.PB_URL || publicEnv.PUBLIC_POCKETBASE_URL;
+export function serverPbUrl(): string {
+	const url = env.PB_URL || publicEnv.PUBLIC_POCKETBASE_URL;
+	if (!url) throw new Error('PB_URL or PUBLIC_POCKETBASE_URL must be set');
+	return url;
+}
 
 const AUTH_CALL = /\/auth-(with-password|refresh)$/;
 
@@ -26,18 +30,26 @@ class SuperuserClient extends PocketBase {
 	}
 }
 
-const superuser = new SuperuserClient(serverPbUrl());
-// Every request shares this client: the SDK's default would abort one visitor's call
-// when another makes the same one.
-superuser.autoCancellation(false);
+let superuser: SuperuserClient | null = null;
 let signingIn: Promise<void> | null = null;
+
+/** Built on first use: the build imports this module with no environment. */
+function superuserClient(): SuperuserClient {
+	if (!superuser) {
+		superuser = new SuperuserClient(serverPbUrl());
+		// Every request shares this client: the SDK's default would abort one visitor's call
+		// when another makes the same one.
+		superuser.autoCancellation(false);
+	}
+	return superuser;
+}
 
 async function authenticate() {
 	const { PB_SUPERUSER_EMAIL, PB_SUPERUSER_PASSWORD } = env;
 	if (!PB_SUPERUSER_EMAIL || !PB_SUPERUSER_PASSWORD) {
 		throw new Error('PB_SUPERUSER_EMAIL and PB_SUPERUSER_PASSWORD must be set');
 	}
-	await superuser.collection('_superusers').authWithPassword(
+	await superuserClient().collection('_superusers').authWithPassword(
 		PB_SUPERUSER_EMAIL,
 		PB_SUPERUSER_PASSWORD,
 		{ autoRefreshThreshold: 30 * 60 }
@@ -53,6 +65,7 @@ function signIn(): Promise<void> {
 }
 
 export async function getSuperuserClient(): Promise<PocketBase> {
-	if (!superuser.authStore.isValid) await signIn();
-	return superuser;
+	const client = superuserClient();
+	if (!client.authStore.isValid) await signIn();
+	return client;
 }
