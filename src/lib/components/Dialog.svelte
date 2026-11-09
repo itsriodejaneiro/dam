@@ -46,11 +46,16 @@
 		open = false;
 		onclose?.();
 	}
+
+	// `close` arrives a task after `dialog.close()`: a dialog reopened in between is not closing.
+	function onNativeClose() {
+		if (!dialogEl?.open) close();
+	}
 </script>
 
 <dialog
 	bind:this={dialogEl}
-	onclose={close}
+	onclose={onNativeClose}
 	oncancel={onCancel}
 	onclick={onBackdropClick}
 	style="--dialog-width: {width}"
