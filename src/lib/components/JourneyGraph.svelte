@@ -2,7 +2,7 @@
 	import type { NodeType } from '$lib/services/types';
 	import type { CameraState, GraphHighlight, VisNode, VisEdge } from '$lib/types/journey';
 	import { localesState, localizedNode, localizedNodeType, m } from '$lib/i18n';
-	import { canvasHeight, TOP_PAD, LAYER_H, VIS_W } from '$lib/journey';
+	import { canvasHeight, laneTops, VIS_W } from '$lib/journey';
 
 	interface Props {
 		nodes: VisNode[];
@@ -46,10 +46,10 @@
 	const LABEL_X = 32;
 
 	const visH = $derived(canvasHeight(types));
+	const tops = $derived(laneTops(types));
 
 	function bandTop(typ: NodeType): number {
-		const idx = Math.max(0, typ.layer_order - 1);
-		return TOP_PAD + idx * LAYER_H;
+		return tops.get(typ.id)!;
 	}
 
 	function sizeOf(n: VisNode): number {

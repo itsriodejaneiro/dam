@@ -1319,6 +1319,18 @@ export const messages = {
 		es: 'Las cámaras y los destacados de todos los pasos se borrarán: las posiciones son de cada mapa.'
 	},
 	'journeys_admin.confirm_map_action': { pt: 'Trocar', en: 'Change', fr: 'Changer', es: 'Cambiar' },
+	'journeys_admin.confirm_unpublish_title': {
+		pt: 'Despublicar com alterações por salvar?',
+		en: 'Unpublish with unsaved changes?',
+		fr: 'Dépublier avec des modifications non enregistrées ?',
+		es: '¿Despublicar con cambios sin guardar?'
+	},
+	'journeys_admin.confirm_unpublish_desc': {
+		pt: 'A jornada sai do site agora. As alterações ficam aqui no editor, por salvar.',
+		en: 'The journey leaves the site now. Your changes stay here in the editor, unsaved.',
+		fr: "Le parcours quitte le site maintenant. Vos modifications restent ici dans l'éditeur, non enregistrées.",
+		es: 'El recorrido sale del sitio ahora. Los cambios quedan aquí en el editor, sin guardar.'
+	},
 	'journeys_admin.leave_title': { pt: 'Sair sem salvar?', en: 'Leave without saving?', fr: 'Quitter sans enregistrer ?', es: '¿Salir sin guardar?' },
 	'journeys_admin.leave_desc': {
 		pt: 'As alterações por salvar serão perdidas.',

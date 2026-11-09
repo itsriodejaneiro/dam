@@ -6,6 +6,7 @@ import type {
 	CameraState,
 	GraphHighlight,
 	Journey,
+	JourneyGraphData,
 	JourneyStep,
 	PhaseTransition,
 	VisNode
@@ -13,16 +14,33 @@ import type {
 import type { Localized } from '$lib/i18n';
 
 export const VIS_W = 1280;
-export const LAYER_H = 160;
+export const LAYER_H = 160; // height of each layer; raise it for more breathing room
 export const TOP_PAD = 40;
 export const BOTTOM_PAD = 30;
 
 export const canvasHeight = (types: NodeType[]): number =>
 	TOP_PAD + BOTTOM_PAD + Math.max(1, types.length) * LAYER_H;
 
-/** The height of a category's lane on the graph. */
-export const laneCenter = (layerOrder: number): number =>
-	TOP_PAD + Math.max(0, layerOrder - 1) * LAYER_H + LAYER_H / 2;
+/** The height of the centre of the lane at this place among the categories, from 1. */
+export const laneCenter = (place: number): number =>
+	TOP_PAD + Math.max(0, place - 1) * LAYER_H + LAYER_H / 2;
+
+/**
+ * Where each category's lane starts, by category id. A lane is the category's place in the
+ * sorted list: `layer_order` only orders, and removing a category leaves a gap in its
+ * numbers while the canvas counts categories.
+ */
+export function laneTops(types: NodeType[]): Map<string, number> {
+	const sorted = [...types].sort((a, b) => a.layer_order - b.layer_order);
+	return new Map(sorted.map((t, i) => [t.id, TOP_PAD + i * LAYER_H]));
+}
+
+/**
+ * A saved height in the lane that starts at `top`, as far down the lane as it was saved.
+ * Removing or moving a category shifts the lanes under the positions already saved.
+ */
+export const heightInLane = (y: number, top: number): number =>
+	top + ((((y - TOP_PAD) % LAYER_H) + LAYER_H) % LAYER_H);
 
 /** The whole map in view. */
 export const fullCamera = (types: NodeType[]): CameraState => ({
@@ -57,10 +75,26 @@ export function fitCamera(nodeIds: string[], nodes: VisNode[], types: NodeType[]
 	};
 }
 
+type StepHighlight = Pick<JourneyStep, 'highlight_nodes' | 'highlight_edges'>;
+
+/**
+ * A step's choices that are still on the graph. A node taken off a map, and its
+ * connections, stay in the step's record, and would dim the graph around nothing.
+ */
+export function liveHighlight(
+	step: StepHighlight,
+	graph: Pick<JourneyGraphData, 'nodes' | 'edges'>
+): StepHighlight {
+	const nodes = new Set(graph.nodes.map((n) => n.id));
+	const edges = new Set(graph.edges.map((e) => e.id));
+	return {
+		highlight_nodes: step.highlight_nodes.filter((id) => nodes.has(id)),
+		highlight_edges: step.highlight_edges.filter((id) => edges.has(id))
+	};
+}
+
 /** What a step lights up; null when it chooses nothing, and the whole graph shows. */
-export function stepHighlight(
-	step: Pick<JourneyStep, 'highlight_nodes' | 'highlight_edges'>
-): GraphHighlight | null {
+export function stepHighlight(step: StepHighlight): GraphHighlight | null {
 	if (step.highlight_nodes.length === 0 && step.highlight_edges.length === 0) return null;
 	return { nodes: new Set(step.highlight_nodes), edges: new Set(step.highlight_edges) };
 }

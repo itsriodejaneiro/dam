@@ -19,6 +19,7 @@
 		fullCamera,
 		phaseColor,
 		phaseTransitions,
+		liveHighlight,
 		stepHighlight,
 		stepNumbers
 	} from '$lib/journey';
@@ -153,7 +154,9 @@
 		return activeStep.camera ?? fitCamera(activeStep.highlight_nodes, visNodes, types);
 	});
 
-	const highlight = $derived(activeStep ? stepHighlight(activeStep) : null);
+	const highlight = $derived(
+		activeStep ? stepHighlight(liveHighlight(activeStep, { nodes: visNodes, edges: visEdges })) : null
+	);
 
 	function onStepChange(stepId: string) {
 		// During programmatic scroll, ignore observer firing for other steps

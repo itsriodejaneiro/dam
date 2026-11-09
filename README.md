@@ -51,6 +51,8 @@ PB_SUPERUSER_PASSWORD=a-long-password
 docker compose -f compose.yaml -f compose.local.yaml up --build
 ```
 
+On a machine where Homebrew left the Compose plugin outside Docker's path, `docker compose` answers `unknown command`: run `docker-compose`, the standalone binary, with the same arguments. `bun run dev` accepts both.
+
 Open <http://localhost:3000>, which sends you to `/setup`, and sign in with the superuser in `.env`. Ctrl-C stops both services. `APP_PORT` and `PB_PORT` in `.env` change the two ports; keep `ORIGIN` and `PUBLIC_POCKETBASE_URL` in step with them.
 
 Name the files with `-f`: a bare `docker compose up` also merges `compose.override.yaml`, the development setup, which leaves the app to Vite.

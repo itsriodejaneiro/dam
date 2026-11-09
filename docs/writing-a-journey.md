@@ -54,7 +54,7 @@ The bar at the top stays on screen while you work.
 
 ![The preview of a draft](/screens/writing-a-journey-7.png)
 
-- **Publish** makes the journey public. It needs at least one step. In a published journey, **Save** reaches visitors at once; **Unpublish** takes it back.
+- **Publish** makes the journey public. It needs at least one step. In a published journey, **Save** reaches visitors at once; **Unpublish** takes it back. With unsaved changes, **Unpublish** asks first, and the changes stay in the editor, unsaved.
 
 The list also publishes and unpublishes, and removes a journey with its steps.
 

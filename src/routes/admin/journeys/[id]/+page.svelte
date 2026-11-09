@@ -14,7 +14,14 @@
 	} from '$lib/components';
 	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
-	import { fitCamera, fullCamera, phaseColor, stepHighlight, stepNumbers } from '$lib/journey';
+	import {
+		fitCamera,
+		fullCamera,
+		liveHighlight,
+		phaseColor,
+		stepHighlight,
+		stepNumbers
+	} from '$lib/journey';
 	import type { JourneyInput, StepInput } from '$lib/services/journeys';
 	import type {
 		CameraState,
@@ -156,6 +163,8 @@
 			steps = stepRecords.map(draftOf);
 			knownStepIds = new Set(stepRecords.map((s) => s.id));
 			graph = await journeys.getJourneyGraph(journey.map);
+			// Before the saved key: what left the map goes with the next Save, and is no edit.
+			for (const s of steps) Object.assign(s, liveHighlight(s, graph));
 			savedKey = JSON.stringify([journeyPayload(), stepsPayload()]);
 			selectStep(steps[0]?.id ?? null);
 		} catch {
@@ -381,21 +390,38 @@
 		}
 	}
 
-	async function togglePublished() {
-		if (!published && steps.length === 0) {
-			error = m('journeys_admin.error.no_steps');
-			return;
-		}
-		if (!(await save())) return;
+	async function setPublished(next: boolean) {
+		error = '';
 		publishing = true;
 		try {
-			await journeys.updateJourney(data.id, { published: !published });
-			published = !published;
+			await journeys.updateJourney(data.id, { published: next });
+			published = next;
 		} catch (err) {
 			error = (err as Error).message || m('journeys_admin.error.save');
 		} finally {
 			publishing = false;
 		}
+	}
+
+	async function publish() {
+		if (steps.length === 0) {
+			error = m('journeys_admin.error.no_steps');
+			return;
+		}
+		if (await save()) await setPublished(true);
+	}
+
+	let unpublishOpen = $state(false);
+
+	// Writes only the flag: an edit in progress stays in the page, away from the live journey.
+	function unpublish() {
+		if (dirty) unpublishOpen = true;
+		else void setPublished(false);
+	}
+
+	async function confirmUnpublish() {
+		unpublishOpen = false;
+		await setPublished(false);
 	}
 
 	async function preview() {
@@ -457,7 +483,12 @@
 				<Button variant="ghost" disabled={saving || publishing} onclick={preview}>
 					{m('journeys_admin.preview')}
 				</Button>
-				<Button variant="secondary" loading={publishing} disabled={saving} onclick={togglePublished}>
+				<Button
+					variant="secondary"
+					loading={publishing}
+					disabled={saving}
+					onclick={published ? unpublish : publish}
+				>
 					{published ? m('journeys_admin.unpublish') : m('journeys_admin.publish')}
 				</Button>
 				<Button loading={saving} disabled={!dirty || publishing} onclick={save}>
@@ -746,6 +777,15 @@
 	confirmLabel={m('journeys_admin.confirm_map_action')}
 	cancelLabel={m('common.cancel')}
 	onConfirm={confirmMap}
+/>
+
+<ConfirmDialog
+	bind:open={unpublishOpen}
+	title={m('journeys_admin.confirm_unpublish_title')}
+	description={m('journeys_admin.confirm_unpublish_desc')}
+	confirmLabel={m('journeys_admin.unpublish')}
+	cancelLabel={m('common.cancel')}
+	onConfirm={confirmUnpublish}
 />
 
 <ConfirmDialog

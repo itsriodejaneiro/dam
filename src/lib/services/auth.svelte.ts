@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import { page } from '$app/state';
 import { pb } from './pb';
 
 class AuthState {
@@ -39,6 +40,11 @@ class AuthState {
 	logout() {
 		pb.authStore.clear();
 	}
+
+	/** The sign-in page, returning to the page open now. */
+	loginPath(): string {
+		return `/login?redirect=${encodeURIComponent(page.url.pathname + page.url.search)}`;
+	}
 }
 
 export const auth = new AuthState();
@@ -47,6 +53,6 @@ export const auth = new AuthState();
     role goes to the home page: /login would send it straight back here. */
 export function requireAdmin() {
 	$effect(() => {
-		if (browser && !auth.isAdmin) goto(auth.isLoggedIn ? '/' : '/login');
+		if (browser && !auth.isAdmin) goto(auth.isLoggedIn ? '/' : auth.loginPath());
 	});
 }
