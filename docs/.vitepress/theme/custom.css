@@ -1,0 +1,55 @@
+/* The app's legacy pack (src/lib/styles/themes/legacy.css) in VitePress's tokens. The values
+   repeat here because VitePress switches modes with html.dark and the app with [data-mode]. */
+
+:root {
+	--vp-font-family-base: 'Fira Sans', system-ui, sans-serif;
+	--vp-font-family-mono: 'Fira Mono', monospace;
+
+	--vp-c-bg: #f5f1ea;
+	--vp-c-bg-alt: #ebe6dc;
+	--vp-c-bg-elv: #ffffff;
+	--vp-c-bg-soft: #ebe6dc;
+	--vp-c-divider: #e0d9cc;
+	--vp-c-border: #c9c0ad;
+	--vp-c-gutter: #e0d9cc;
+	--vp-c-text-1: #1a1d24;
+	--vp-c-text-2: #5e616b;
+	--vp-c-text-3: #94939a;
+
+	--vp-c-brand-1: #c75a1a;
+	--vp-c-brand-2: #b34f15;
+	--vp-c-brand-3: #c75a1a;
+	--vp-c-brand-soft: #fde8d4;
+
+	--vp-button-brand-text: #f5f1ea;
+	--vp-button-brand-hover-text: #f5f1ea;
+	--vp-button-brand-active-text: #f5f1ea;
+}
+
+.dark {
+	--vp-c-bg: #1a1825;
+	--vp-c-bg-alt: #14121e;
+	--vp-c-bg-elv: #252132;
+	--vp-c-bg-soft: #252132;
+	--vp-c-divider: #36314a;
+	--vp-c-border: #4a4565;
+	--vp-c-gutter: #14121e;
+	--vp-c-text-1: #ebe6f0;
+	--vp-c-text-2: #8b8599;
+	--vp-c-text-3: #5a5670;
+
+	--vp-c-brand-1: #ffc28f;
+	--vp-c-brand-2: #ffb377;
+	--vp-c-brand-3: #ffc28f;
+	--vp-c-brand-soft: #3a2c1e;
+
+	--vp-button-brand-text: #14121e;
+	--vp-button-brand-hover-text: #14121e;
+	--vp-button-brand-active-text: #14121e;
+}
+
+/* The screens have the app's own frame: a border sets them apart from the page. */
+.vp-doc img {
+	border: 1px solid var(--vp-c-divider);
+	border-radius: 4px;
+}
