@@ -582,10 +582,10 @@ export const messages = {
 	// ──────────────────────────────────────────────
 	'login.title': { pt: 'Entrar.', en: 'Sign in.', fr: 'Connexion.', es: 'Iniciar sesión.' },
 	'login.lede': {
-		pt: 'Acesso restrito a curadores. Use suas credenciais de superuser.',
-		en: 'Restricted access to curators. Use your superuser credentials.',
-		fr: 'Accès réservé aux curateurs. Utilisez vos identifiants de superutilisateur.',
-		es: 'Acceso restringido a curadores. Use sus credenciales de superusuario.'
+		pt: 'Acesso restrito a curadores. Entre como superuser ou com uma conta criada em Contas.',
+		en: 'Restricted access to curators. Sign in as the superuser or with an account created in Accounts.',
+		fr: 'Accès réservé aux curateurs. Connectez-vous en tant que superutilisateur ou avec un compte créé dans Comptes.',
+		es: 'Acceso restringido a curadores. Entre como superusuario o con una cuenta creada en Cuentas.'
 	},
 	'login.email': { pt: 'Email', en: 'Email', fr: 'E-mail', es: 'Correo' },
 	'login.password': { pt: 'Senha', en: 'Password', fr: 'Mot de passe', es: 'Contraseña' },
