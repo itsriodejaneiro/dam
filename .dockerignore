@@ -18,3 +18,7 @@ build
 .git
 .vscode
 .DS_Store
+
+# the manual and its tests never run in an image
+docs
+e2e
