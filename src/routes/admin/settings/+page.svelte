@@ -11,7 +11,7 @@
 	let { data, form } = $props();
 
 	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
+		if (browser && !auth.isLoggedIn) goto(auth.loginPath());
 	});
 
 	let saving = $state(false);

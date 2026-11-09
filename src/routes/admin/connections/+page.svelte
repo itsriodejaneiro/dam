@@ -17,7 +17,7 @@
 	import { localesState, localizedNode, localizedNodeType, m } from '$lib/i18n';
 
 	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
+		if (browser && !auth.isLoggedIn) goto(auth.loginPath());
 	});
 
 	let types = $state<NodeType[]>([]);

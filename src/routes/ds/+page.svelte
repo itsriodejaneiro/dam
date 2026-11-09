@@ -10,7 +10,7 @@
 	import { m, type Localized } from '$lib/i18n';
 
 	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
+		if (browser && !auth.isLoggedIn) goto(auth.loginPath());
 	});
 
 	// Swatches read the --node-slot-* resolved on <html>, reflecting the active pack.

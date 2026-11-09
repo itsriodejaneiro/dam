@@ -10,7 +10,7 @@
 	let { data } = $props();
 
 	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
+		if (browser && !auth.isLoggedIn) goto(auth.loginPath());
 	});
 
 	let journey = $state.raw<Journey | null>(null);

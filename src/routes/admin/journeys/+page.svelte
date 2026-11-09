@@ -10,7 +10,7 @@
 	import type { Journey } from '$lib/types/journey';
 
 	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
+		if (browser && !auth.isLoggedIn) goto(auth.loginPath());
 	});
 
 	let list = $state<Journey[]>([]);

@@ -35,7 +35,7 @@
 	let { data } = $props();
 
 	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
+		if (browser && !auth.isLoggedIn) goto(auth.loginPath());
 	});
 
 	type StepDraft = Omit<StepInput, 'order' | 'duration'> & { duration: Localized };

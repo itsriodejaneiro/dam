@@ -8,7 +8,7 @@
 	import { localesState, localizedMap, m, type Localized } from '$lib/i18n';
 
 	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
+		if (browser && !auth.isLoggedIn) goto(auth.loginPath());
 	});
 
 	let mapList = $state<MapRecord[]>([]);
