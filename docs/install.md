@@ -34,6 +34,8 @@ PB_SUPERUSER_PASSWORD=choose-a-long-password
 docker compose -f compose.yaml -f compose.local.yaml up --build
 ```
 
+Keep `--build` on every manual `up`: it rebuilds PocketBase's fixed image tag from your checkout, and `up` alone runs whatever image already has that tag. `bun run dev` adds a hash of the build files to the tag and needs no flag.
+
 On a machine where Homebrew left the Compose plugin outside Docker's path, `docker compose` answers `unknown command`: run `docker-compose`, the standalone binary, with the same arguments. `bun run dev` accepts both.
 
 Open <http://localhost:3000>. The PocketBase admin is at <http://localhost:8090/_/>.
