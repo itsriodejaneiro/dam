@@ -24,7 +24,7 @@
 
 <svelte:window onclick={onWindowClick} onkeydown={onKeydown} />
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 	<div class="settings" bind:this={el}>
 		<button
 			class="trigger"

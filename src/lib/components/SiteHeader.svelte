@@ -52,7 +52,7 @@
 				>{m('nav.journeys')}</a
 			>
 		{/if}
-		{#if auth.isLoggedIn}
+		{#if auth.isAdmin}
 			<span class="nav-sep"></span>
 			<a href="/admin/entities" class:active={page.url.pathname === '/admin/entities'}>
 				{m('nav.entities')}
@@ -117,7 +117,7 @@
 						>{m('nav.journeys')}</a
 					>
 				{/if}
-				{#if auth.isLoggedIn}
+				{#if auth.isAdmin}
 					<div class="drawer-sep"></div>
 					<a href="/admin/entities" class:active={page.url.pathname === '/admin/entities'}>
 						{m('nav.entities')}

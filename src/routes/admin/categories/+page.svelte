@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { ChevronUp, ChevronDown, Plus } from '@lucide/svelte';
 	import { AppMeta, Button, ConfirmDialog, Dialog, LocalizedInput } from '$lib/components';
-	import { auth, nodeTypes, type NodeType } from '$lib/services';
+	import { auth, requireAdmin, nodeTypes, type NodeType } from '$lib/services';
 	import {
 		localesState,
 		localizedNodeType,
@@ -12,9 +10,7 @@
 		type Localized
 	} from '$lib/i18n';
 
-	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
-	});
+	requireAdmin();
 
 	let types = $state<NodeType[]>([]);
 	let loading = $state(true);
@@ -221,7 +217,7 @@
 	}
 </script>
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 	<main class="admin-page">
 		<section class="admin-hero">
 			<AppMeta section={m('meta.admin')} />

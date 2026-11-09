@@ -161,12 +161,21 @@ async function limitAuthRoutes(pb: PocketBase, log: Logger): Promise<void> {
 	log('  ~ auth rate limit');
 }
 
+/** Until the first setup closes it, anyone can sign up in `users`. In an empty project an
+    account with no role came through that window, and it goes before the deploy opens. */
+async function removeEarlySignups(pb: PocketBase, log: Logger): Promise<void> {
+	const early = await pb.collection('users').getFullList({ filter: 'role = ""' });
+	for (const { id } of early) await pb.collection('users').delete(id);
+	if (early.length > 0) log(`  - accounts from before the setup: ${early.length}`);
+}
+
 /** Creates/updates every project collection and the settings record. Idempotent. */
 export async function setupCollections(pb: PocketBase, log: Logger = noop): Promise<void> {
 	const up = (name: string, definition: Record<string, unknown>) =>
 		upsertCollection(pb, name, definition, log);
 
 	await limitAuthRoutes(pb, log);
+	const empty = !(await isConfigured(pb));
 
 	// A new PocketBase ships `users` open to public signup: these rules close it.
 	await up('users', {
@@ -178,6 +187,7 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 			{ name: 'role', type: 'select', required: true, maxSelect: 1, values: [...ACCOUNT_ROLES] }
 		]
 	});
+	if (empty) await removeEarlySignups(pb, log);
 
 	const nodeTypesId = await up('node_types', {
 		name: 'node_types',

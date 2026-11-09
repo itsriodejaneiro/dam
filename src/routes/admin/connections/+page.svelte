@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -7,6 +6,7 @@
 	import { AppMeta, Button, ConfirmDialog, Dialog, EdgeDialog, Tag } from '$lib/components';
 	import {
 		auth,
+		requireAdmin,
 		edges,
 		nodeTypes,
 		nodes,
@@ -16,9 +16,7 @@
 	} from '$lib/services';
 	import { localesState, localizedNode, localizedNodeType, m } from '$lib/i18n';
 
-	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
-	});
+	requireAdmin();
 
 	let types = $state<NodeType[]>([]);
 	let nodeList = $state<Node[]>([]);
@@ -165,7 +163,7 @@
 	}
 </script>
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 	<main class="admin-page">
 		<section class="admin-hero">
 			<AppMeta section={m('meta.admin')} />

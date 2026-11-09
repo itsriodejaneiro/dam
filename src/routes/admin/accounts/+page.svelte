@@ -1,16 +1,12 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { Plus } from '@lucide/svelte';
 	import type { ClientResponseError } from 'pocketbase';
 	import { AppMeta, Button, ConfirmDialog, Dialog } from '$lib/components';
-	import { accounts, auth, type Account } from '$lib/services';
+	import { accounts, auth, requireAdmin, type Account } from '$lib/services';
 	import { m } from '$lib/i18n';
 
-	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
-	});
+	requireAdmin();
 
 	let list = $state<Account[]>([]);
 	let loading = $state(true);
@@ -104,7 +100,7 @@
 	}
 </script>
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 	<main class="admin-page">
 		<section class="admin-hero">
 			<AppMeta section={m('meta.admin')} />

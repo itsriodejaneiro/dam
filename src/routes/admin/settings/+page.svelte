@@ -1,18 +1,14 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { AppMeta, Button, SettingsFields } from '$lib/components';
-	import { auth } from '$lib/services/auth.svelte';
+	import { auth, requireAdmin } from '$lib/services/auth.svelte';
 	import { pb } from '$lib/services/pb';
 	import { m } from '$lib/i18n';
 
 	let { data, form } = $props();
 
-	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
-	});
+	requireAdmin();
 
 	let saving = $state(false);
 	// Bumped after a save, so the fields reload from the fresh settings (the logo above all).
@@ -29,7 +25,7 @@
 	};
 </script>
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 	<main>
 		<section class="hero">
 			<AppMeta section={m('meta.admin')} />

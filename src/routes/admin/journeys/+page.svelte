@@ -1,17 +1,14 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { Plus } from '@lucide/svelte';
 	import { AppMeta, Button, ConfirmDialog, Dialog, LocalizedInput, Pill } from '$lib/components';
-	import { auth, journeys, maps, type MapRecord } from '$lib/services';
+	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
 	import { countedSteps } from '$lib/journey';
 	import type { Journey } from '$lib/types/journey';
 
-	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
-	});
+	requireAdmin();
 
 	let list = $state<Journey[]>([]);
 	let mapList = $state<MapRecord[]>([]);
@@ -117,7 +114,7 @@
 	}
 </script>
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 	<main class="admin-page">
 		<section class="admin-hero">
 			<AppMeta section={m('meta.admin')} />

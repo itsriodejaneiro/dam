@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph } from '$lib/components';
 	import type { DocumentState, GraphHighlight, PhaseTransition, JourneyDocument, VisEdge, VisNode } from '$lib/types/journey';
 	import { fullCamera, laneCenter } from '$lib/journey';
-	import { auth, type NodeType } from '$lib/services';
+	import { auth, requireAdmin, type NodeType } from '$lib/services';
 	import { m, type Localized } from '$lib/i18n';
 
-	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
-	});
+	requireAdmin();
 
 	// Swatches read the --node-slot-* resolved on <html>, reflecting the active pack.
 	// A MutationObserver re-reads when data-theme/data-mode changes (PackSwitch/ThemeToggle).
@@ -147,7 +144,7 @@
 	let rteContent = $state(m('ds.editor_content'));
 </script>
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 <main>
 	<!-- HERO -->
 	<section class="hero">

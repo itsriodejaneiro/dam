@@ -12,7 +12,7 @@
 		LocalizedRichTextEditor,
 		Pill
 	} from '$lib/components';
-	import { auth, journeys, maps, type MapRecord } from '$lib/services';
+	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
 	import { fitCamera, fullCamera, phaseColor, stepHighlight, stepNumbers } from '$lib/journey';
 	import type { JourneyInput, StepInput } from '$lib/services/journeys';
@@ -27,9 +27,7 @@
 
 	let { data } = $props();
 
-	$effect(() => {
-		if (browser && !auth.isLoggedIn) goto('/login');
-	});
+	requireAdmin();
 
 	type StepDraft = Omit<StepInput, 'order' | 'duration'> & { duration: Localized };
 
@@ -426,7 +424,7 @@
 	}
 </script>
 
-{#if auth.isLoggedIn}
+{#if auth.isAdmin}
 	<main class="admin-page editor">
 		{#if loading}
 			<p class="admin-loading">

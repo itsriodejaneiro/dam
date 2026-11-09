@@ -1,5 +1,5 @@
 export { pb } from './pb';
-export { auth } from './auth.svelte';
+export { auth, requireAdmin } from './auth.svelte';
 
 export * from './types';
 export * as nodeTypes from './nodeTypes';
