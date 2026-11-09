@@ -7,7 +7,7 @@ test('the categories of the graph', async ({ page }) => {
 	await page.goto('/admin/categories');
 	await s.shot(page.getByText('Agencies', { exact: true }), { fullPage: true });
 
-	const firstRow = page.locator('.row', { hasText: 'Agencies' });
+	const firstRow = page.locator('.admin-row', { hasText: 'Agencies' });
 	await firstRow.getByRole('button', { name: 'edit' }).click();
 	const form = page.getByRole('dialog').filter({ hasText: 'Edit category' });
 	await s.shot(form.getByText('Base size'), { of: form });

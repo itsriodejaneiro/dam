@@ -14,7 +14,7 @@ test('the maps of a deployment', async ({ page }) => {
 	await s.shot(form.getByText('Slug'), { of: form });
 	await form.getByRole('button', { name: 'Create' }).click();
 
-	const row = page.locator('.row', { hasText: 'Hosting chain' });
+	const row = page.locator('.admin-row', { hasText: 'Hosting chain' });
 	await expect(row).toBeVisible();
 	await s.shot(page.locator('.badge', { hasText: 'main' }));
 
