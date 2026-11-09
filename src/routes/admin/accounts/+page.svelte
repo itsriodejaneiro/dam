@@ -107,7 +107,7 @@
 {#if auth.isLoggedIn}
 	<main class="admin-page">
 		<section class="admin-hero">
-			<AppMeta section="admin" />
+			<AppMeta section={m('meta.admin')} />
 			<div class="admin-head">
 				<div>
 					<h1>{m('accounts.title')}</h1>

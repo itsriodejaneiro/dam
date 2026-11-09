@@ -92,7 +92,7 @@
 
 <main>
 	<section class="setup">
-		<AppMeta section="setup" />
+		<AppMeta section={m('meta.setup')} />
 		<div class="wrap">
 			<h1>{m('setup.title')}</h1>
 

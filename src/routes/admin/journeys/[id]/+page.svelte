@@ -437,7 +437,7 @@
 			<p class="admin-error">{m('journeys_admin.error.load')}</p>
 		{:else}
 			<section class="admin-hero">
-				<AppMeta section="admin" />
+				<AppMeta section={m('meta.admin')} />
 				<div>
 					<a class="admin-action back" href="/admin/journeys">{m('journeys_admin.back')}</a>
 					<h1>{t(form.title, code) || m('journeys_admin.untitled')}</h1>

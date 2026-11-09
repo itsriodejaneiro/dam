@@ -73,7 +73,7 @@
 <main>
 	<!-- HERO -->
 	<section class="hero">
-		<AppMeta section="showcase" />
+		<AppMeta section={m('meta.showcase')} />
 		<div>
 			<h1>Design <em>{m('ds.hero_em')}</em>.</h1>
 			<p class="lede">

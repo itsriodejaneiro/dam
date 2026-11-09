@@ -168,7 +168,7 @@
 {#if auth.isLoggedIn}
 	<main>
 		<section class="hero">
-			<AppMeta section="admin" />
+			<AppMeta section={m('meta.admin')} />
 			<div class="head-row">
 				<div>
 					<h1>{m('connections.title')}</h1>

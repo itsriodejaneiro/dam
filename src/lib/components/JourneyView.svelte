@@ -195,7 +195,7 @@
 <main>
 	<!-- Hero intro -->
 	<section class="hero">
-		<AppMeta section="contexto" />
+		<AppMeta section={m('meta.context')} />
 		<div>
 			<h1>{tlocale(journey.title, code)}</h1>
 			<p class="lede">{tlocale(journey.description, code)}</p>

@@ -38,7 +38,7 @@
 
 <main>
 	<section class="login">
-		<AppMeta section="acesso" />
+		<AppMeta section={m('meta.access')} />
 		<div class="form-wrap">
 			<h1>{m('login.title')}</h1>
 			<p class="lede">{m('login.lede')}</p>

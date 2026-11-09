@@ -70,6 +70,16 @@ export const messages = {
 	'nav.menu_close': { pt: 'Fechar menu', en: 'Close menu', fr: 'Fermer le menu', es: 'Cerrar menú' },
 
 	// ──────────────────────────────────────────────
+	// META (AppMeta): short, the label sits in a 5rem column
+	// ──────────────────────────────────────────────
+	'meta.access': { pt: 'acesso', en: 'access', fr: 'accès', es: 'acceso' },
+	'meta.admin': { pt: 'admin', en: 'admin', fr: 'admin', es: 'admin' },
+	'meta.context': { pt: 'contexto', en: 'context', fr: 'contexte', es: 'contexto' },
+	'meta.datavis': { pt: 'datavis', en: 'datavis', fr: 'dataviz', es: 'dataviz' },
+	'meta.setup': { pt: 'setup', en: 'setup', fr: 'config', es: 'config' },
+	'meta.showcase': { pt: 'showcase', en: 'showcase', fr: 'vitrine', es: 'vitrina' },
+
+	// ──────────────────────────────────────────────
 	// THEME (ThemeToggle) + AUTH (AuthButton)
 	// ──────────────────────────────────────────────
 	'theme.mode_dark': { pt: 'escuro', en: 'dark', fr: 'sombre', es: 'oscuro' },

@@ -523,7 +523,7 @@
 
 <main>
 	<section class="hero">
-		<AppMeta section="datavis" />
+		<AppMeta section={m('meta.datavis')} />
 		<div>
 			<h1>{m('map_view.title')}</h1>
 			<p class="lede">{place ? m('map_view.lede', place) : m('map_view.lede_generic')}</p>

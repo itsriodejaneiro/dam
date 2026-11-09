@@ -13,7 +13,7 @@
 
 <main>
 	<section class="hero">
-		<AppMeta section="contexto" />
+		<AppMeta section={m('meta.context')} />
 		<div>
 			<h1>{m('journeys.title')}</h1>
 			<p class="lede">{place ? m('journeys.lede', place) : m('journeys.lede_generic')}</p>

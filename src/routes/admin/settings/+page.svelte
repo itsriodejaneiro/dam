@@ -32,7 +32,7 @@
 {#if auth.isLoggedIn}
 	<main>
 		<section class="hero">
-			<AppMeta section="admin" />
+			<AppMeta section={m('meta.admin')} />
 			<div>
 				<h1>{m('settings.title')}</h1>
 				<p class="lede">{m('settings.lede')}</p>
