@@ -2,13 +2,15 @@
 
 A theme, or pack, is a set of colors a deployment chooses in [Settings](./configure.md). Each pack has a light and a dark mode.
 
-The packs that ship with the DAM:
+## The packs that ship with the DAM
 
 | Pack | Character |
 |---|---|
 | `legacy` | the default: warm neutrals with an orange accent |
 | `green` | green neutrals and accent |
 | `orange` | neutral background with an orange accent |
+
+## Create a pack
 
 1. Copy `src/lib/styles/themes/legacy.css` to a new file named after the pack, and change the values. Keep every token, in both modes: the chrome tokens, the eight `--node-slot-N` of the entities and the three `--status-*`.
 2. Replace `legacy` with the name of your pack in the file's selectors.
