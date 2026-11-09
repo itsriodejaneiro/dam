@@ -1,0 +1,14 @@
+# Docker on one machine, named by hand: both ports on loopback.
+#
+#   docker compose -f compose.yaml -f compose.local.yaml up --build
+#
+# The browser needs both: the app, and PocketBase for login and the admin.
+
+services:
+  app:
+    ports:
+      - 127.0.0.1:${APP_PORT:-3000}:3000
+
+  dam-pocketbase:
+    ports:
+      - 127.0.0.1:${PB_PORT:-8090}:8090

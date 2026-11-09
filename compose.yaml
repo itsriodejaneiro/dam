@@ -1,10 +1,13 @@
-# PocketBase as a deploy runs it: a deploy names this file alone (`-f compose.yaml`).
-# `bun run dev` gives no `-f`, so Compose also merges compose.override.yaml, which
-# publishes the port and mounts the checkout's own database.
+# The app and PocketBase as a deploy runs them: a deploy names this file alone
+# (`-f compose.yaml`). `bun run dev` gives no `-f`, so Compose also merges
+# compose.override.yaml, which leaves the app to Vite, publishes PocketBase's port and
+# mounts the checkout's own database.
 
 services:
   # A name no other project on the server uses, never plain `pocketbase`: Dokploy puts
-  # its projects on one shared network, where a plain name answers from two databases.
+  # the services of every project on one shared network, where a plain name answers from
+  # two databases. Two DAM deploys share this name there, so the app calls the alias
+  # below instead.
   dam-pocketbase:
     # One image for every checkout, so a new worktree builds nothing. The tag carries
     # the version, so moving the pin builds again and an unchanged one works offline.
@@ -25,6 +28,38 @@ services:
       # Read by pocketbase/entrypoint.sh and used only while the account does not exist.
       - PB_SUPERUSER_EMAIL=${PB_SUPERUSER_EMAIL:-}
       - PB_SUPERUSER_PASSWORD=${PB_SUPERUSER_PASSWORD:-}
+    networks:
+      default:
+        # Named after the Compose project, one per deploy, so two deploys on one server
+        # never answer for each other.
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}-pocketbase
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      dam-pocketbase:
+        # healthy, not started: the app's first request already reads the settings record
+        condition: service_healthy
+    expose:
+      - 3000
+    environment:
+      # Where the server reaches PocketBase: the container next door.
+      - PB_URL=http://${COMPOSE_PROJECT_NAME}-pocketbase:8090
+      # Where the browser reaches it, for login and the admin: PocketBase's public domain.
+      - PUBLIC_POCKETBASE_URL=${PUBLIC_POCKETBASE_URL:?set PUBLIC_POCKETBASE_URL to the public URL of PocketBase}
+      # The server side logs in with these to run /setup.
+      - PB_SUPERUSER_EMAIL=${PB_SUPERUSER_EMAIL:?set PB_SUPERUSER_EMAIL}
+      - PB_SUPERUSER_PASSWORD=${PB_SUPERUSER_PASSWORD:?set PB_SUPERUSER_PASSWORD}
+      # Above adapter-node's 512 KB default, so an oversized logo reaches the form's own
+      # error instead of a bare 413.
+      - BODY_SIZE_LIMIT=2M
+      # Behind a proxy SvelteKit cannot work out its own URL, and every form POST answers
+      # 403 without it. `:?` fails the deploy with this sentence instead.
+      - ORIGIN=${ORIGIN:?set ORIGIN to the public URL of the app}
 
 volumes:
   pb_data: {}

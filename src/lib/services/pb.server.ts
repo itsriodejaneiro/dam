@@ -2,7 +2,10 @@ import PocketBase from 'pocketbase';
 import { env as publicEnv } from '$env/dynamic/public';
 import { env } from '$env/dynamic/private';
 
-const superuser = new PocketBase(publicEnv.PUBLIC_POCKETBASE_URL);
+/** Where the server reaches PocketBase: PB_URL in a deploy, the browser's URL otherwise. */
+export const serverPbUrl = (): string => env.PB_URL || publicEnv.PUBLIC_POCKETBASE_URL;
+
+const superuser = new PocketBase(serverPbUrl());
 let authenticated = false;
 
 async function ensureAuth() {

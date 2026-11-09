@@ -2,11 +2,11 @@
    re-runs authRefresh against PocketBase and checks that it really is a _superuser. */
 
 import PocketBase from 'pocketbase';
-import { env } from '$env/dynamic/public';
+import { serverPbUrl } from '$lib/services/pb.server';
 
 export async function isSuperuserToken(token: string): Promise<boolean> {
 	if (!token) return false;
-	const check = new PocketBase(env.PUBLIC_POCKETBASE_URL);
+	const check = new PocketBase(serverPbUrl());
 	check.authStore.save(token, null);
 	try {
 		await check.collection('_superusers').authRefresh();

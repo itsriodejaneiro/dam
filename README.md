@@ -15,6 +15,12 @@ Each deployment runs its own app and its own PocketBase. A country is configurat
 
 ## Install
 
+There are three ways to run it: by hand for development, with Docker on any machine, or with Dokploy. All three end at `/setup`, a wizard that asks for the deployment's name, languages, theme and brand, then creates the schema and seeds an example map and journey.
+
+A deployment has two public addresses, one for the app and one for PocketBase. The browser talks to PocketBase directly, for login and for everything under `/admin`, so PocketBase needs an address the browser can reach. The app's server side uses the internal network.
+
+### By hand
+
 You need [Bun](https://bun.sh) and Docker: Docker Desktop or Docker Engine, or on macOS [Colima](https://github.com/abiosoft/colima) (`brew install colima docker docker-compose`).
 
 ```bash
@@ -22,9 +28,79 @@ bun install
 bun run dev
 ```
 
-`bun run dev` creates `.env` from `.env.example`, starts Colima when Docker is down, brings PocketBase up in Docker and serves the app. One Ctrl-C stops everything.
+`bun run dev` creates `.env` from `.env.example`, starts Colima when Docker is down, brings PocketBase up in Docker and serves the app with Vite. One Ctrl-C stops everything.
 
-Open <http://localhost:5173>. A new project sends you to `/setup`, a wizard that asks for the deployment's name, languages, theme and brand, then creates the schema and seeds an example map and journey. The PocketBase admin is at <http://127.0.0.1:8090/_/>, with the credentials in `.env`.
+Open <http://localhost:5173>. A new project sends you to `/setup`: sign in with the superuser in `.env`. The PocketBase admin is at <http://127.0.0.1:8090/_/>, with the same credentials.
+
+### With Docker
+
+`compose.yaml` builds the app and PocketBase from this repository and runs them side by side. Create a `.env` next to it:
+
+```dotenv
+ORIGIN=http://localhost:3000
+PUBLIC_POCKETBASE_URL=http://localhost:8090
+PB_SUPERUSER_EMAIL=admin@example.org
+PB_SUPERUSER_PASSWORD=a-long-password
+```
+
+`compose.yaml` publishes no port. On one machine, add `compose.local.yaml`, which publishes the app and PocketBase on loopback:
+
+```bash
+docker compose -f compose.yaml -f compose.local.yaml up --build
+```
+
+Open <http://localhost:3000>, which sends you to `/setup`, and sign in with the superuser in `.env`. Ctrl-C stops both services. `APP_PORT` and `PB_PORT` in `.env` change the two ports; keep `ORIGIN` and `PUBLIC_POCKETBASE_URL` in step with them.
+
+Name the files with `-f`: a bare `docker compose up` also merges `compose.override.yaml`, the development setup, which leaves the app to Vite.
+
+On a server, put a reverse proxy with TLS in front of `app` (port 3000) and `dam-pocketbase` (port 8090), and set `ORIGIN` and `PUBLIC_POCKETBASE_URL` to the two public URLs.
+
+Each deployment on a server needs its own Compose project, which also names its internal PocketBase address: `COMPOSE_PROJECT_NAME=dam-acme` in `.env` gives `dam-acme-pocketbase`.
+
+**Data and backups.** The database and the uploaded files live in the named volume `pb_data`. Rebuilding and `down` keep it; `down -v` deletes it. PocketBase has its own scheduled backups in its admin, under Settings, Backups. For a copy of the whole volume:
+
+```bash
+docker compose -f compose.yaml stop dam-pocketbase
+docker compose -f compose.yaml cp dam-pocketbase:/pb/pb_data ./pb_data-backup
+docker compose -f compose.yaml start dam-pocketbase
+```
+
+To restore it, stop both services, so the app signs in again against the restored database:
+
+```bash
+docker compose -f compose.yaml stop
+docker compose -f compose.yaml cp ./pb_data-backup/. dam-pocketbase:/pb/pb_data
+docker compose -f compose.yaml start
+```
+
+### With Dokploy
+
+Point two DNS names at the server, one for the app and one for PocketBase. Then, in [Dokploy](https://dokploy.com):
+
+1. Create a project and add a **Compose** service.
+2. In **General**, choose this repository and its branch, with `./compose.yaml` as the **Compose Path**.
+3. In **Environment**, set the variables, with your two names:
+
+   ```dotenv
+   ORIGIN=https://map.example.org
+   PUBLIC_POCKETBASE_URL=https://pb.map.example.org
+   PB_SUPERUSER_EMAIL=admin@example.org
+   PB_SUPERUSER_PASSWORD=a-long-password
+   ```
+
+4. In **Domains**, add both, with HTTPS on:
+
+   | Service | Host | Port |
+   |---|---|---|
+   | `app` | `map.example.org` | 3000 |
+   | `dam-pocketbase` | `pb.map.example.org` | 8090 |
+
+5. **Deploy**. The first boot creates the superuser.
+6. Open `https://map.example.org/setup`, sign in with that superuser and fill in the wizard.
+
+Several deployments share one Dokploy with nothing else to set: Dokploy gives each Compose service its own project, and each deployment's internal PocketBase address comes from it.
+
+The app's server side signs in with `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD`, so they stay set after the first boot. A password changed in the PocketBase admin changes in the environment too, followed by a restart of the app.
 
 ## Configure
 
@@ -34,10 +110,12 @@ Everything that identifies a deployment lives in the `settings` record: its name
 
 | Variable | What it is |
 |---|---|
-| `COMPOSE_PROJECT_NAME` | the Docker Compose project of this checkout |
-| `PB_PORT` | PocketBase's port on the host |
-| `PUBLIC_POCKETBASE_URL` | the PocketBase URL |
-| `PB_ADMIN_URL`, `APP_URL` | the URLs of the PocketBase admin and of the app |
+| `COMPOSE_PROJECT_NAME` | the Docker Compose project: its containers, its volume and PocketBase's internal address |
+| `ORIGIN` | the public URL of the app; `compose.yaml` refuses to start without it, since every form POST answers 403 otherwise |
+| `PUBLIC_POCKETBASE_URL` | the PocketBase URL the browser uses |
+| `PB_URL` | the PocketBase URL the server uses; `compose.yaml` sets it to the internal address, and without it the server uses `PUBLIC_POCKETBASE_URL` |
+| `PB_PORT`, `APP_PORT` | the ports `compose.local.yaml` publishes; in development, `PB_PORT` is PocketBase's port on the host |
+| `PB_ADMIN_URL`, `APP_URL` | the URLs `bun run dev` prints |
 | `PB_SUPERUSER_EMAIL`, `PB_SUPERUSER_PASSWORD` | the superuser, created on the first boot of a new database and used by the scripts and the server side |
 
 ## Commands
@@ -53,6 +131,6 @@ Everything that identifies a deployment lives in the `settings` record: its name
 
 ## Contributing
 
-Open a pull request against `main`. Code, comments and commit messages are in English, and commits follow [Conventional Commits](https://www.conventionalcommits.org) (`feat: add a filter to the map`). Run `bun run check` and `bun run build` before you push; CI runs both on every pull request.
+Set up as in [By hand](#by-hand) and open a pull request against `main`. Code, comments and commit messages are in English, and commits follow [Conventional Commits](https://www.conventionalcommits.org) (`feat: add a filter to the map`). Run `bun run check` and `bun run build` before you push; CI runs both on every pull request.
 
 Text on screen goes through `m('key')` in `src/lib/i18n/messages.ts`, in every locale. The PocketBase schema is defined once, in `src/lib/server/setup.ts`.

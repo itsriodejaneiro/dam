@@ -1,6 +1,11 @@
 # Development only: Compose merges this file into compose.yaml when no `-f` is given.
 
 services:
+  # Vite serves the app in development: a profile nobody turns on leaves the image out.
+  app:
+    profiles:
+      - image
+
   dam-pocketbase:
     # Each checkout publishes the port of its own .env, on loopback only.
     ports:

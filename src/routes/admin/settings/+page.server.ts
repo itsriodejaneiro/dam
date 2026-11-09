@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import PocketBase, { ClientResponseError } from 'pocketbase';
-import { env } from '$env/dynamic/public';
 import { parseSettingsForm, writeSettings } from '$lib/server/settings';
+import { serverPbUrl } from '$lib/services/pb.server';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = () => ({ titleKey: 'settings.title' as const });
@@ -14,7 +14,7 @@ export const actions: Actions = {
 		const parsed = parseSettingsForm(form);
 		if ('error' in parsed) return fail(400, { error: parsed.error });
 
-		const pb = new PocketBase(env.PUBLIC_POCKETBASE_URL);
+		const pb = new PocketBase(serverPbUrl());
 		pb.authStore.save(String(form.get('token') ?? ''), null);
 		try {
 			await writeSettings(pb, parsed.data);

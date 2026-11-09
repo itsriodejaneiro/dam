@@ -4,9 +4,9 @@ set -e
 # The first superuser comes from the environment: a credential in an image layer would
 # be in every copy of the image.
 #
-# `create` and not `upsert`: upsert rewrites the password on every boot, which makes the
-# deploy panel the permanent home of the credential. Create fails harmlessly once the
-# account exists, so the variables can be removed after the first deploy.
+# `create` and not `upsert`: upsert rewrites the password on every boot, undoing one
+# changed in the admin. Create fails harmlessly once the account exists. The app's server
+# side logs in with the same variables, so a changed password changes there too.
 #
 # The output is read because `superuser create` exits 0 on a duplicated e-mail.
 if [ -n "$PB_SUPERUSER_EMAIL" ] && [ -n "$PB_SUPERUSER_PASSWORD" ]; then
