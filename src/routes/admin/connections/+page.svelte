@@ -188,8 +188,8 @@
 				</p>
 			{:else}
 				<div class="filters">
-					<div class="search">
-						<Search size={14} class="search-icon" />
+					<div class="admin-search">
+						<Search size={14} class="admin-search-icon" />
 						<input
 							class="input"
 							type="search"
@@ -200,7 +200,7 @@
 						{#if query}
 							<button
 								type="button"
-								class="search-clear"
+								class="admin-search-clear"
 								onclick={() => setParam('q', '')}
 								aria-label={m('common.clear_search')}
 							>
@@ -369,37 +369,6 @@
 <style>
 	.filters {
 		margin-bottom: 1.5rem;
-	}
-	.search {
-		position: relative;
-	}
-	.search :global(.search-icon) {
-		position: absolute;
-		left: 0.85rem;
-		top: 50%;
-		transform: translateY(-50%);
-		color: var(--text-soft);
-		pointer-events: none;
-	}
-	.search .input {
-		padding-left: 2.4rem;
-		padding-right: 2.4rem;
-	}
-	.search-clear {
-		position: absolute;
-		right: 0.5rem;
-		top: 50%;
-		transform: translateY(-50%);
-		background: transparent;
-		border: 0;
-		padding: 0.4rem;
-		cursor: pointer;
-		color: var(--text-soft);
-		display: inline-flex;
-		border-radius: 2px;
-	}
-	.search-clear:hover {
-		color: var(--text);
 	}
 
 	.list .cell-stack {

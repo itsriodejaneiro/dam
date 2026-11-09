@@ -1,5 +1,6 @@
-/* The frame of an admin screen, used directly in the HTML: page width, heading, the
-   block under it, the table with its row actions, the small icon buttons of a list, and the form of its dialog. */
+/* The frame of an admin screen, used directly in the HTML: page width, heading, the block
+   under it, the table with its row actions, the grid list, the search field, the small icon
+   buttons of a list, and the form of its dialog. */
 
 .admin-page {
   max-width: 1240px;
@@ -93,6 +94,76 @@
   color: var(--text-soft);
 }
 
+/* A list on a grid: each screen sets its `grid-template-columns` on .admin-list. */
+.admin-list {
+  display: grid;
+  align-items: center;
+}
+.admin-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.admin-row.header {
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+.admin-row:not(.header) .col-order {
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+.admin-row:not(.header) .col-slug {
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.admin-row .col-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  justify-content: flex-end;
+}
+
+.admin-search {
+  position: relative;
+}
+.admin-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-soft);
+  pointer-events: none;
+}
+.admin-search .input {
+  padding-left: 2.4rem;
+  padding-right: 2.4rem;
+}
+.admin-search-clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  padding: 0.4rem;
+  cursor: pointer;
+  color: var(--text-soft);
+  display: inline-flex;
+  border-radius: 2px;
+}
+.admin-search-clear:hover {
+  color: var(--text);
+}
+
 .admin-action {
   background: transparent;
   border: 0;
@@ -157,4 +228,6 @@
 @media (max-width: 600px) {
   .admin-table .num { white-space: normal; }
   .admin-action { display: block; margin: 0.3rem 0 0 auto; }
+  /* A table cell stacks its actions on a phone; a list row keeps them inline. */
+  .admin-row .col-actions .admin-action { margin: 0 0 0 0.8rem; }
 }

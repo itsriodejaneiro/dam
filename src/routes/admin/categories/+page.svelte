@@ -243,8 +243,8 @@
 			{:else if types.length === 0}
 				<p class="admin-empty">{m('categories.empty')}</p>
 			{:else}
-				<div class="list">
-					<div class="row header">
+				<div class="admin-list">
+					<div class="admin-row header">
 						<span class="col-order">{m('categories.col_order')}</span>
 						<span class="col-label">{m('categories.field.label')}</span>
 						<span class="col-slug">{m('categories.field.slug')}</span>
@@ -253,7 +253,7 @@
 					</div>
 					{#each types as t, i (t.id)}
 						{@const tv = typeViewById.get(t.id)}
-						<div class="row">
+						<div class="admin-row">
 							<span class="col-order">{t.layer_order}</span>
 							<span class="col-label">
 								<strong>{tv?.label ?? ''}</strong>
@@ -435,44 +435,15 @@
 </Dialog>
 
 <style>
-	/* Grid-based list */
-	.list {
-		display: grid;
+	.admin-list {
 		grid-template-columns: 3rem 1fr 1fr 3rem auto;
-		align-items: center;
-	}
-	.row {
-		display: grid;
-		grid-template-columns: subgrid;
-		grid-column: 1 / -1;
-		padding: 0.7rem 0;
-		border-bottom: 1px solid var(--border);
-		align-items: center;
-	}
-	.row.header {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.68rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--text-soft);
-		font-weight: 500;
 	}
 
-	.row:not(.header) .col-order {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.78rem;
-		color: var(--text-soft);
-	}
 	.col-label .sub {
 		display: block;
 		font-size: 0.78rem;
 		color: var(--text-soft);
 		margin-top: 0.15rem;
-	}
-	.row:not(.header) .col-slug {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.82rem;
-		color: var(--text-muted);
 	}
 	.col-color {
 		display: flex;
@@ -484,12 +455,6 @@
 		width: 12px;
 		height: 12px;
 		border-radius: 50%;
-	}
-	.col-actions {
-		display: flex;
-		align-items: center;
-		gap: 0.2rem;
-		justify-content: flex-end;
 	}
 
 	.reassign-desc {
@@ -529,12 +494,5 @@
 		height: 18px;
 		border-radius: 50%;
 		background: var(--swatch-color);
-	}
-
-	/* admin.css stacks a table cell's actions on a phone; these rows keep theirs inline. */
-	@media (max-width: 600px) {
-		.col-actions .admin-action {
-			margin: 0 0 0 0.8rem;
-		}
 	}
 </style>

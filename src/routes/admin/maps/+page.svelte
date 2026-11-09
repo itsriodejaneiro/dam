@@ -180,8 +180,8 @@
 			{:else if mapList.length === 0}
 				<p class="admin-empty">{m('maps_admin.empty')}</p>
 			{:else}
-				<div class="list">
-					<div class="row header">
+				<div class="admin-list">
+					<div class="admin-row header">
 						<span class="col-order">{m('categories.col_order')}</span>
 						<span class="col-label">{m('maps_admin.field.label')}</span>
 						<span class="col-slug">{m('maps_admin.field.slug')}</span>
@@ -189,7 +189,7 @@
 					</div>
 					{#each mapList as map, i (map.id)}
 						{@const mv = mapViewById.get(map.id)}
-						<div class="row" class:protected={isMain(i)}>
+						<div class="admin-row" class:protected={isMain(i)}>
 							<span class="col-order">{map.order}</span>
 							<span class="col-label">
 								<strong>{mv?.label ?? ''}</strong>
@@ -286,47 +286,11 @@
 />
 
 <style>
-	/* Grid-based list */
-	.list {
-		display: grid;
+	.admin-list {
 		grid-template-columns: 3rem 1fr 1fr auto;
-		align-items: center;
 	}
-	.row {
-		display: grid;
-		grid-template-columns: subgrid;
-		grid-column: 1 / -1;
-		padding: 0.7rem 0;
-		border-bottom: 1px solid var(--border);
-		align-items: center;
-	}
-	.row.header {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.68rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--text-soft);
-		font-weight: 500;
-	}
-	.row.protected {
+	.admin-row.protected {
 		opacity: 0.7;
-	}
-
-	.row:not(.header) .col-order {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.78rem;
-		color: var(--text-soft);
-	}
-	.row:not(.header) .col-slug {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.82rem;
-		color: var(--text-muted);
-	}
-	.col-actions {
-		display: flex;
-		align-items: center;
-		gap: 0.2rem;
-		justify-content: flex-end;
 	}
 
 	.badge {
@@ -345,12 +309,5 @@
 
 	.remove-error {
 		margin-bottom: 1rem;
-	}
-
-	/* admin.css stacks a table cell's actions on a phone; these rows keep theirs inline. */
-	@media (max-width: 600px) {
-		.col-actions .admin-action {
-			margin: 0 0 0 0.8rem;
-		}
 	}
 </style>
