@@ -104,6 +104,8 @@ Point two DNS names at the server, one for the app and one for PocketBase. Then,
 
 Several deployments share one Dokploy with nothing else to set: Dokploy gives each Compose service its own project, and each deployment's internal PocketBase address comes from it.
 
+`/setup` and `bun run db:setup` turn on PocketBase's rate limit for logins, 20 attempts a minute per address, and read the visitor's address from the `X-Forwarded-For` the reverse proxy writes. That expects one proxy in front of PocketBase and no port of its own, which is what `compose.yaml` sets up.
+
 The app's server side signs in with `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD`, so they stay set after the first boot. A password changed in the PocketBase admin changes in the environment too, followed by a restart of the app.
 
 ## Configure

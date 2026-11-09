@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { ClientResponseError } from 'pocketbase';
 	import { AppMeta, Button } from '$lib/components';
 	import { auth } from '$lib/services/auth.svelte';
 	import { m } from '$lib/i18n';
@@ -28,8 +29,9 @@
 		try {
 			await auth.login(email, password);
 			goto(dest());
-		} catch {
-			error = m('login.invalid');
+		} catch (err) {
+			const limited = err instanceof ClientResponseError && err.status === 429;
+			error = m(limited ? 'login.too_many' : 'login.invalid');
 		} finally {
 			loading = false;
 		}

@@ -3,8 +3,8 @@
    superuser; with no env dependency, it serves both the CLI
    (scripts/setup-collections.ts) and the web endpoint (/setup).
 
-   - setupCollections(pb): creates/updates every collection and the settings record
-     (idempotent).
+   - setupCollections(pb): creates/updates every collection and the settings record,
+     and turns on the rate limit of the auth routes (idempotent).
    - seedBaseData(pb, locales): fills a new project with the base categories (node_types),
      the main map and the example (seed-example.ts), in the deploy's locales. The
      node_type slug comes from the label in the default locale (locales[0]).
@@ -144,10 +144,29 @@ async function textDefaultLocale(pb: PocketBase): Promise<{ id: string; code: st
 	return { id: record.id, code: (code as string) ?? DEFAULT_SETTINGS.defaultLocale };
 }
 
+/** The one rate limit: logins, by password or otherwise. PocketBase counts per address and
+    per auth collection, so the app's form, which tries `users` and then `_superusers`,
+    spends one attempt of each. */
+const AUTH_RATE_LIMIT = { label: '*:auth', audience: '', duration: 60, maxRequests: 20 };
+
+/** PocketBase ships with rate limits off, and its stock rule list would limit every route
+    once on, so the list is written whole. A deploy sits behind one reverse proxy, the only
+    way to reach PocketBase: without the header every visitor counts as the proxy's address,
+    and the rightmost entry is the one that proxy wrote, while the rest is the client's word. */
+async function limitAuthRoutes(pb: PocketBase, log: Logger): Promise<void> {
+	await pb.settings.update({
+		rateLimits: { enabled: true, rules: [AUTH_RATE_LIMIT] },
+		trustedProxy: { headers: ['X-Forwarded-For'], useLeftmostIP: false }
+	});
+	log('  ~ auth rate limit');
+}
+
 /** Creates/updates every project collection and the settings record. Idempotent. */
 export async function setupCollections(pb: PocketBase, log: Logger = noop): Promise<void> {
 	const up = (name: string, definition: Record<string, unknown>) =>
 		upsertCollection(pb, name, definition, log);
+
+	await limitAuthRoutes(pb, log);
 
 	// A new PocketBase ships `users` open to public signup: these rules close it.
 	await up('users', {

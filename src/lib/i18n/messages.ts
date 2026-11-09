@@ -596,6 +596,12 @@ export const messages = {
 		fr: 'Identifiants invalides.',
 		es: 'Credenciales inválidas.'
 	},
+	'login.too_many': {
+		pt: 'Tentativas demais. Aguarde um minuto e tente de novo.',
+		en: 'Too many attempts. Wait a minute and try again.',
+		fr: 'Trop de tentatives. Attendez une minute et réessayez.',
+		es: 'Demasiados intentos. Espere un minuto e inténtelo de nuevo.'
+	},
 
 	// ──────────────────────────────────────────────
 	// ENTITIES (/admin/entities)
