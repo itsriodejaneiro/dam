@@ -392,21 +392,38 @@
 		}
 	}
 
-	async function togglePublished() {
-		if (!published && steps.length === 0) {
-			error = m('journeys_admin.error.no_steps');
-			return;
-		}
-		if (!(await save())) return;
+	async function setPublished(next: boolean) {
+		error = '';
 		publishing = true;
 		try {
-			await journeys.updateJourney(data.id, { published: !published });
-			published = !published;
+			await journeys.updateJourney(data.id, { published: next });
+			published = next;
 		} catch (err) {
 			error = (err as Error).message || m('journeys_admin.error.save');
 		} finally {
 			publishing = false;
 		}
+	}
+
+	async function publish() {
+		if (steps.length === 0) {
+			error = m('journeys_admin.error.no_steps');
+			return;
+		}
+		if (await save()) await setPublished(true);
+	}
+
+	let unpublishOpen = $state(false);
+
+	// Writes only the flag: an edit in progress stays in the page, away from the live journey.
+	function unpublish() {
+		if (dirty) unpublishOpen = true;
+		else void setPublished(false);
+	}
+
+	async function confirmUnpublish() {
+		unpublishOpen = false;
+		await setPublished(false);
 	}
 
 	async function preview() {
@@ -468,7 +485,12 @@
 				<Button variant="ghost" disabled={saving || publishing} onclick={preview}>
 					{m('journeys_admin.preview')}
 				</Button>
-				<Button variant="secondary" loading={publishing} disabled={saving} onclick={togglePublished}>
+				<Button
+					variant="secondary"
+					loading={publishing}
+					disabled={saving}
+					onclick={published ? unpublish : publish}
+				>
 					{published ? m('journeys_admin.unpublish') : m('journeys_admin.publish')}
 				</Button>
 				<Button loading={saving} disabled={!dirty || publishing} onclick={save}>
@@ -757,6 +779,15 @@
 	confirmLabel={m('journeys_admin.confirm_map_action')}
 	cancelLabel={m('common.cancel')}
 	onConfirm={confirmMap}
+/>
+
+<ConfirmDialog
+	bind:open={unpublishOpen}
+	title={m('journeys_admin.confirm_unpublish_title')}
+	description={m('journeys_admin.confirm_unpublish_desc')}
+	confirmLabel={m('journeys_admin.unpublish')}
+	cancelLabel={m('common.cancel')}
+	onConfirm={confirmUnpublish}
 />
 
 <ConfirmDialog
