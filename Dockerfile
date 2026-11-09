@@ -16,14 +16,19 @@ RUN bun run build
 
 # A production install from scratch instead of the build tree: Vite, svelte-check and
 # TypeScript are the bulk of it and none of them run here.
-FROM oven/bun:1.3-alpine
-WORKDIR /app
-ENV NODE_ENV=production
+FROM oven/bun:1.3-alpine AS deps
+WORKDIR /src
 
 COPY package.json bun.lock ./
 # --ignore-scripts: `prepare` runs svelte-kit sync, a build tool this stage leaves out.
 RUN bun install --frozen-lockfile --production --ignore-scripts
 
+FROM oven/bun:1.3-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY package.json ./
+COPY --from=deps /src/node_modules ./node_modules
 COPY --from=build /src/build ./build
 
 # Nothing here writes to disk: the data lives in PocketBase's volume.
