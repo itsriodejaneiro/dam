@@ -47,7 +47,7 @@ function fromRecord(record: RecordModel): DeploySettings {
 		theme: isPack(record.theme) ? record.theme : DEFAULT_SETTINGS.theme,
 		// the browser loads it, so the public URL
 		logo: record.logo ? new PocketBase(env.PUBLIC_POCKETBASE_URL).files.getURL(record, record.logo) : null,
-		flag: record.flag || null,
+		flag: hasFlag(record.flag) ? record.flag : null,
 		journeys: record.journeys !== false
 	};
 }
