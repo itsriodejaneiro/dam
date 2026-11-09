@@ -3,7 +3,7 @@ import * as nodeTypes from './nodeTypes';
 import * as nodesApi from './nodes';
 import * as edgesApi from './edges';
 import * as mapNodes from './mapNodes';
-import { laneCenter, VIS_W } from '$lib/journey';
+import { heightInLane, laneTops, LAYER_H, VIS_W } from '$lib/journey';
 import type {
 	Journey,
 	JourneyDocument,
@@ -140,6 +140,7 @@ export async function getJourneyGraph(mapId: string): Promise<JourneyGraphData> 
 
 	const types = allTypes.sort((a, b) => a.layer_order - b.layer_order);
 	const typeById = new Map(allTypes.map((t) => [t.id, t]));
+	const tops = laneTops(types);
 	const placementByNode = new Map<string, MapNode>(placements.map((mn) => [mn.node, mn]));
 
 	const onMap = allNodes.filter((n) => placementByNode.has(n.id));
@@ -154,14 +155,17 @@ export async function getJourneyGraph(mapId: string): Promise<JourneyGraphData> 
 
 	const nodes = onMap.map((n) => {
 		const type = typeById.get(n.type)!;
-		const placed = placementByNode.get(n.id);
+		const top = tops.get(type.id)!;
+		const mn = placementByNode.get(n.id);
+		// PocketBase stores an empty number as 0: (0, 0) is a node nobody has placed.
+		const placed = mn?.x || mn?.y ? mn : null;
 		return {
 			id: n.id,
 			raw: n,
 			type,
 			degree: degree.get(n.id) ?? 0,
-			x: placed?.x ?? VIS_W / 2,
-			y: placed?.y ?? laneCenter(type.layer_order),
+			x: placed ? placed.x! : VIS_W / 2,
+			y: placed ? heightInLane(placed.y!, top) : top + LAYER_H / 2,
 			index: 0,
 			vx: 0,
 			vy: 0

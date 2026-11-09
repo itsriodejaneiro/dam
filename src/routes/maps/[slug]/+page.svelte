@@ -32,6 +32,7 @@
 	} from '$lib/services';
 	import { localesState, localizedNode, localizedNodeType, localizedMap, t, m } from '$lib/i18n';
 	import { placeName } from '$lib/settings';
+	import { canvasHeight, heightInLane, laneTops, LAYER_H, VIS_W } from '$lib/journey';
 
 	const slug = $derived(page.data.slug as string);
 	let allMaps = $state<MapRecord[]>([]);
@@ -120,10 +121,6 @@
 	}
 
 	const SCRAMBLE_TOOLTIP = true;
-	const VIS_W = 1280;
-	const LAYER_H = 160; // height of each layer; raise it for more breathing room
-	const TOP_PAD = 40;
-	const BOTTOM_PAD = 30;
 	const LABEL_X = 32;
 
 	let types = $state<NodeType[]>([]);
@@ -269,11 +266,11 @@
 		tooltip = { ...tooltip, visible: false };
 	}
 
-	const visH = $derived(TOP_PAD + BOTTOM_PAD + Math.max(1, types.length) * LAYER_H);
+	const visH = $derived(canvasHeight(types));
+	const tops = $derived(laneTops(types));
 
 	function bandTop(typ: NodeType): number {
-		const idx = Math.max(0, typ.layer_order - 1);
-		return TOP_PAD + idx * LAYER_H;
+		return tops.get(typ.id)!;
 	}
 	function laneY(typ: NodeType): number {
 		return bandTop(typ) + LAYER_H / 2;
@@ -318,6 +315,8 @@
 
 			const sorted = [...t].sort((a, b) => a.layer_order - b.layer_order);
 			const typesById = new Map(sorted.map((x) => [x.id, x]));
+			// The lanes come from this list, so it is in place before the nodes.
+			types = sorted;
 
 			const tmpNodes: VisNode[] = ns
 				.filter((n) => nodeIdsInMap.has(n.id) && typesById.has(n.type))
@@ -325,15 +324,16 @@
 					const typ = typesById.get(n.type)!;
 					const mn = mapNodeByNodeId.get(n.id);
 					const hasSavedPos = mn?.x != null && mn?.y != null && (mn!.x !== 0 || mn!.y !== 0);
+					const savedY = hasSavedPos ? heightInLane(mn!.y!, bandTop(typ)) : undefined;
 					return {
 						id: n.id,
 						raw: n,
 						type: typ,
 						degree: 0,
 						x: hasSavedPos ? mn!.x! : VIS_W / 2 + (Math.random() - 0.5) * 220,
-						y: hasSavedPos ? mn!.y! : laneY(typ) + (Math.random() - 0.5) * 60,
+						y: savedY ?? laneY(typ) + (Math.random() - 0.5) * 60,
 						fx: hasSavedPos ? mn!.x! : undefined,
-						fy: hasSavedPos ? mn!.y! : undefined
+						fy: savedY
 					};
 				});
 
@@ -349,7 +349,6 @@
 			}
 			for (const n of tmpNodes) n.degree = degree.get(n.id) ?? 0;
 
-			types = sorted;
 			rawNodes = ns;
 			visNodes = tmpNodes;
 			visEdges = tmpEdges;

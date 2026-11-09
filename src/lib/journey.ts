@@ -13,16 +13,33 @@ import type {
 import type { Localized } from '$lib/i18n';
 
 export const VIS_W = 1280;
-export const LAYER_H = 160;
+export const LAYER_H = 160; // height of each layer; raise it for more breathing room
 export const TOP_PAD = 40;
 export const BOTTOM_PAD = 30;
 
 export const canvasHeight = (types: NodeType[]): number =>
 	TOP_PAD + BOTTOM_PAD + Math.max(1, types.length) * LAYER_H;
 
-/** The height of a category's lane on the graph. */
-export const laneCenter = (layerOrder: number): number =>
-	TOP_PAD + Math.max(0, layerOrder - 1) * LAYER_H + LAYER_H / 2;
+/** The height of the centre of the lane at this place among the categories, from 1. */
+export const laneCenter = (place: number): number =>
+	TOP_PAD + Math.max(0, place - 1) * LAYER_H + LAYER_H / 2;
+
+/**
+ * Where each category's lane starts, by category id. A lane is the category's place in the
+ * sorted list: `layer_order` only orders, and removing a category leaves a gap in its
+ * numbers while the canvas counts categories.
+ */
+export function laneTops(types: NodeType[]): Map<string, number> {
+	const sorted = [...types].sort((a, b) => a.layer_order - b.layer_order);
+	return new Map(sorted.map((t, i) => [t.id, TOP_PAD + i * LAYER_H]));
+}
+
+/**
+ * A saved height in the lane that starts at `top`, as far down the lane as it was saved.
+ * Removing or moving a category shifts the lanes under the positions already saved.
+ */
+export const heightInLane = (y: number, top: number): number =>
+	top + ((((y - TOP_PAD) % LAYER_H) + LAYER_H) % LAYER_H);
 
 /** The whole map in view. */
 export const fullCamera = (types: NodeType[]): CameraState => ({

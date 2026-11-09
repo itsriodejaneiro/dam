@@ -254,7 +254,7 @@
 					{#each types as t, i (t.id)}
 						{@const tv = typeViewById.get(t.id)}
 						<div class="admin-row">
-							<span class="col-order">{t.layer_order}</span>
+							<span class="col-order">{i + 1}</span>
 							<span class="col-label">
 								<strong>{tv?.label ?? ''}</strong>
 								{#if tv?.is_fallback}
