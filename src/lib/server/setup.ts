@@ -144,10 +144,14 @@ async function textDefaultLocale(pb: PocketBase): Promise<{ id: string; code: st
 	return { id: record.id, code: (code as string) ?? DEFAULT_SETTINGS.defaultLocale };
 }
 
-/** The one rate limit: logins, by password or otherwise. PocketBase counts per address and
-    per auth collection, so the app's form, which tries `users` and then `_superusers`,
-    spends one attempt of each. */
-const AUTH_RATE_LIMIT = { label: '*:auth', audience: '', duration: 60, maxRequests: 20 };
+/** Logins, by password or otherwise, and the two public routes that send mail. PocketBase
+    counts per address and per auth collection, so the app's form, which tries `users` and
+    then `_superusers`, spends one login attempt of each. */
+const AUTH_RATE_LIMITS = [
+	{ label: '*:auth', audience: '', duration: 60, maxRequests: 20 },
+	{ label: '*:requestPasswordReset', audience: '', duration: 60, maxRequests: 5 },
+	{ label: '*:requestVerification', audience: '', duration: 60, maxRequests: 5 }
+];
 
 /** PocketBase ships with rate limits off, and its stock rule list would limit every route
     once on, so the list is written whole. A deploy sits behind one reverse proxy, the only
@@ -155,7 +159,7 @@ const AUTH_RATE_LIMIT = { label: '*:auth', audience: '', duration: 60, maxReques
     and the rightmost entry is the one that proxy wrote, while the rest is the client's word. */
 async function limitAuthRoutes(pb: PocketBase, log: Logger): Promise<void> {
 	await pb.settings.update({
-		rateLimits: { enabled: true, rules: [AUTH_RATE_LIMIT] },
+		rateLimits: { enabled: true, rules: AUTH_RATE_LIMITS },
 		trustedProxy: { headers: ['X-Forwarded-For'], useLeftmostIP: false }
 	});
 	log('  ~ auth rate limit');
