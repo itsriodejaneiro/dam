@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { JourneyStep } from '$lib/types/journey';
 	import { localesState, t } from '$lib/i18n';
+	import { sanitizeHtml } from '$lib/sanitize';
 
 	interface Props {
 		step: JourneyStep;
@@ -51,7 +52,7 @@
 		{t(step.title, code)}
 	</h3>
 
-	<div class="step-body">{@html t(step.body, code)}</div>
+	<div class="step-body">{@html sanitizeHtml(t(step.body, code))}</div>
 </article>
 
 <style>

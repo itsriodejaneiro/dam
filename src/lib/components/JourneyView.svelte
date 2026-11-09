@@ -2,6 +2,7 @@
 	import { onMount, untrack } from 'svelte';
 	import { journeys as journeysApi, type NodeType } from '$lib/services';
 	import { localesState, localizedNode, localizedNodeType, t as tlocale, m } from '$lib/i18n';
+	import { safeUrl, sanitizeHtml } from '$lib/sanitize';
 	import type {
 		CameraState,
 		DocumentState,
@@ -319,7 +320,7 @@
 
 			{#if selectedView.description}
 				<hr class="nd-sep" />
-				<div class="nd-desc">{@html selectedView.description}</div>
+				<div class="nd-desc">{@html sanitizeHtml(selectedView.description)}</div>
 			{/if}
 
 			{#if selectedView.links.length > 0}
@@ -328,7 +329,7 @@
 				<ul class="nd-links">
 					{#each selectedView.links as l, i (i)}
 						<li>
-							<a href={l.url} target="_blank" rel="noopener noreferrer">
+							<a href={safeUrl(l.url)} target="_blank" rel="noopener noreferrer">
 								{tlocale(l.label, code) || l.url}
 							</a>
 						</li>

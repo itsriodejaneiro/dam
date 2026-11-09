@@ -31,6 +31,7 @@
 		type NodeType
 	} from '$lib/services';
 	import { localesState, localizedNode, localizedNodeType, localizedMap, t, m } from '$lib/i18n';
+	import { sanitizeHtml } from '$lib/sanitize';
 	import { placeName } from '$lib/settings';
 
 	const slug = $derived(page.data.slug as string);
@@ -705,7 +706,7 @@
 							{/if}
 
 							{#if dv?.description}
-								<div class="info-desc">{@html dv.description}</div>
+								<div class="info-desc">{@html sanitizeHtml(dv.description)}</div>
 							{/if}
 
 							{#if selectedLinks.length > 0}
