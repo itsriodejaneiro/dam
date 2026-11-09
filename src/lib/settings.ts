@@ -38,6 +38,14 @@ export const DEFAULT_SETTINGS: DeploySettings = {
 	journeys: true
 };
 
+/** The stored codes the app knows, each once. An admin account writes this record over the
+    REST API, where the settings form never runs: these codes reach <html lang>, and a
+    repeated one throws in the locale switch's keyed {#each} on every page. */
+export function knownLocales(stored: unknown): string[] {
+	if (!Array.isArray(stored)) return [];
+	return [...new Set(stored.filter((code) => (LOCALE_CODES as readonly unknown[]).includes(code)))];
+}
+
 /** The stored name, text under known locale codes only. An admin account writes this record
     over the REST API, where the settings form never runs, and any other value fails every
     page: a number breaks the texts built from it and a `__proto__` key the page's data. */

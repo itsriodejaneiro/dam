@@ -11,6 +11,7 @@ import { serverPbUrl } from '$lib/services/pb.server';
 import { LOCALE_CODES, type MessageKey } from '$lib/i18n/messages';
 import {
 	DEFAULT_SETTINGS,
+	knownLocales,
 	LOGO_MAX_BYTES,
 	LOGO_TYPES,
 	storedName,
@@ -29,13 +30,6 @@ let cached: { value: DeploySettings; expires: number } | null = null;
 let inFlight: Promise<DeploySettings> | null = null;
 /** Bumped on invalidation, so a read begun before a save never caches the old record. */
 let generation = 0;
-
-/** The stored codes the app knows. An admin account writes this record over the REST API,
-    where parseSettingsForm never runs, and these codes reach <html lang>. */
-function knownLocales(stored: unknown): string[] {
-	if (!Array.isArray(stored)) return [];
-	return stored.filter((code) => (LOCALE_CODES as readonly unknown[]).includes(code));
-}
 
 function fromRecord(record: RecordModel): DeploySettings {
 	const known = knownLocales(record.locales);
