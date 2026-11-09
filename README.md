@@ -4,6 +4,8 @@ The Digital Assets Map (DAM) is an interactive map of a country's digital infras
 
 Each deployment runs its own app and its own PocketBase. A country is configuration and content, kept in that PocketBase and edited in the app.
 
+**The manual:** <https://itsriodejaneiro.github.io/dam/>
+
 ## Stack
 
 - **SvelteKit** (Svelte 5 runes, TypeScript)
@@ -28,7 +30,7 @@ bun install
 bun run dev
 ```
 
-`bun run dev` creates `.env` from `.env.example`, starts Colima when Docker is down, brings PocketBase up in Docker and serves the app with Vite. One Ctrl-C stops everything.
+`bun run dev` creates `.env` from `.env.example`, starts Colima when Docker is down, brings PocketBase up in Docker and serves the app with Vite. One Ctrl-C stops the app and its container; Colima keeps running.
 
 Open <http://localhost:5173>. A new project sends you to `/setup`: sign in with the superuser in `.env`. The PocketBase admin is at <http://127.0.0.1:8090/_/>, with the same credentials.
 
@@ -65,13 +67,15 @@ docker compose -f compose.yaml cp dam-pocketbase:/pb/pb_data ./pb_data-backup
 docker compose -f compose.yaml start dam-pocketbase
 ```
 
-To restore it, stop both services, so the app signs in again against the restored database:
+To restore it, stop both services, so nothing touches the database during the copy:
 
 ```bash
 docker compose -f compose.yaml stop
 docker compose -f compose.yaml cp ./pb_data-backup/. dam-pocketbase:/pb/pb_data
 docker compose -f compose.yaml start
 ```
+
+An app left running through a restore signs in again by itself, as long as `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD` work on the restored database.
 
 ### With Dokploy
 
