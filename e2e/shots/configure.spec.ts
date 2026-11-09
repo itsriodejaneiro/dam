@@ -1,4 +1,4 @@
-// Screens of "Configure your deployment": the settings form and the saved result.
+// Screen of "Configure your deployment": the settings form, which then saves.
 import { expect, screens, signIn, test } from './lib';
 
 test('the settings of the deployment', async ({ page }) => {

@@ -17,7 +17,7 @@
 
 ## Content in several languages
 
-Every text you write has one line per language of the deployment: the labels of entities, categories and maps, and the texts of a journey. A language left blank falls back to the next one, and the lists mark that text with a `~`.
+Every text you write has one line per language of the deployment: the labels of entities, categories and maps, and the texts of a journey. A language left blank shows the text of the default language, and the admin lists mark it with a `~`.
 
 Adding a language later adds its lines to every form, and the old content waits for its translation.
 

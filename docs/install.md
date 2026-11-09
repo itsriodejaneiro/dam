@@ -28,7 +28,7 @@ PB_SUPERUSER_EMAIL=admin@example.com
 PB_SUPERUSER_PASSWORD=choose-a-long-password
 ```
 
-Then build and start both services, naming the two files:
+`compose.yaml` publishes no port. On one machine, add `compose.local.yaml`, which publishes the app and PocketBase on loopback:
 
 ```bash
 docker compose -f compose.yaml -f compose.local.yaml up --build
@@ -36,11 +36,15 @@ docker compose -f compose.yaml -f compose.local.yaml up --build
 
 Open <http://localhost:3000>. The PocketBase admin is at <http://localhost:8090/_/>.
 
-Name the files with `-f`: a bare `docker compose up` also merges `compose.override.yaml`, the development setup, which leaves the app out.
+Name the files with `-f`: a bare `docker compose up` also merges `compose.override.yaml`, the development setup, which leaves the app to Vite.
+
+## On a server
+
+The [README](https://github.com/itsriodejaneiro/dam#install) has the steps for a server: the reverse proxy, Dokploy, and the backup of the database.
 
 ## The `.env` file
 
-`.env` holds infrastructure only: addresses, ports and the superuser, the account that installs and can do everything. The first boot of a new database creates the superuser from `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD`. The defaults in `.env.example` are for development: set your own on a server.
+`.env` holds infrastructure only: addresses, ports and the superuser, the account that installs and can do everything. The first boot of a new database creates the superuser from `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD`, and the app's server side signs in with them, so they stay set. The defaults in `.env.example` are for development: set your own on a server.
 
 Everything else that identifies a deployment lives in the app: see [Configure your deployment](./configure.md).
 
