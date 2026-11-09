@@ -139,13 +139,13 @@
 </script>
 
 {#if auth.isLoggedIn}
-	<main>
-		<section class="hero">
+	<main class="admin-page">
+		<section class="admin-hero">
 			<AppMeta section={m('meta.admin')} />
-			<div class="head-row">
+			<div class="admin-head">
 				<div>
 					<h1>{m('entities.title')}</h1>
-					<p class="lede">{m('entities.lede')}</p>
+					<p class="admin-lede">{m('entities.lede')}</p>
 				</div>
 				<Button
 					onclick={openNew}
@@ -157,9 +157,9 @@
 			</div>
 		</section>
 
-		<section class="block">
+		<section class="admin-block">
 			{#if loading}
-				<p class="loading">
+				<p class="admin-loading">
 					<span class="spinner" aria-hidden="true"></span>
 					{m('common.loading')}
 				</p>
@@ -214,15 +214,15 @@
 
 				<div class="list">
 					{#if nodeList.length === 0}
-						<p class="empty">
+						<p class="admin-empty">
 							{types.length === 0
 								? m('entities.empty_no_types')
 								: m('entities.empty')}
 						</p>
 					{:else if filtered.length === 0}
-						<p class="empty">{m('entities.no_results')}</p>
+						<p class="admin-empty">{m('entities.no_results')}</p>
 					{:else}
-						<table>
+						<table class="admin-table">
 							<thead>
 								<tr>
 									<th>{m('entities.col_type')}</th>
@@ -256,8 +256,8 @@
 											{/if}
 										</td>
 										<td class="num">
-											<button class="link" onclick={() => openEdit(n)}>{m('common.edit_lower')}</button>
-											<button class="link danger" onclick={() => askRemoveNode(n)}>
+											<button class="admin-action" onclick={() => openEdit(n)}>{m('common.edit_lower')}</button>
+											<button class="admin-action danger" onclick={() => askRemoveNode(n)}>
 												{m('common.remove_lower')}
 											</button>
 										</td>
@@ -286,48 +286,6 @@
 />
 
 <style>
-	main {
-		max-width: 1240px;
-		margin: 0 auto;
-		padding: 4rem 2.5rem 6rem;
-	}
-	.hero {
-		padding: 2rem 0;
-		display: grid;
-		grid-template-columns: 5rem 1fr;
-		gap: 1.5rem;
-	}
-	.head-row {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1.5rem;
-	}
-	.hero h1 {
-		font-size: clamp(2rem, 4vw, 3rem);
-		font-weight: 300;
-		letter-spacing: -0.03em;
-		line-height: 1.05;
-	}
-	.lede {
-		margin-top: 1rem;
-		max-width: 58ch;
-		color: var(--text-muted);
-	}
-	.loading {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.85rem;
-		color: var(--text-soft);
-	}
-
-	.block {
-		padding: 3rem 0;
-		border-top: 1px solid var(--border);
-	}
-
 	.filters {
 		display: flex;
 		flex-direction: column;
@@ -409,30 +367,6 @@
 		font-size: 0.68rem;
 	}
 
-	.list table {
-		width: 100%;
-		border-collapse: collapse;
-	}
-	.list th,
-	.list td {
-		text-align: left;
-		padding: 0.7rem 0.8rem;
-		border-bottom: 1px solid var(--border);
-		vertical-align: middle;
-	}
-	.list th {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.68rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--text-soft);
-		font-weight: 500;
-	}
-	.list td.num,
-	.list th.num {
-		text-align: right;
-		white-space: nowrap;
-	}
 	.list .sub {
 		font-size: 0.78rem;
 		color: var(--text-soft);
@@ -440,39 +374,5 @@
 	}
 	.list .muted {
 		color: var(--text-soft);
-	}
-	.list .empty {
-		padding: 1.5rem;
-		text-align: center;
-		color: var(--text-soft);
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.85rem;
-		border: 1px dashed var(--border);
-		border-radius: 3px;
-	}
-
-	.link {
-		background: transparent;
-		border: 0;
-		padding: 0;
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.72rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--text-muted);
-		cursor: pointer;
-		margin-left: 0.8rem;
-	}
-	.link:hover {
-		color: var(--accent);
-	}
-	.link.danger:hover {
-		color: var(--danger);
-	}
-
-	@media (max-width: 900px) {
-		main { padding: 2rem 1.2rem 4rem; }
-		.hero { grid-template-columns: 1fr; gap: 0.5rem; }
-		.head-row { flex-direction: column; }
 	}
 </style>

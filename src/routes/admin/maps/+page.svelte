@@ -156,29 +156,29 @@
 </script>
 
 {#if auth.isLoggedIn}
-	<main>
-		<section class="hero">
+	<main class="admin-page">
+		<section class="admin-hero">
 			<AppMeta section={m('meta.admin')} />
-			<div class="head-row">
+			<div class="admin-head">
 				<div>
 					<h1>{m('maps_admin.title')}</h1>
-					<p class="lede">{m('maps_admin.lede')}</p>
+					<p class="admin-lede">{m('maps_admin.lede')}</p>
 				</div>
 				<Button onclick={openNew}><Plus size={14} /> {m('maps_admin.new')}</Button>
 			</div>
 		</section>
 
-		<section class="block">
+		<section class="admin-block">
 			{#if removeError}
-				<p class="error remove-error">{removeError}</p>
+				<p class="admin-error remove-error">{removeError}</p>
 			{/if}
 			{#if loading}
-				<p class="loading">
+				<p class="admin-loading">
 					<span class="spinner" aria-hidden="true"></span>
 					{m('common.loading')}
 				</p>
 			{:else if mapList.length === 0}
-				<p class="empty">{m('maps_admin.empty')}</p>
+				<p class="admin-empty">{m('maps_admin.empty')}</p>
 			{:else}
 				<div class="list">
 					<div class="row header">
@@ -204,7 +204,7 @@
 							<span class="col-actions">
 								{#if !isMain(i)}
 									<button
-										class="reorder-btn"
+										class="admin-icon-btn"
 										disabled={i <= 1 || reordering}
 										onclick={() => moveUp(i)}
 										aria-label={m('common.move_up')}
@@ -212,15 +212,15 @@
 										<ChevronUp size={16} />
 									</button>
 									<button
-										class="reorder-btn"
+										class="admin-icon-btn"
 										disabled={i === mapList.length - 1 || reordering}
 										onclick={() => moveDown(i)}
 										aria-label={m('common.move_down')}
 									>
 										<ChevronDown size={16} />
 									</button>
-									<button class="link" onclick={() => openEdit(map)}>{m('common.edit_lower')}</button>
-									<button class="link danger" onclick={() => askRemove(map)}>
+									<button class="admin-action" onclick={() => openEdit(map)}>{m('common.edit_lower')}</button>
+									<button class="admin-action danger" onclick={() => askRemove(map)}>
 										{m('common.remove_lower')}
 									</button>
 								{/if}
@@ -238,8 +238,8 @@
 	title={editingMap ? m('maps_admin.dialog.title.edit') : m('maps_admin.dialog.title.new')}
 	dismissable={false}
 >
-	<form onsubmit={submit}>
-		<div class="field">
+	<form class="admin-form" onsubmit={submit}>
+		<div class="admin-field">
 			<span class="field-label">{m('maps_admin.field.label')}</span>
 			<LocalizedInput
 				id="map-label"
@@ -247,7 +247,7 @@
 				placeholder={m('maps_admin.field.label_placeholder')}
 			/>
 		</div>
-		<div class="field">
+		<div class="admin-field">
 			<label class="field-label" for="map-slug">{m('maps_admin.field.slug')}</label>
 			<input
 				id="map-slug"
@@ -260,9 +260,9 @@
 			/>
 		</div>
 		{#if error}
-			<p class="error">{error}</p>
+			<p class="admin-error">{error}</p>
 		{/if}
-		<div class="form-actions">
+		<div class="admin-form-actions">
 			<Button type="button" variant="secondary" onclick={() => (dialogOpen = false)}>
 				{m('common.cancel')}
 			</Button>
@@ -286,48 +286,6 @@
 />
 
 <style>
-	main {
-		max-width: 1240px;
-		margin: 0 auto;
-		padding: 4rem 2.5rem 6rem;
-	}
-	.hero {
-		padding: 2rem 0;
-		display: grid;
-		grid-template-columns: 5rem 1fr;
-		gap: 1.5rem;
-	}
-	.head-row {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1.5rem;
-	}
-	.hero h1 {
-		font-size: clamp(2rem, 4vw, 3rem);
-		font-weight: 300;
-		letter-spacing: -0.03em;
-		line-height: 1.05;
-	}
-	.lede {
-		margin-top: 1rem;
-		max-width: 58ch;
-		color: var(--text-muted);
-	}
-	.loading {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.85rem;
-		color: var(--text-soft);
-	}
-
-	.block {
-		padding: 3rem 0;
-		border-top: 1px solid var(--border);
-	}
-
 	/* Grid-based list */
 	.list {
 		display: grid;
@@ -385,87 +343,14 @@
 		vertical-align: middle;
 	}
 
-	.reorder-btn {
-		background: transparent;
-		border: 0;
-		padding: 0.3rem;
-		cursor: pointer;
-		color: var(--text-soft);
-		display: inline-flex;
-		border-radius: 2px;
-		transition: color 0.15s;
-	}
-	.reorder-btn:hover:not(:disabled) {
-		color: var(--accent);
-	}
-	.reorder-btn:disabled {
-		opacity: 0.3;
-		cursor: not-allowed;
-	}
-
-	.link {
-		background: transparent;
-		border: 0;
-		padding: 0;
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.72rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--text-muted);
-		cursor: pointer;
-		margin-left: 0.8rem;
-	}
-	.link:hover {
-		color: var(--accent);
-	}
-	.link.danger:hover {
-		color: var(--danger);
-	}
-
-	.empty {
-		padding: 1.5rem;
-		text-align: center;
-		color: var(--text-soft);
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.85rem;
-		border: 1px dashed var(--border);
-		border-radius: 3px;
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: 1.2rem;
-	}
-	.field {
-		display: flex;
-		flex-direction: column;
-	}
-	.error {
-		color: var(--danger);
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.78rem;
-	}
 	.remove-error {
 		margin-bottom: 1rem;
 	}
-	.form-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.8rem;
-		margin-top: 0.5rem;
-	}
 
-	@media (max-width: 900px) {
-		main {
-			padding: 2rem 1.2rem 4rem;
-		}
-		.hero {
-			grid-template-columns: 1fr;
-			gap: 0.5rem;
-		}
-		.head-row {
-			flex-direction: column;
+	/* admin.css stacks a table cell's actions on a phone; these rows keep theirs inline. */
+	@media (max-width: 600px) {
+		.col-actions .admin-action {
+			margin: 0 0 0 0.8rem;
 		}
 	}
 </style>
