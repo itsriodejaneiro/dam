@@ -67,13 +67,15 @@ docker compose -f compose.yaml cp dam-pocketbase:/pb/pb_data ./pb_data-backup
 docker compose -f compose.yaml start dam-pocketbase
 ```
 
-To restore it, stop both services, so the app signs in again against the restored database:
+To restore it, stop both services, so nothing touches the database during the copy:
 
 ```bash
 docker compose -f compose.yaml stop
 docker compose -f compose.yaml cp ./pb_data-backup/. dam-pocketbase:/pb/pb_data
 docker compose -f compose.yaml start
 ```
+
+An app left running through a restore signs in again by itself, as long as `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD` work on the restored database.
 
 ### With Dokploy
 
