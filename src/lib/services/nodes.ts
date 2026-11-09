@@ -35,7 +35,7 @@ export async function getNode(id: string): Promise<Node> {
 
 /**
  * Creates a node + fills in every translation provided.
- * Fails if the default locale's translation is missing (PB constraint).
+ * NodeDialog.svelte requires the default locale's label; this function writes what it receives.
  */
 export async function createNode(
 	data: NodeInput,
