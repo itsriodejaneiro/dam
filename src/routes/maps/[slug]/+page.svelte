@@ -31,7 +31,7 @@
 		type NodeType
 	} from '$lib/services';
 	import { localesState, localizedNode, localizedNodeType, localizedMap, t, m } from '$lib/i18n';
-	import { sanitizeHtml } from '$lib/sanitize';
+	import { safeUrl, sanitizeHtml } from '$lib/sanitize';
 	import { placeName } from '$lib/settings';
 	import { canvasHeight, heightInLane, laneTops, LAYER_H, VIS_W } from '$lib/journey';
 
@@ -429,7 +429,7 @@
 	const SAVE_DELAY = 800;
 
 	function scheduleSavePosition(node: VisNode) {
-		if (!auth.isLoggedIn) return;
+		if (!auth.isAdmin) return;
 		const mn = mapNodeByNodeId.get(node.id);
 		if (!mn || node.fx == null || node.fy == null) return;
 
@@ -484,7 +484,7 @@
 
 		// Clear persisted position
 		const mn = mapNodeByNodeId.get(n.id);
-		if (mn && auth.isLoggedIn) {
+		if (mn && auth.isAdmin) {
 			mapNodesApi.clearPosition(mn.id);
 			mn.x = null;
 			mn.y = null;
@@ -684,7 +684,7 @@
 
 							<hr class="info-sep" />
 
-							{#if auth.isLoggedIn}
+							{#if auth.isAdmin}
 								<div class="info-actions">
 									<Button
 										variant="secondary"
@@ -714,7 +714,7 @@
 									<ul class="ext-links">
 										{#each selectedLinks as l, i (i)}
 											<li>
-												<a href={l.url} target="_blank" rel="noopener noreferrer">
+												<a href={safeUrl(l.url)} target="_blank" rel="noopener noreferrer">
 													{t(l.label, code) || l.url}
 												</a>
 											</li>
@@ -768,7 +768,7 @@
 									<button class="unpin" type="button" onclick={() => unpin(d)}>
 										{m('map_view.unpin')}
 									</button>
-									{#if auth.isLoggedIn}
+									{#if auth.isAdmin}
 										<span class="pin-coords">{Math.round(d.fx)}, {Math.round(d.fy ?? 0)}</span>
 									{/if}
 								</div>
