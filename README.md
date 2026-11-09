@@ -30,7 +30,7 @@ bun install
 bun run dev
 ```
 
-`bun run dev` creates `.env` from `.env.example`, starts Colima when Docker is down, brings PocketBase up in Docker and serves the app with Vite. One Ctrl-C stops everything.
+`bun run dev` creates `.env` from `.env.example`, starts Colima when Docker is down, brings PocketBase up in Docker and serves the app with Vite. One Ctrl-C stops the app and its container; Colima keeps running.
 
 Open <http://localhost:5173>. A new project sends you to `/setup`: sign in with the superuser in `.env`. The PocketBase admin is at <http://127.0.0.1:8090/_/>, with the same credentials.
 

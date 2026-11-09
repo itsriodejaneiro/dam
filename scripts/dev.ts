@@ -64,7 +64,11 @@ if (!Bun.which(COMPOSE[0])) die(INSTALL);
 if (!Bun.spawnSync(['docker', 'info'], quiet).success) {
 	if (!Bun.which('colima')) die('Docker is not running: start it and run this again');
 	console.log('▸ starting Colima');
-	if (!Bun.spawnSync(['colima', 'start'], loud).success) die('`colima start` failed');
+	// The VM serves the whole machine and outlives this checkout. Its daemons (limactl, ssh)
+	// inherit the folder and the session of what starts them, and closing a git worktree
+	// stops every process whose folder is inside it: a stop there would take the VM down.
+	const colima = Bun.spawn(['colima', 'start'], { ...loud, cwd: '/', detached: true });
+	if ((await colima.exited) !== 0) die('`colima start` failed');
 }
 
 const compose = (...args: string[]) => Bun.spawn([...COMPOSE, ...args], { cwd: ROOT, ...loud }).exited;
