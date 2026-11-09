@@ -703,7 +703,8 @@ export async function resetProject(pb: PocketBase): Promise<void> {
 /** True if the project already has a schema (the `maps` collection exists). */
 export async function isConfigured(pb: PocketBase): Promise<boolean> {
 	try {
-		await pb.collections.getOne('maps');
+		// the record route and a public collection: any client can ask, signed in or not
+		await pb.collection('maps').getList(1, 1, { skipTotal: true });
 		return true;
 	} catch (err: unknown) {
 		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
