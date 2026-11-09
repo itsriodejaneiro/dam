@@ -25,6 +25,7 @@ export const messages = {
 	// ──────────────────────────────────────────────
 	'common.save': { pt: 'Salvar', en: 'Save', fr: 'Enregistrer', es: 'Guardar' },
 	'common.cancel': { pt: 'Cancelar', en: 'Cancel', fr: 'Annuler', es: 'Cancelar' },
+	'common.confirm': { pt: 'Confirmar', en: 'Confirm', fr: 'Confirmer', es: 'Confirmar' },
 	'common.create': { pt: 'Criar', en: 'Create', fr: 'Créer', es: 'Crear' },
 	'common.edit': { pt: 'Editar', en: 'Edit', fr: 'Modifier', es: 'Editar' },
 	'common.edit_lower': { pt: 'editar', en: 'edit', fr: 'modifier', es: 'editar' },

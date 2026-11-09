@@ -2,6 +2,7 @@
 	import { AlertTriangle } from '@lucide/svelte';
 	import Dialog from './Dialog.svelte';
 	import Button from './Button.svelte';
+	import { m } from '$lib/i18n';
 
 	type Variant = 'danger' | 'primary';
 
@@ -21,8 +22,8 @@
 		open = $bindable(false),
 		title,
 		description = '',
-		confirmLabel = 'Confirmar',
-		cancelLabel = 'Cancelar',
+		confirmLabel,
+		cancelLabel,
 		variant = 'danger',
 		loading = false,
 		onConfirm,
@@ -54,12 +55,13 @@
 			{/if}
 		</div>
 	</div>
+	<!-- The fallbacks live here because a prop default is read once and would miss a locale switch. -->
 	<div class="actions">
 		<Button variant="ghost" onclick={cancel} disabled={loading}>
-			{cancelLabel}
+			{cancelLabel ?? m('common.cancel')}
 		</Button>
 		<Button variant={variant === 'danger' ? 'danger' : 'primary'} {loading} onclick={confirm}>
-			{confirmLabel}
+			{confirmLabel ?? m('common.confirm')}
 		</Button>
 	</div>
 </Dialog>
