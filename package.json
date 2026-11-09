@@ -8,11 +8,16 @@
 		"build": "vite build",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"docs:dev": "vitepress dev docs",
+		"docs:build": "vitepress build docs",
+		"docs:preview": "vitepress preview docs",
+		"shots": "playwright test",
 		"db:setup": "bun run scripts/setup-collections.ts",
 		"db:reset": "bun run scripts/reset-db.ts",
 		"db:seed-maps": "bun run scripts/seed-main-map.ts"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.65.0",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
@@ -23,7 +28,8 @@
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"typescript": "^6.0.2",
-		"vite": "^8.0.7"
+		"vite": "^8.0.7",
+		"vitepress": "^1.6.4"
 	},
 	"dependencies": {
 		"@lucide/svelte": "^1.14.0",
