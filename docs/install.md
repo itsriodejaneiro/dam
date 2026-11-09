@@ -44,7 +44,7 @@ The [README](https://github.com/itsriodejaneiro/dam#install) has the steps for a
 
 ## The `.env` file
 
-`.env` holds infrastructure only: addresses, ports and the superuser, the account that installs and can do everything. The first boot of a new database creates the superuser from `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD`, and the app's server side signs in with them, so they stay set. The defaults in `.env.example` are for development: set your own on a server.
+`.env` holds infrastructure only: addresses, ports and the superuser, the account that installs and can do everything. The first boot of a new database creates the superuser from `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD`, at least 8 characters long, and the app's server side signs in with them, so they stay set. The defaults in `.env.example` are for development: set your own on a server.
 
 Everything else that identifies a deployment lives in the app: see [Configure your deployment](./configure.md).
 

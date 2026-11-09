@@ -8,12 +8,15 @@ set -e
 # changed in the admin. Create fails harmlessly once the account exists. The app's server
 # side logs in with the same variables, so a changed password changes there too.
 #
-# The output is read because `superuser create` exits 0 on a duplicated e-mail.
+# The output is read because `superuser create` exits 0 on every failure. Only the
+# duplicated e-mail means the account is there; anything else left no superuser, and the
+# log has to say why, since the health check stays green.
 if [ -n "$PB_SUPERUSER_EMAIL" ] && [ -n "$PB_SUPERUSER_PASSWORD" ]; then
 	result=$(/pb/pocketbase superuser create "$PB_SUPERUSER_EMAIL" "$PB_SUPERUSER_PASSWORD" \
 		--dir=/pb/pb_data 2>&1 || true)
 	case "$result" in
-	*Error*) echo "superuser $PB_SUPERUSER_EMAIL already exists: password left as it is" ;;
+	*"Value must be unique"*) echo "superuser $PB_SUPERUSER_EMAIL already exists: password left as it is" ;;
+	*Error*) echo "superuser $PB_SUPERUSER_EMAIL not created: $result" >&2 ;;
 	*) echo "superuser $PB_SUPERUSER_EMAIL created" ;;
 	esac
 fi

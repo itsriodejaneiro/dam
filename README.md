@@ -122,7 +122,7 @@ Everything that identifies a deployment lives in the `settings` record: its name
 | `PB_URL` | the PocketBase URL the server uses; `compose.yaml` sets it to the internal address, and without it the server uses `PUBLIC_POCKETBASE_URL` |
 | `PB_PORT`, `APP_PORT` | the ports `compose.local.yaml` publishes; in development, `PB_PORT` is PocketBase's port on the host |
 | `PB_ADMIN_URL`, `APP_URL` | the URLs `bun run dev` prints |
-| `PB_SUPERUSER_EMAIL`, `PB_SUPERUSER_PASSWORD` | the superuser, created on the first boot of a new database and used by the scripts and the server side |
+| `PB_SUPERUSER_EMAIL`, `PB_SUPERUSER_PASSWORD` | the superuser, created on the first boot of a new database and used by the scripts and the server side; the password needs at least 8 characters |
 
 ## Commands
 
