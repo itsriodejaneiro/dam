@@ -1,0 +1,20 @@
+# Images build from the repository root (compose.yaml), and a build context is uploaded
+# whole before the first instruction runs.
+
+node_modules
+**/node_modules
+
+# the dev database: a deploy never shares one with a laptop
+pocketbase/pb_data
+
+.svelte-kit
+build
+
+# .env holds the dev passwords
+.env
+.env.*
+!.env.example
+
+.git
+.vscode
+.DS_Store

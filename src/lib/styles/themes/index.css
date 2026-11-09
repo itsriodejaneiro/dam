@@ -1,0 +1,10 @@
+/* Theme packs. Each pack defines the same tokens scoped in
+   [data-theme='<pack>']; the active pack comes from the settings record
+   through the hook, with an optional localStorage override.
+   See src/lib/theme.ts (PACKS).
+
+   To trim a deploy to a single pack, keep only the @import it needs. */
+
+@import './legacy.css';
+@import './green.css';
+@import './orange.css';

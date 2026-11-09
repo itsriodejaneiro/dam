@@ -1,0 +1,65 @@
+/* Minimal reset + the document's base typography. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 15px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Fira Sans', system-ui, sans-serif;
+  font-weight: 400;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: 0 0;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  min-height: 100vh;
+}
+
+a { color: inherit; }
+
+button { font: inherit; color: inherit; }
+
+/* Page title + navbar brand. Coloured when the theme pack defines --heading
+   (e.g. green in light mode); otherwise it inherits --text (legacy, dark). */
+h1 { color: var(--heading, var(--text)); }
+
+.mono { font-family: 'Fira Mono', monospace; }
+
+/* Marks a value that came from the translation fallback, not the current locale.
+   Inline next to labels in admin tables. */
+.fallback-mark {
+  color: var(--text-soft);
+  font-weight: 400;
+  margin-left: 0.25rem;
+  cursor: help;
+  user-select: none;
+}
+
+.spinner {
+  width: 0.85em;
+  height: 0.85em;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  animation: spin 0.7s linear infinite;
+  flex: none;
+  display: inline-block;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2s; }
+}

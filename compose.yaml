@@ -1,0 +1,30 @@
+# PocketBase as a deploy runs it: a deploy names this file alone (`-f compose.yaml`).
+# `bun run dev` gives no `-f`, so Compose also merges compose.override.yaml, which
+# publishes the port and mounts the checkout's own database.
+
+services:
+  # A name no other project on the server uses, never plain `pocketbase`: Dokploy puts
+  # its projects on one shared network, where a plain name answers from two databases.
+  dam-pocketbase:
+    # One image for every checkout, so a new worktree builds nothing. The tag carries
+    # the version, so moving the pin builds again and an unchanged one works offline.
+    image: dam-pocketbase:0.39.7
+    build:
+      context: .
+      dockerfile: pocketbase/Dockerfile
+      args:
+        PB_VERSION: 0.39.7
+    restart: unless-stopped
+    # `expose`, not `ports`: the deploy's proxy reaches it over the internal network and
+    # terminates TLS. A published port would be an unencrypted PocketBase on the internet.
+    expose:
+      - 8090
+    volumes:
+      - pb_data:/pb/pb_data
+    environment:
+      # Read by pocketbase/entrypoint.sh and used only while the account does not exist.
+      - PB_SUPERUSER_EMAIL=${PB_SUPERUSER_EMAIL:-}
+      - PB_SUPERUSER_PASSWORD=${PB_SUPERUSER_PASSWORD:-}
+
+volumes:
+  pb_data: {}

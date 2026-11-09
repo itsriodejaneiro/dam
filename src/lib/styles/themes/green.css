@@ -1,0 +1,79 @@
+/* Theme pack: GREEN — green, gold, red and black.
+   Green, gold and red anchor some node slots; the rest fill distinct
+   complementary hues so the 8 categories stay perceptually separable.
+   Pack scoped in [data-theme='green']; light/dark mode in [data-mode]. */
+
+[data-theme='green'] {
+  /* Node palette: a saturated red/gold/green trio up front; the remaining
+     slots complete 8 distinct categories. High chroma for colour; same
+     8-slot contract as legacy. */
+  --node-slot-1: oklch(0.575 0.205  25);  /* red */
+  --node-slot-2: oklch(0.820 0.170  92);  /* gold */
+  --node-slot-3: oklch(0.600 0.160 155);  /* green */
+  --node-slot-4: oklch(0.675 0.175  50);  /* orange */
+  --node-slot-5: oklch(0.650 0.130 197);  /* teal */
+  --node-slot-6: oklch(0.580 0.150 248);  /* blue */
+  --node-slot-7: oklch(0.550 0.165 305);  /* plum */
+  --node-slot-8: oklch(0.625 0.190 352);  /* magenta */
+
+  /* Status: gold = draft, blue = review, green = confirmed. */
+  --status-draft:     var(--node-slot-2);
+  --status-review:    var(--node-slot-6);
+  --status-confirmed: var(--node-slot-3);
+}
+
+[data-theme='green'][data-mode='light'] {
+  --bg:            #f6f8f6;
+  --bg-elevated:   #ffffff;
+  --bg-sunken:     #ecefe9;
+  --border:        #dde3db;
+  --border-strong: #c3ccc0;
+  --text:          #14231a;
+  --text-muted:    #4a5a50;
+  --text-soft:     #6d7b72;
+  /* headings (page h1 + brand) in a deep pine green: 8:1 on bg */
+  --heading:       oklch(0.40 0.11 152);
+  /* vivid green; L~0.53 keeps AA contrast as text/link and under white text */
+  --accent:        oklch(0.53 0.155 152);
+  --accent-soft:   #d9f0e0;
+  --accent-fg:     #ffffff;
+  /* red darkened for AA */
+  --danger:        #c1121f;
+  --danger-soft:   #fce4e4;
+  --danger-fg:     #ffffff;
+  --dot:           rgba(20,35,26,0.06);
+  --shadow:        0 1px 0 rgba(20,35,26,0.04), 0 8px 24px -12px rgba(20,35,26,0.16);
+  --node-tint:     1;
+  --grid-line:     rgba(20,35,26,0.06);
+  --tooltip-bg:    rgba(255, 255, 255, 0.94);
+  --tooltip-border: rgba(20, 35, 26, 0.12);
+}
+
+[data-theme='green'][data-mode='dark'] {
+  /* Emerald charcoal: raised L and green chroma so the hue shows in the
+     background (near-black would swallow the green). */
+  --bg:            #0f2319;
+  --bg-elevated:   #1b3025;
+  --bg-sunken:     #07160e;
+  /* map/graph canvas background, raised so it never reads as a black hole
+     (a large area; the near-black bg-sunken only suits small chips) */
+  --bg-canvas:     #0c1e15;
+  --border:        #2e4237;
+  --border-strong: #455c4f;
+  --text:          #e1eae5;
+  --text-muted:    #9aa9a0;
+  --text-soft:     #68756e;
+  /* vivid green, lightened to glow on a dark background */
+  --accent:        oklch(0.75 0.175 152);
+  --accent-soft:   #143923;
+  --accent-fg:     #0a110c;
+  --danger:        #ff6b5e;
+  --danger-soft:   #3a1614;
+  --danger-fg:     #0a110c;
+  --dot:           rgba(232,239,233,0.06);
+  --shadow:        0 1px 0 rgba(0,0,0,0.35), 0 8px 24px -8px rgba(0,0,0,0.45);
+  --node-tint:     1.05;
+  --grid-line:     rgba(232,239,233,0.05);
+  --tooltip-bg:    rgba(6, 12, 8, 0.82);
+  --tooltip-border: rgba(232, 239, 233, 0.14);
+}

@@ -1,0 +1,6 @@
+/* Single entry point for global CSS. Imported once in +layout.svelte. */
+
+@import './themes/index.css';
+@import './base.css';
+@import './forms.css';
+@import './admin.css';

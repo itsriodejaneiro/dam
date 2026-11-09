@@ -1,0 +1,160 @@
+/* The frame of an admin screen, used directly in the HTML: page width, heading, the
+   block under it, the table with its row actions, the small icon buttons of a list, and the form of its dialog. */
+
+.admin-page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 6rem;
+}
+.admin-hero {
+  padding: 2rem 0;
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 1.5rem;
+}
+.admin-hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.admin-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.admin-lede {
+  margin-top: 1rem;
+  max-width: 58ch;
+  color: var(--text-muted);
+}
+.admin-block {
+  padding: 3rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.admin-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+.admin-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-soft);
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.85rem;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+}
+.admin-error {
+  color: var(--danger);
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.78rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+.admin-table th {
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+.admin-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+.admin-table .fit {
+  white-space: nowrap;
+}
+.admin-note {
+  margin-left: 0.6rem;
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.admin-action {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 0.8rem;
+  text-decoration: none;
+}
+.admin-action:hover:not(:disabled) { color: var(--accent); }
+.admin-action.danger:hover:not(:disabled) { color: var(--danger); }
+.admin-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.admin-icon-btn {
+  background: transparent;
+  border: 0;
+  padding: 0.3rem;
+  cursor: pointer;
+  color: var(--text-soft);
+  display: inline-flex;
+  border-radius: 2px;
+  transition: color 0.15s;
+}
+.admin-icon-btn:hover:not(:disabled) { color: var(--accent); }
+.admin-icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.admin-field {
+  display: flex;
+  flex-direction: column;
+}
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .admin-page { padding: 2rem 1.2rem 4rem; }
+  .admin-hero {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .admin-head { flex-direction: column; }
+}
+
+@media (max-width: 600px) {
+  .admin-table .num { white-space: normal; }
+  .admin-action { display: block; margin: 0.3rem 0 0 auto; }
+}

@@ -1,0 +1,27 @@
+/* Form utility classes, used directly in the HTML.
+   Global because .input styles both <input> and <select>,
+   and wrapping that in a Svelte component would force polymorphic wrappers. */
+
+.input {
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 0.92rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+.input:focus { outline: none; border-color: var(--accent); }
+.input::placeholder { color: var(--text-soft); }
+
+.field-label {
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  display: block;
+  margin-bottom: 0.4rem;
+}

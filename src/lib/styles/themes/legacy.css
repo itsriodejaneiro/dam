@@ -1,0 +1,68 @@
+/* Theme pack: LEGACY — the project's original palette and the default.
+   Pack scoped in [data-theme='legacy']; light/dark mode in [data-mode]. */
+
+[data-theme='legacy'] {
+  /* Node palette, indexed by the node_type's color_slot.
+     Adding or renaming a type in PocketBase never breaks a colour; the slot
+     only has to exist. L/C vary for perceptual separation; H runs warm→cold. */
+  --node-slot-1: oklch(0.71 0.18  42);  /* orange */
+  --node-slot-2: oklch(0.80 0.17  80);  /* gold */
+  --node-slot-3: oklch(0.76 0.20 120);  /* chartreuse */
+  --node-slot-4: oklch(0.62 0.19  18);  /* red */
+  --node-slot-5: oklch(0.70 0.15 160);  /* green */
+  --node-slot-6: oklch(0.66 0.12 195);  /* teal */
+  --node-slot-7: oklch(0.60 0.16 235);  /* blue */
+  --node-slot-8: oklch(0.54 0.15 270);  /* indigo */
+
+  /* Semantic status tokens, picked from the palette. */
+  --status-draft:     var(--node-slot-2);
+  --status-review:    var(--node-slot-5);
+  --status-confirmed: var(--node-slot-6);
+}
+
+[data-theme='legacy'][data-mode='light'] {
+  --bg:            #f5f1ea;
+  --bg-elevated:   #ffffff;
+  --bg-sunken:     #ebe6dc;
+  --border:        #e0d9cc;
+  --border-strong: #c9c0ad;
+  --text:          #1a1d24;
+  --text-muted:    #5e616b;
+  --text-soft:     #94939a;
+  --accent:        #C75A1A;
+  --accent-soft:   #fde8d4;
+  /* text that sits ON the accent (primary button) */
+  --accent-fg:     var(--bg);
+  --danger:        #b73a26;
+  --danger-soft:   #fde6e1;
+  --danger-fg:     var(--bg);
+  --dot:           rgba(26,29,36,0.08);
+  --shadow:        0 1px 0 rgba(26,29,36,0.04), 0 8px 24px -12px rgba(26,29,36,0.18);
+  --node-tint:     1;
+  --grid-line:     rgba(26,29,36,0.06);
+  --tooltip-bg:    rgba(255, 255, 255, 0.92);
+  --tooltip-border: rgba(26, 29, 36, 0.14);
+}
+
+[data-theme='legacy'][data-mode='dark'] {
+  --bg:            #1a1825;
+  --bg-elevated:   #252132;
+  --bg-sunken:     #14121e;
+  --border:        #36314a;
+  --border-strong: #4a4565;
+  --text:          #ebe6f0;
+  --text-muted:    #8b8599;
+  --text-soft:     #5a5670;
+  --accent:        #ffc28f;
+  --accent-soft:   #3a2c1e;
+  --accent-fg:     var(--bg-sunken);
+  --danger:        #ff8a7a;
+  --danger-soft:   #3a1f1c;
+  --danger-fg:     var(--bg-sunken);
+  --dot:           rgba(235,230,240,0.06);
+  --shadow:        0 1px 0 rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.4);
+  --node-tint:     1.05;
+  --grid-line:     rgba(235,230,240,0.05);
+  --tooltip-bg:    rgba(0, 0, 0, 0.78);
+  --tooltip-border: rgba(235, 230, 240, 0.16);
+}

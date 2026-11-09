@@ -1,0 +1,76 @@
+/* Theme pack: ORANGE — orange, white and green.
+   Light inherits the legacy palette (which already works well), with a
+   burnt-orange heading. Dark carries the identity: warm charcoal and a vivid
+   orange accent. Pack scoped in [data-theme='orange']; mode in [data-mode]. */
+
+[data-theme='orange'] {
+  /* Node palette: the legacy arc (slot 1 orange and slot 5 green anchor the
+     pack). L/C vary for perceptual separation of the 8 types. */
+  --node-slot-1: oklch(0.72 0.18  52);  /* orange */
+  --node-slot-2: oklch(0.80 0.17  85);  /* gold */
+  --node-slot-3: oklch(0.76 0.20 125);  /* chartreuse */
+  --node-slot-4: oklch(0.62 0.19  18);  /* red */
+  --node-slot-5: oklch(0.68 0.15 158);  /* green */
+  --node-slot-6: oklch(0.66 0.12 195);  /* teal */
+  --node-slot-7: oklch(0.60 0.16 235);  /* blue */
+  --node-slot-8: oklch(0.54 0.15 270);  /* indigo */
+
+  --status-draft:     var(--node-slot-2);
+  --status-review:    var(--node-slot-7);
+  --status-confirmed: var(--node-slot-5);
+}
+
+[data-theme='orange'][data-mode='light'] {
+  --bg:            #f5f1ea;
+  --bg-elevated:   #ffffff;
+  --bg-sunken:     #ebe6dc;
+  --border:        #e0d9cc;
+  --border-strong: #c9c0ad;
+  --text:          #1a1d24;
+  --text-muted:    #5e616b;
+  --text-soft:     #94939a;
+  /* headings (h1 + brand) in a deep burnt orange: AA on the light bg */
+  --heading:       oklch(0.42 0.11 52);
+  --accent:        #c2551a;
+  --accent-soft:   #fde5d0;
+  --accent-fg:     #ffffff;
+  --danger:        #b73a26;
+  --danger-soft:   #fde6e1;
+  --danger-fg:     #ffffff;
+  --dot:           rgba(26,29,36,0.08);
+  --shadow:        0 1px 0 rgba(26,29,36,0.04), 0 8px 24px -12px rgba(26,29,36,0.18);
+  --node-tint:     1;
+  --grid-line:     rgba(26,29,36,0.06);
+  --tooltip-bg:    rgba(255, 255, 255, 0.92);
+  --tooltip-border: rgba(26, 29, 36, 0.14);
+}
+
+[data-theme='orange'][data-mode='dark'] {
+  /* Dark-orange (terracotta) background. Hue ~42 (towards red) avoids the olive
+     that hue 55 gives when dark and desaturated. A tone trial; the other
+     values are still to be tuned. */
+  --bg:            oklch(0.28 0.055 42);
+  --bg-elevated:   oklch(0.33 0.058 42);
+  --bg-sunken:     oklch(0.23 0.05 42);
+  /* map canvas raised so it never reads as a black hole */
+  --bg-canvas:     oklch(0.30 0.055 42);
+  --border:        #38332b;
+  --border-strong: #4e463a;
+  --text:          #f0eae0;
+  --text-muted:    #a69d8d;
+  --text-soft:     #6d6558;
+  /* orange, lightened to glow on dark (AA as text/link) */
+  --accent:        oklch(0.76 0.16 55);
+  --accent-soft:   #3a2915;
+  --accent-fg:     #141210;
+  /* red clearly distinct from the orange accent */
+  --danger:        oklch(0.70 0.19 25);
+  --danger-soft:   #3a1913;
+  --danger-fg:     #141210;
+  --dot:           rgba(240,234,224,0.06);
+  --shadow:        0 1px 0 rgba(0,0,0,0.32), 0 8px 24px -8px rgba(0,0,0,0.44);
+  --node-tint:     1.05;
+  --grid-line:     rgba(240,234,224,0.05);
+  --tooltip-bg:    rgba(10, 8, 5, 0.82);
+  --tooltip-border: rgba(240, 234, 224, 0.14);
+}

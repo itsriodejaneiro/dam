@@ -1,0 +1,10 @@
+# Development only: Compose merges this file into compose.yaml when no `-f` is given.
+
+services:
+  dam-pocketbase:
+    # Each checkout publishes the port of its own .env, on loopback only.
+    ports:
+      - 127.0.0.1:${PB_PORT:?set PB_PORT in .env}:8090
+    # A folder, not a named volume: copying a database between worktrees is copying it.
+    volumes:
+      - ./pocketbase/pb_data:/pb/pb_data
