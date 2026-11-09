@@ -94,22 +94,26 @@
 		}
 
 		private update = () => {
-			let output = '';
+			// Built from nodes and text: the characters come from a stored label.
+			const output = document.createDocumentFragment();
 			let done = 0;
 			for (const q of this.queue) {
 				if (this.frame >= q.end) {
 					done++;
-					output += q.to;
+					output.append(q.to);
 				} else if (this.frame >= q.start) {
 					if (!q.char || Math.random() < this.SWAP_RATE) {
 						q.char = this.chars[Math.floor(Math.random() * this.chars.length)];
 					}
-					output += `<span class="scramble-mid">${q.char}</span>`;
+					const mid = document.createElement('span');
+					mid.className = 'scramble-mid';
+					mid.textContent = q.char;
+					output.append(mid);
 				} else {
-					output += q.from;
+					output.append(q.from);
 				}
 			}
-			this.el.innerHTML = output;
+			this.el.replaceChildren(output);
 			if (done < this.queue.length) {
 				this.frame++;
 				this.rafId = requestAnimationFrame(this.update);
