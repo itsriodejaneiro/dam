@@ -117,6 +117,9 @@
 			if (done < this.queue.length) {
 				this.frame++;
 				this.rafId = requestAnimationFrame(this.update);
+			} else {
+				// The frames leave one text node per UTF-16 unit, an emoji in two: one node again.
+				this.el.normalize();
 			}
 		};
 
