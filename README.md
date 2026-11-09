@@ -41,7 +41,7 @@ Open <http://localhost:5173>. A new project sends you to `/setup`: sign in with 
 ```dotenv
 ORIGIN=http://localhost:3000
 PUBLIC_POCKETBASE_URL=http://localhost:8090
-PB_SUPERUSER_EMAIL=admin@example.org
+PB_SUPERUSER_EMAIL=admin@example.com
 PB_SUPERUSER_PASSWORD=a-long-password
 ```
 
@@ -88,7 +88,7 @@ Point two DNS names at the server, one for the app and one for PocketBase. Then,
    ```dotenv
    ORIGIN=https://map.example.org
    PUBLIC_POCKETBASE_URL=https://pb.map.example.org
-   PB_SUPERUSER_EMAIL=admin@example.org
+   PB_SUPERUSER_EMAIL=admin@example.com
    PB_SUPERUSER_PASSWORD=a-long-password
    ```
 
