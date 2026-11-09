@@ -1,13 +1,13 @@
 <script lang="ts">
 	interface Props {
-		section: string;
+		section?: string;
 	}
 	let { section }: Props = $props();
 
 	const version = __APP_VERSION__;
 </script>
 
-<div class="meta">v{version} / {section}</div>
+<div class="meta">v{version}{#if section} / {section}{/if}</div>
 
 <style>
 	.meta {

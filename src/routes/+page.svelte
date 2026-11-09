@@ -9,7 +9,7 @@
 
 <main>
 	<section class="hero">
-		<AppMeta section="2026.05" />
+		<AppMeta />
 		<div>
 			<h1>
 				{m('nav.brand')}<br />
