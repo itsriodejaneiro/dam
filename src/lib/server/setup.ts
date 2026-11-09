@@ -11,7 +11,7 @@
    - isConfigured(pb): true if the schema already exists. */
 
 import type PocketBase from 'pocketbase';
-import type { LocaleCode } from '../i18n/messages';
+import { LOCALE_CODES, type LocaleCode } from '../i18n/messages';
 import { laneCenter } from '../journey';
 import { ACCOUNT_ROLES } from '../roles';
 import { DEFAULT_SETTINGS, LOGO_MAX_BYTES, LOGO_TYPES } from '../settings';
@@ -128,6 +128,20 @@ async function ensureSettingsRecord(pb: PocketBase, log: Logger): Promise<void> 
 		journeys
 	});
 	log('  + settings: defaults');
+}
+
+/** The default locale of a database where the field is still text, and the record that
+    holds it. PocketBase replaces a column whose field changes type, which would blank
+    the value. A stored value the app does not know gives way to one it does. */
+async function textDefaultLocale(pb: PocketBase): Promise<{ id: string; code: string } | null> {
+	const [collection] = await pb.collections.getFullList({ filter: 'name = "settings"' });
+	const field = (collection?.fields ?? []).find((f) => f.name === 'default_locale');
+	if (field?.type !== 'text') return null;
+	const [record] = (await pb.collection('settings').getList(1, 1)).items;
+	if (!record) return null;
+	const stored: unknown[] = [record.default_locale, ...(record.locales ?? [])];
+	const code = stored.find((c) => (LOCALE_CODES as readonly unknown[]).includes(c));
+	return { id: record.id, code: (code as string) ?? DEFAULT_SETTINGS.defaultLocale };
 }
 
 /** Creates/updates every project collection and the settings record. Idempotent. */
@@ -252,6 +266,7 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 		indexes: ['CREATE UNIQUE INDEX idx_map_translations_pair ON map_translations (map, locale)']
 	});
 
+	const textLocale = await textDefaultLocale(pb);
 	await up('settings', {
 		name: 'settings',
 		type: 'base',
@@ -260,13 +275,16 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 			...AUTODATE_FIELDS,
 			{ name: 'name', type: 'json', maxSize: 5000 },
 			{ name: 'locales', type: 'json', required: true, maxSize: 1000 },
-			{ name: 'default_locale', type: 'text', required: true },
+			{ name: 'default_locale', type: 'select', required: true, maxSelect: 1, values: [...LOCALE_CODES] },
 			{ name: 'theme', type: 'select', required: true, maxSelect: 1, values: [...PACKS] },
 			{ name: 'logo', type: 'file', maxSelect: 1, maxSize: LOGO_MAX_BYTES, mimeTypes: LOGO_TYPES },
 			{ name: 'flag', type: 'text', pattern: '^[a-z]{2}$' },
 			{ name: 'journeys', type: 'bool' }
 		]
 	});
+	if (textLocale) {
+		await pb.collection('settings').update(textLocale.id, { default_locale: textLocale.code });
+	}
 	await ensureSettingsRecord(pb, log);
 
 	// Texts are JSON {code: text}: a journey is always read and edited whole.

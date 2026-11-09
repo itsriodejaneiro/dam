@@ -29,11 +29,16 @@ let inFlight: Promise<DeploySettings> | null = null;
 /** Bumped on invalidation, so a read begun before a save never caches the old record. */
 let generation = 0;
 
+/** The stored codes the app knows. An admin account writes this record over the REST API,
+    where parseSettingsForm never runs, and these codes reach <html lang>. */
+function knownLocales(stored: unknown): string[] {
+	if (!Array.isArray(stored)) return [];
+	return stored.filter((code) => (LOCALE_CODES as readonly unknown[]).includes(code));
+}
+
 function fromRecord(record: RecordModel): DeploySettings {
-	const locales: string[] =
-		Array.isArray(record.locales) && record.locales.length > 0
-			? record.locales
-			: DEFAULT_SETTINGS.locales;
+	const known = knownLocales(record.locales);
+	const locales = known.length > 0 ? known : DEFAULT_SETTINGS.locales;
 	return {
 		name: (record.name as Record<string, string> | null) ?? {},
 		locales,
