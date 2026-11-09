@@ -12,9 +12,12 @@ set -e
 # message means a new account and only the duplicated e-mail means one already there;
 # anything else left no superuser, and the log has to say why, since the health check
 # stays green.
+#
+# `--` ends the flags: read as one, a password starting with a dash fails and its value
+# lands in that log.
 if [ -n "$PB_SUPERUSER_EMAIL" ] && [ -n "$PB_SUPERUSER_PASSWORD" ]; then
-	result=$(/pb/pocketbase superuser create "$PB_SUPERUSER_EMAIL" "$PB_SUPERUSER_PASSWORD" \
-		--dir=/pb/pb_data 2>&1 || true)
+	result=$(/pb/pocketbase superuser create --dir=/pb/pb_data -- \
+		"$PB_SUPERUSER_EMAIL" "$PB_SUPERUSER_PASSWORD" 2>&1 || true)
 	case "$result" in
 	*"Successfully created"*) echo "superuser $PB_SUPERUSER_EMAIL created" ;;
 	*"Value must be unique"*) echo "superuser $PB_SUPERUSER_EMAIL already exists: password left as it is" ;;
