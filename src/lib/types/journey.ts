@@ -89,7 +89,7 @@ export interface VisEdge extends SimulationLinkDatum<VisNode> {
 	id: string;
 }
 
-export interface JourneyGraph {
+export interface JourneyGraphData {
 	types: NodeType[];
 	nodes: VisNode[];
 	edges: VisEdge[];

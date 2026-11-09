@@ -16,7 +16,7 @@ export { default as AuthButton } from './AuthButton.svelte';
 export { default as SettingsMenu } from './SettingsMenu.svelte';
 export { default as SettingsFields } from './SettingsFields.svelte';
 export { default as SiteHeader } from './SiteHeader.svelte';
-export { default as ReadOnlyGraph } from './ReadOnlyGraph.svelte';
+export { default as JourneyGraph } from './JourneyGraph.svelte';
 export { default as JourneyNav } from './JourneyNav.svelte';
 export { default as StepCard } from './StepCard.svelte';
 export { default as DocInventory } from './DocInventory.svelte';

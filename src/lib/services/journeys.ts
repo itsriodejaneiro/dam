@@ -7,7 +7,7 @@ import { laneCenter, VIS_W } from '$lib/journey';
 import type {
 	Journey,
 	JourneyDocument,
-	JourneyGraph,
+	JourneyGraphData,
 	JourneyPhase,
 	JourneyStep,
 	VisEdge
@@ -130,7 +130,7 @@ export async function saveSteps(
 }
 
 /** The map's nodes at their saved positions and the connections among them. */
-export async function getJourneyGraph(mapId: string): Promise<JourneyGraph> {
+export async function getJourneyGraph(mapId: string): Promise<JourneyGraphData> {
 	const [allTypes, allNodes, allEdges, placements] = await Promise.all([
 		nodeTypes.getNodeTypes(),
 		nodesApi.getNodes(),

@@ -21,7 +21,7 @@
 		stepHighlight,
 		stepNumbers
 	} from '$lib/journey';
-	import ReadOnlyGraph from './ReadOnlyGraph.svelte';
+	import JourneyGraph from './JourneyGraph.svelte';
 	import JourneyNav from './JourneyNav.svelte';
 	import StepCard from './StepCard.svelte';
 	import DocInventory from './DocInventory.svelte';
@@ -231,7 +231,7 @@
 					<DocInventory documents={documentStates} phaseColorFn={phaseColor} />
 				{/if}
 				<div class="graph-area">
-					<ReadOnlyGraph
+					<JourneyGraph
 						nodes={visNodes}
 						edges={visEdges}
 						{types}

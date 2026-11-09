@@ -7,10 +7,10 @@
 		AppMeta,
 		Button,
 		ConfirmDialog,
+		JourneyGraph,
 		LocalizedInput,
 		LocalizedRichTextEditor,
-		Pill,
-		ReadOnlyGraph
+		Pill
 	} from '$lib/components';
 	import { auth, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
@@ -18,7 +18,7 @@
 	import type { JourneyInput, StepInput } from '$lib/services/journeys';
 	import type {
 		CameraState,
-		JourneyGraph,
+		JourneyGraphData,
 		JourneyPhase,
 		JourneyStep,
 		VisEdge,
@@ -38,7 +38,7 @@
 	let loading = $state(true);
 	let loadFailed = $state(false);
 	let mapList = $state<MapRecord[]>([]);
-	let graph = $state.raw<JourneyGraph>({ types: [], nodes: [], edges: [] });
+	let graph = $state.raw<JourneyGraphData>({ types: [], nodes: [], edges: [] });
 
 	// The draft: everything below stays in the page until Save.
 	let published = $state(false);
@@ -560,7 +560,7 @@
 				<div class="steps-layout">
 					<div class="graph-col">
 						<div class="graph-frame">
-							<ReadOnlyGraph
+							<JourneyGraph
 								nodes={graph.nodes}
 								edges={graph.edges}
 								types={graph.types}
