@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress';
+import { version } from '../../package.json';
 
 export default defineConfig({
 	lang: 'en-US',
@@ -25,6 +26,8 @@ export default defineConfig({
 	themeConfig: {
 		search: { provider: 'local' },
 		outline: { level: [2, 3] },
+		// the manual builds from the same commit as the code, so this is the code's version
+		nav: [{ text: `v${version}`, link: '/changelog' }],
 		socialLinks: [{ icon: 'github', link: 'https://github.com/itsriodejaneiro/dam' }],
 		editLink: {
 			pattern: 'https://github.com/itsriodejaneiro/dam/edit/main/docs/:path',
@@ -72,7 +75,8 @@ export default defineConfig({
 				items: [
 					{ text: 'Contributing', link: '/contributing' },
 					{ text: 'Add a theme', link: '/add-a-theme' },
-					{ text: 'Design system', link: '/design-system' }
+					{ text: 'Design system', link: '/design-system' },
+					{ text: 'Changelog', link: '/changelog' }
 				]
 			}
 		]

@@ -39,7 +39,7 @@ Commit the pictures that changed with the page that describes them.
 
 ## Releases
 
-A release is a tag `vX.Y.Z` on `main`, with its entry in `CHANGELOG.md` and a GitHub Release. The commits since the last release set the version: a `feat` is a minor, a `fix` a patch, and a breaking change (`feat!:` or a `BREAKING CHANGE:` footer) a major. `package.json` holds the version, and the screens show it.
+A release is a tag `vX.Y.Z` on `main`, with its entry in the [changelog](./changelog.md) and a GitHub Release. The commits since the last release set the version: a `feat` is a minor, a `fix` a patch, and a breaking change (`feat!:` or a `BREAKING CHANGE:` footer) a major. `package.json` holds the version, and the screens and the top of this manual show it.
 
 The maintainers cut the releases. A pull request leaves the version and `CHANGELOG.md` as they are: its commit messages become the lines of the changelog.
 
