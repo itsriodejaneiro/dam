@@ -24,9 +24,15 @@
 	}
 
 	const stepsOf = (j: Journey) => j.expand?.journey_steps_via_journey ?? [];
-	/** Published, with a saved edit that differs from what the visitor reads. */
-	const changed = (j: Journey) =>
-		j.published !== null && !samePublished(toPublished(j, stepsOf(j)), j.published);
+	// Published, with a saved edit that differs from what the visitor reads.
+	const changedIds = $derived(
+		new Set(
+			list
+				.filter((j) => j.published && !samePublished(toPublished(j, stepsOf(j)), j.published))
+				.map((j) => j.id)
+		)
+	);
+	const changed = (j: Journey) => changedIds.has(j.id);
 
 	// Dialog
 	let dialogOpen = $state(false);
