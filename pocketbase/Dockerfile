@@ -1,7 +1,7 @@
 # PocketBase, the image `bun run dev` and a deploy both run.
 #
-# The build context is the repository root and PB_VERSION comes from compose.yaml,
-# which pins it beside the tag of the image.
+# The build context is the repository root and PB_VERSION comes from compose.yaml, the
+# one place it is pinned.
 #
 # pb_data is mounted from outside (compose.yaml): replacing this image never touches
 # the database.

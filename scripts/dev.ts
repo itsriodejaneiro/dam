@@ -112,11 +112,14 @@ process.on('SIGTERM', () => void stop());
 
 // --- PocketBase -------------------------------------------------------------
 console.log('▸ PocketBase');
-// compose.yaml puts this on the image's tag: a changed entrypoint is a tag no image has
-// yet, so `up` builds it and replaces the container of every checkout that runs this.
+// compose.override.yaml tags the image with this: a moved pin or a changed entrypoint is a
+// tag no image has yet, so `up` builds it and replaces the container of every checkout that
+// runs this.
+const pbVersion = /^\s+PB_VERSION:\s*(\S+)/m.exec(readFileSync(join(ROOT, 'compose.yaml'), 'utf8'))?.[1];
+if (!pbVersion) die('compose.yaml pins no PB_VERSION');
 const imageHash = new Bun.CryptoHasher('sha256');
 for (const file of ['pocketbase/Dockerfile', 'pocketbase/entrypoint.sh']) imageHash.update(readFileSync(join(ROOT, file)));
-process.env.PB_IMAGE_SUFFIX = `-${imageHash.digest('hex').slice(0, 8)}`;
+process.env.PB_IMAGE_TAG = `${pbVersion}-${imageHash.digest('hex').slice(0, 8)}`;
 if ((await compose('up', '-d')) !== 0) await stop(1);
 
 async function waitForPb(attempts = 120): Promise<boolean> {

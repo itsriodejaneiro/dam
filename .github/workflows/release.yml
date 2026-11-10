@@ -1,0 +1,133 @@
+name: Release
+
+# The two images a deploy pulls, the app and PocketBase, for amd64 and arm64, pushed to the
+# GitHub Container Registry on every version tag: compose.deploy.yaml runs them with no clone.
+
+on:
+  push:
+    tags: ['v*']
+  # Publishes a tag again: pick it under "Use workflow from".
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Run in a private repository too, as a rehearsal billed to the plan
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  version:
+    # Public repositories only: Actions minutes and GHCR storage are free there, while a
+    # private one pays for both, some 300 MB of packages a version. The jobs below wait on
+    # this one, so they skip with it.
+    if: ${{ !github.event.repository.private || inputs.force }}
+    runs-on: ubuntu-24.04
+    outputs:
+      registry: ${{ steps.version.outputs.registry }}
+      pocketbase: ${{ steps.version.outputs.pocketbase }}
+      newest: ${{ steps.version.outputs.newest }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        run: |
+          [[ $GITHUB_REF == refs/tags/v* ]] || { echo "::error::run this from a version tag (v1.2.3), not $GITHUB_REF"; exit 1; }
+          # GHCR takes lowercase names only.
+          echo "registry=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >>"$GITHUB_OUTPUT"
+          # PocketBase's version is pinned once, in compose.yaml.
+          pocketbase=$(sed -nE 's/^ +PB_VERSION: *//p' compose.yaml)
+          [[ $pocketbase =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::no PB_VERSION in compose.yaml"; exit 1; }
+          echo "pocketbase=$pocketbase" >>"$GITHUB_OUTPUT"
+          # The moving tags (the minor, latest, PocketBase's version) follow the newest
+          # release: publishing an older tag again gives it back its own version tag only.
+          newest=$(git ls-remote --tags --refs origin 'refs/tags/v*' | sed 's|.*refs/tags/||' | sort -V | tail -n 1)
+          echo "newest=$([ "$newest" = "$GITHUB_REF_NAME" ] && echo true || echo false)" >>"$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    strategy:
+      matrix:
+        image: [dam, dam-pocketbase]
+        arch: [amd64, arm64]
+    # Each architecture builds natively on a runner of its own: under QEMU emulation the
+    # app's build takes several times longer.
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v4
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ needs.version.outputs.registry }}/${{ matrix.image }}
+          tags: type=semver,pattern={{version}}
+      - id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ matrix.image == 'dam' && 'Dockerfile' || 'pocketbase/Dockerfile' }}
+          build-args: PB_VERSION=${{ needs.version.outputs.pocketbase }}
+          platforms: linux/${{ matrix.arch }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # By digest, with no tag: the merge job tags the two architectures together.
+          outputs: type=image,name=${{ needs.version.outputs.registry }}/${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}
+          cache-to: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }},mode=max
+      - env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: mkdir -p "$RUNNER_TEMP/digests" && touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: digest-${{ matrix.image }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    needs: [version, build]
+    strategy:
+      matrix:
+        image: [dam, dam-pocketbase]
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE: ${{ needs.version.outputs.registry }}/${{ matrix.image }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digest-${{ matrix.image }}-*
+          merge-multiple: true
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v4
+      - id: meta
+        uses: docker/metadata-action@v6
+        env:
+          # The description and the source on the image index, which GHCR shows.
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          # PocketBase's version takes a prefix: an image has one set of tags, shared with
+          # the DAM's own versions.
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ needs.version.outputs.newest }}
+            type=raw,value=latest,enable=${{ needs.version.outputs.newest }}
+            type=raw,value=pocketbase-${{ needs.version.outputs.pocketbase }},enable=${{ matrix.image == 'dam-pocketbase' && needs.version.outputs.newest == 'true' }}
+      - working-directory: ${{ runner.temp }}/digests
+        run: |
+          args=()
+          while read -r tag; do args+=(-t "$tag"); done < <(jq -r '.tags[]' <<<"$DOCKER_METADATA_OUTPUT_JSON")
+          while read -r note; do args+=(--annotation "$note"); done < <(jq -r '.annotations[]' <<<"$DOCKER_METADATA_OUTPUT_JSON")
+          docker buildx imagetools create "${args[@]}" $(printf "$IMAGE@sha256:%s " *)
+      - run: docker buildx imagetools inspect "$IMAGE:${{ steps.meta.outputs.version }}"

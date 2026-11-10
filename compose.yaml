@@ -1,7 +1,13 @@
 # The app and PocketBase as a deploy runs them: a deploy names this file alone
 # (`-f compose.yaml`). `bun run dev` gives no `-f`, so Compose also merges
 # compose.override.yaml, which leaves the app to Vite, publishes PocketBase's port and
-# mounts the checkout's own database.
+# mounts the checkout's own database. compose.deploy.yaml runs the same two services from
+# the published images, with no clone.
+#
+# Each service names the image a release publishes beside the build of this checkout.
+# `up --build` builds the checkout under that name; `up` alone runs the image already
+# under it, or pulls the published one and builds only when there is none. DAM_VERSION
+# picks a release, the same for both: the app and PocketBase's entrypoint ship together.
 
 services:
   # A name no other project on the server uses, never plain `pocketbase`: Dokploy puts
@@ -9,15 +15,12 @@ services:
   # two databases. Two DAM deploys share this name there, so the app calls the alias
   # below instead.
   dam-pocketbase:
-    # One image for every checkout with the same build files, so a new worktree builds
-    # nothing. The tag carries the version, so moving the pin builds again and an unchanged
-    # one works offline. `up` keeps any image it finds under the tag: `bun run dev` adds a
-    # hash of the Dockerfile and the entrypoint, and by hand the command is `up -d --build`.
-    image: dam-pocketbase:0.39.7${PB_IMAGE_SUFFIX:-}
+    image: ghcr.io/itsriodejaneiro/dam-pocketbase:${DAM_VERSION:-latest}
     build:
       context: .
       dockerfile: pocketbase/Dockerfile
       args:
+        # The one pin of PocketBase's version: the release workflow and `bun run dev` read it here.
         PB_VERSION: 0.39.7
     restart: unless-stopped
     # `expose`, not `ports`: the deploy's proxy reaches it over the internal network and
@@ -38,6 +41,7 @@ services:
           - ${COMPOSE_PROJECT_NAME}-pocketbase
 
   app:
+    image: ghcr.io/itsriodejaneiro/dam:${DAM_VERSION:-latest}
     build:
       context: .
       dockerfile: Dockerfile

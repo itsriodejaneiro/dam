@@ -1,0 +1,50 @@
+# The app and PocketBase from the images each release publishes: this file and a .env are
+# the whole deploy, with no clone of the repository.
+#
+#   docker compose -f compose.deploy.yaml up -d
+#
+# DAM_VERSION in .env pins a release (1.2.0) or a minor (1.2); without it, `latest`.
+# compose.yaml is the same two services built from a checkout, with the reasons behind
+# each line.
+
+services:
+  # A name no other project on the server uses: a panel such as Dokploy puts the services of
+  # every project on one network, so the app calls the per-project alias below instead.
+  dam-pocketbase:
+    image: ghcr.io/itsriodejaneiro/dam-pocketbase:${DAM_VERSION:-latest}
+    restart: unless-stopped
+    # Reached through the internal network: the proxy in front terminates TLS.
+    expose:
+      - 8090
+    volumes:
+      - pb_data:/pb/pb_data
+    environment:
+      # Creates the superuser on the first boot of a new database.
+      - PB_SUPERUSER_EMAIL=${PB_SUPERUSER_EMAIL:-}
+      - PB_SUPERUSER_PASSWORD=${PB_SUPERUSER_PASSWORD:-}
+    networks:
+      default:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}-pocketbase
+
+  app:
+    image: ghcr.io/itsriodejaneiro/dam:${DAM_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      dam-pocketbase:
+        condition: service_healthy
+    expose:
+      - 3000
+    environment:
+      - PB_URL=http://${COMPOSE_PROJECT_NAME}-pocketbase:8090
+      # PocketBase's public URL, for the browser: login and the admin.
+      - PUBLIC_POCKETBASE_URL=${PUBLIC_POCKETBASE_URL:?set PUBLIC_POCKETBASE_URL to the public URL of PocketBase}
+      # The server side signs in with these to run /setup.
+      - PB_SUPERUSER_EMAIL=${PB_SUPERUSER_EMAIL:?set PB_SUPERUSER_EMAIL}
+      - PB_SUPERUSER_PASSWORD=${PB_SUPERUSER_PASSWORD:?set PB_SUPERUSER_PASSWORD}
+      - BODY_SIZE_LIMIT=2M
+      # The app's public URL: without it every form POST answers 403.
+      - ORIGIN=${ORIGIN:?set ORIGIN to the public URL of the app}
+
+volumes:
+  pb_data: {}
