@@ -1,6 +1,6 @@
 # Install
 
-The Digital Assets Map runs on [Bun](https://bun.sh) and [PocketBase](https://pocketbase.io). Install it by hand to develop or to keep control of each piece, or with Docker to bring everything up on a server. Both end at the same place: the [setup wizard](#the-setup-wizard).
+The Digital Assets Map runs on [Bun](https://bun.sh) and [PocketBase](https://pocketbase.io). Install it by hand to develop or to keep control of each piece, with Docker to build everything from a clone, or from the published images to run it with no clone at all. All three end at the same place: the [setup wizard](#the-setup-wizard).
 
 ## By hand
 
@@ -34,13 +34,26 @@ PB_SUPERUSER_PASSWORD=choose-a-long-password
 docker compose -f compose.yaml -f compose.local.yaml up --build
 ```
 
-Keep `--build` on every manual `up`: it rebuilds PocketBase's fixed image tag from your checkout, and `up` alone runs whatever image already has that tag. `bun run dev` adds a hash of the build files to the tag and needs no flag.
+Keep `--build` on every manual `up`: it builds both images from your checkout, and `up` alone runs whatever image already has their tag, or pulls the [published one](#from-the-published-images). `bun run dev` builds PocketBase under a tag of its own and needs no flag.
 
 On a machine where Homebrew left the Compose plugin outside Docker's path, `docker compose` answers `unknown command`: run `docker-compose`, the standalone binary, with the same arguments. `bun run dev` accepts both.
 
 Open <http://localhost:3000>. The PocketBase admin is at <http://localhost:8090/_/>.
 
 Name the files with `-f`: a bare `docker compose up` also merges `compose.override.yaml`, the development setup, which leaves the app to Vite.
+
+## From the published images
+
+Every release publishes the app and PocketBase as two images, for amd64 and arm64, and `compose.deploy.yaml` runs them: a machine needs that file and the same `.env` as [With Docker](#with-docker), with no clone and no build. This works from the first published release.
+
+```bash
+curl -O https://raw.githubusercontent.com/itsriodejaneiro/dam/main/compose.deploy.yaml
+docker compose -f compose.deploy.yaml up -d
+```
+
+`DAM_VERSION` in `.env` pins a release, such as `DAM_VERSION=1.2.0`, or its minor, `1.2`, for the newest patch of it; without it, the images are the `latest` ones. To update, change `DAM_VERSION` and run `up -d` again; on `latest` or a minor, run `docker compose -f compose.deploy.yaml pull` first.
+
+The file publishes no port, like `compose.yaml`: on one machine, fetch `compose.local.yaml` too and add `-f compose.local.yaml`; on a server, a reverse proxy reaches the two services.
 
 ## On a server
 

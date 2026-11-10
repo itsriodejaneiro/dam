@@ -17,7 +17,7 @@ Each deployment runs its own app and its own PocketBase. A country is configurat
 
 ## Install
 
-There are three ways to run it: by hand for development, with Docker on any machine, or with Dokploy. All three end at `/setup`, a wizard that asks for the deployment's name, languages, theme and brand, then creates the schema and seeds an example map and journey.
+There are four ways to run it: by hand for development, with Docker from a clone, from the published images with no clone, or with Dokploy. All four end at `/setup`, a wizard that asks for the deployment's name, languages, theme and brand, then creates the schema and seeds an example map and journey.
 
 A deployment has two public addresses, one for the app and one for PocketBase. The browser talks to PocketBase directly, for login and for everything under `/admin`, so PocketBase needs an address the browser can reach. The app's server side uses the internal network.
 
@@ -51,7 +51,7 @@ PB_SUPERUSER_PASSWORD=a-long-password
 docker compose -f compose.yaml -f compose.local.yaml up --build
 ```
 
-Keep `--build` on every manual `up`: it rebuilds PocketBase's fixed image tag from your checkout, and `up` alone runs whatever image already has that tag. `bun run dev` adds a hash of the build files to the tag and needs no flag.
+Keep `--build` on every manual `up`: it builds both images from your checkout, and `up` alone runs whatever image already has their tag, or pulls the [published one](#from-the-published-images). `bun run dev` builds PocketBase under a tag of its own and needs no flag.
 
 On a machine where Homebrew left the Compose plugin outside Docker's path, `docker compose` answers `unknown command`: run `docker-compose`, the standalone binary, with the same arguments. `bun run dev` accepts both.
 
@@ -82,6 +82,25 @@ docker compose -f compose.yaml start
 ```
 
 An app left running through a restore signs in again by itself, as long as `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD` work on the restored database.
+
+### From the published images
+
+Every release publishes two images to the GitHub Container Registry, for amd64 and arm64: `ghcr.io/itsriodejaneiro/dam`, the app, and `ghcr.io/itsriodejaneiro/dam-pocketbase`. `compose.deploy.yaml` runs them, so a server needs that file and a `.env`, with no clone and no build. This path works from the first published release.
+
+```bash
+curl -O https://raw.githubusercontent.com/itsriodejaneiro/dam/main/compose.deploy.yaml
+docker compose -f compose.deploy.yaml up -d
+```
+
+The `.env` holds the same four variables as [With Docker](#with-docker), plus `DAM_VERSION` to pin a release, the same for both images:
+
+```dotenv
+DAM_VERSION=1.2.0
+```
+
+Each image carries three tags: the version (`1.2.0`), its minor (`1.2`, the newest patch of it) and `latest`, the default. The PocketBase image also carries the PocketBase version it runs (`pocketbase-0.39.7`). To update, change `DAM_VERSION` and run `up -d` again; on `latest` or a minor, `docker compose -f compose.deploy.yaml pull` comes first.
+
+Like `compose.yaml`, the file publishes no port: on a server, the reverse proxy reaches both services, as in [With Docker](#with-docker). To try it on one machine, fetch `compose.local.yaml` too and add `-f compose.local.yaml`. A panel such as Dokploy, Coolify or Portainer takes the file as it is, pasted as a Compose stack, with the variables in its environment, `DAM_VERSION` among them, and a domain on each service.
 
 ### With Dokploy
 
@@ -123,6 +142,7 @@ Everything that identifies a deployment lives in the `settings` record: its name
 | Variable | What it is |
 |---|---|
 | `COMPOSE_PROJECT_NAME` | the Docker Compose project: its containers, its volume and PocketBase's internal address |
+| `DAM_VERSION` | the release of the [published images](#from-the-published-images) a deploy runs (`1.2.0`, or `1.2` for its newest patch); `latest` without it |
 | `ORIGIN` | the public URL of the app; `compose.yaml` refuses to start without it, since every form POST answers 403 otherwise |
 | `PUBLIC_POCKETBASE_URL` | the PocketBase URL the browser uses |
 | `PB_URL` | the PocketBase URL the server uses; `compose.yaml` sets it to the internal address, and without it the server uses `PUBLIC_POCKETBASE_URL` |
