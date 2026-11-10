@@ -1,5 +1,6 @@
 /* What a journey computes from its records: the graph canvas, the camera framing, the
-   phase colours and the cards between phases. Shared by the visitor's page and the editor. */
+   phase colours, the cards between phases, and the copy Publish writes from the edit.
+   Shared by the visitor's page, the editor and the server. */
 
 import type { NodeType } from '$lib/services/types';
 import type {
@@ -9,6 +10,8 @@ import type {
 	JourneyGraphData,
 	JourneyStep,
 	PhaseTransition,
+	PublishedJourney,
+	PublishedStep,
 	VisNode
 } from '$lib/types/journey';
 import type { Localized } from '$lib/i18n';
@@ -127,7 +130,10 @@ export function stepNumbers(steps: Pick<JourneyStep, 'id' | 'phase'>[]): Map<str
 }
 
 /** The cards between phases: one per phase with a summary, the last closing the journey. */
-export function phaseTransitions(journey: Journey, steps: JourneyStep[]): PhaseTransition[] {
+export function phaseTransitions(
+	journey: Pick<PublishedJourney, 'phases' | 'documents'>,
+	steps: Pick<PublishedStep, 'id' | 'phase'>[]
+): PhaseTransition[] {
 	const phaseOfStep = new Map(steps.map((s) => [s.id, s.phase]));
 	const docIds = new Set(journey.documents.map((d) => d.id));
 	return journey.phases
@@ -142,4 +148,60 @@ export function phaseTransitions(journey: Journey, steps: JourneyStep[]): PhaseT
 				.map((d) => d.id),
 			needed: next ? phase.needed.filter((id) => docIds.has(id)) : []
 		}));
+}
+
+// ── The edit and its published copy ──
+
+type EditFields = Pick<Journey, 'map' | 'title' | 'description' | 'phases' | 'documents'>;
+
+/** The copy Publish writes: the edit as the visitor reads it, the steps in their order. */
+export function toPublished(
+	journey: EditFields,
+	steps: (PublishedStep & { order?: number })[]
+): PublishedJourney {
+	return {
+		map: journey.map,
+		title: journey.title ?? {},
+		description: journey.description ?? {},
+		phases: journey.phases ?? [],
+		documents: journey.documents ?? [],
+		steps: [...steps]
+			.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+			.map((step) => ({
+				id: step.id,
+				phase: step.phase,
+				title: step.title ?? {},
+				body: step.body ?? {},
+				duration: step.duration ?? null,
+				camera: step.camera ?? null,
+				highlight_nodes: step.highlight_nodes ?? [],
+				highlight_edges: step.highlight_edges ?? []
+			}))
+	};
+}
+
+/**
+ * The edit Discard writes back from the copy: the journey's fields and its steps, numbered
+ * in order. The steps keep their ids, which the documents point at.
+ */
+export function fromPublished(copy: PublishedJourney): {
+	journey: EditFields;
+	steps: (PublishedStep & { order: number })[];
+} {
+	const { steps, ...journey } = toPublished(copy, copy.steps);
+	return { journey, steps: steps.map((step, i) => ({ ...step, order: i + 1 })) };
+}
+
+/** JSON with each object's keys sorted, the order PocketBase stores a JSON field in. */
+function canonical(value: unknown): string {
+	return JSON.stringify(value, (_key, v: unknown) =>
+		v && typeof v === 'object' && !Array.isArray(v)
+			? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+			: v
+	);
+}
+
+/** True when two copies say the same thing, whatever order their keys come in. */
+export function samePublished(a: PublishedJourney, b: PublishedJourney): boolean {
+	return canonical(a) === canonical(b);
 }

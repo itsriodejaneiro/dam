@@ -3,22 +3,24 @@
 	import JourneyView from '$lib/components/JourneyView.svelte';
 	import { auth, requireAdmin, journeys } from '$lib/services';
 	import { m } from '$lib/i18n';
-	import type { Journey, JourneyStep } from '$lib/types/journey';
+	import { toPublished } from '$lib/journey';
+	import type { PublishedJourney } from '$lib/types/journey';
 
 	let { data } = $props();
 
 	requireAdmin();
 
-	let journey = $state.raw<Journey | null>(null);
-	let steps = $state.raw<JourneyStep[]>([]);
+	// The edit, not the copy: the preview shows what Publish would put on the site.
+	let journey = $state.raw<PublishedJourney | null>(null);
 	let failed = $state(false);
 
 	onMount(async () => {
 		try {
-			[journey, steps] = await Promise.all([
+			const [record, steps] = await Promise.all([
 				journeys.getJourney(data.id),
 				journeys.getSteps(data.id)
 			]);
+			journey = toPublished(record, steps);
 		} catch {
 			failed = true;
 		}
@@ -33,7 +35,7 @@
 	{#if failed}
 		<p class="admin-error failed">{m('journeys_admin.error.load')}</p>
 	{:else if journey}
-		<JourneyView {journey} {steps} />
+		<JourneyView {journey} />
 	{/if}
 {/if}
 

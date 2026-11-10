@@ -16,6 +16,7 @@ import { laneCenter } from '../journey';
 import { ACCOUNT_ROLES } from '../roles';
 import { DEFAULT_SETTINGS, LOGO_MAX_BYTES, LOGO_TYPES } from '../settings';
 import { PACKS } from '../theme';
+import { NoStepsError, publishJourney } from './journeys';
 import { EXAMPLE_EDGES, EXAMPLE_JOURNEY, EXAMPLE_NODES, type ExampleNodeKey } from './seed-example';
 
 // ─────────────────────────────────────────────────────────
@@ -43,11 +44,15 @@ const EDITORIAL_RULES = {
 	deleteRule: ADMIN_ONLY
 } as const;
 
-/** A draft journey can hold what is not out yet: an admin reads it, the public API does not. */
-function publishedOrAdminRead(publishedField: string) {
-	const rule = `${publishedField} = true || ${ADMIN_ONLY}`;
-	return { listRule: rule, viewRule: rule };
-}
+/* The visitor reads a journey through its copy, `published`, null until Publish and after
+   Unpublish; `!= null` is PocketBase's test for a JSON field that holds a value. The steps
+   are the edit, and the copy carries them: only an admin reads them. */
+const JOURNEY_RULES = {
+	...EDITORIAL_RULES,
+	listRule: `published != null || ${ADMIN_ONLY}`,
+	viewRule: `published != null || ${ADMIN_ONLY}`
+} as const;
+const JOURNEY_STEP_RULES = { ...EDITORIAL_RULES, listRule: ADMIN_ONLY, viewRule: ADMIN_ONLY } as const;
 
 /** Creates the collection if missing; otherwise merges fields and indexes. Idempotent. */
 async function upsertCollection(
@@ -322,17 +327,17 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	await ensureSettingsRecord(pb, log);
 
 	// Texts are JSON {code: text}: a journey is always read and edited whole.
+	const flagged = await journeysPublishedByFlag(pb);
 	const journeysId = await up('journeys', {
 		name: 'journeys',
 		type: 'base',
-		...EDITORIAL_RULES,
-		...publishedOrAdminRead('published'),
+		...JOURNEY_RULES,
 		fields: [
 			...AUTODATE_FIELDS,
 			{ name: 'slug', type: 'text', required: true },
 			// Not cascading: removing a map never takes an authored journey with it.
 			{ name: 'map', type: 'relation', required: true, collectionId: mapsId, cascadeDelete: false, maxSelect: 1 },
-			{ name: 'published', type: 'bool' },
+			{ name: 'published', type: 'json', maxSize: 5000000 },
 			{ name: 'title', type: 'json', maxSize: 5000 },
 			{ name: 'description', type: 'json', maxSize: 20000 },
 			{ name: 'phases', type: 'json', maxSize: 200000 },
@@ -344,8 +349,7 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	await up('journey_steps', {
 		name: 'journey_steps',
 		type: 'base',
-		...EDITORIAL_RULES,
-		...publishedOrAdminRead('journey.published'),
+		...JOURNEY_STEP_RULES,
 		fields: [
 			...AUTODATE_FIELDS,
 			{ name: 'journey', type: 'relation', required: true, collectionId: journeysId, cascadeDelete: true, maxSelect: 1 },
@@ -360,6 +364,40 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 		],
 		indexes: ['CREATE INDEX idx_journey_steps_journey ON journey_steps (journey)']
 	});
+	if (flagged) await publishFlagged(pb, flagged, log);
+}
+
+/**
+ * The journeys whose `published` is still the flag that came before the copy, with the
+ * flag on; null once the field holds the copy. Read before the schema swaps the field,
+ * which empties it.
+ */
+async function journeysPublishedByFlag(pb: PocketBase): Promise<string[] | null> {
+	try {
+		const { fields } = await pb.collections.getOne('journeys');
+		const field = (fields as { name: string; type: string }[]).find((f) => f.name === 'published');
+		if (field?.type !== 'bool') return null;
+	} catch (err: unknown) {
+		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
+			return null;
+		}
+		throw err;
+	}
+	const flagged = await pb.collection('journeys').getFullList({ filter: 'published = true', fields: 'id' });
+	return flagged.map((r) => r.id);
+}
+
+/** A journey published by the flag gets its copy from the edit, as Publish writes it. */
+async function publishFlagged(pb: PocketBase, ids: string[], log: Logger): Promise<void> {
+	for (const id of ids) {
+		try {
+			await publishJourney(pb, id);
+			log(`  ~ journey published as a copy: ${id}`);
+		} catch (err) {
+			if (!(err instanceof NoStepsError)) throw err;
+			log(`  ~ journey with no steps, left unpublished: ${id}`);
+		}
+	}
 }
 
 // ─────────────────────────────────────────────────────────
@@ -527,7 +565,8 @@ export async function createMainMap(
 }
 
 /** Writes the example: the nodes in their place on the map, the connections, and the
-    journey through them. The journey is published last, once it is whole. */
+    journey through them. The journey is published last, once it is whole: its copy is
+    the edit the seed wrote. */
 async function seedExample(
 	pb: PocketBase,
 	mapId: string,
@@ -572,7 +611,6 @@ async function seedExample(
 	const journey = await pb.collection('journeys').create({
 		slug,
 		map: mapId,
-		published: false,
 		title: inDeploy(title),
 		description: inDeploy(description),
 		phases: phases.map((phase) => ({
@@ -603,7 +641,6 @@ async function seedExample(
 	}
 
 	await pb.collection('journeys').update(journey.id, {
-		published: true,
 		documents: documents.map((doc) => ({
 			id: doc.id,
 			label: inDeploy(doc.label),
@@ -611,6 +648,7 @@ async function seedExample(
 			unlockedAt: doc.atStep === null ? null : stepIds[doc.atStep]
 		}))
 	});
+	await publishJourney(pb, journey.id);
 	log(`  + journey: ${slug}`);
 }
 

@@ -5,7 +5,8 @@
 	import { AppMeta, Button, ConfirmDialog, Dialog, LocalizedInput, Pill } from '$lib/components';
 	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
-	import { countedSteps } from '$lib/journey';
+	import { countedSteps, samePublished, toPublished } from '$lib/journey';
+	import type { JourneyAction } from '$lib/services/journeys';
 	import type { Journey } from '$lib/types/journey';
 
 	requireAdmin();
@@ -22,7 +23,10 @@
 		return map ? localizedMap(map, code).label : '';
 	}
 
-	const stepCount = (j: Journey) => j.expand?.journey_steps_via_journey?.length ?? 0;
+	const stepsOf = (j: Journey) => j.expand?.journey_steps_via_journey ?? [];
+	/** Published, with a saved edit that differs from what the visitor reads. */
+	const changed = (j: Journey) =>
+		j.published !== null && !samePublished(toPublished(j, stepsOf(j)), j.published);
 
 	// Dialog
 	let dialogOpen = $state(false);
@@ -35,7 +39,10 @@
 	let pendingRemove = $state<Journey | null>(null);
 	let removing = $state(false);
 
-	let toggling = $state<string | null>(null);
+	let discardOpen = $state(false);
+	let pendingDiscard = $state<Journey | null>(null);
+
+	let acting = $state<string | null>(null);
 
 	async function refresh() {
 		list = await journeys.getJourneys();
@@ -79,17 +86,31 @@
 		}
 	}
 
-	async function togglePublished(j: Journey) {
-		toggling = j.id;
+	async function act(j: Journey, action: JourneyAction) {
+		acting = j.id;
 		listError = '';
 		try {
-			await journeys.updateJourney(j.id, { published: !j.published });
+			await journeys.runJourneyAction(j.id, action);
 			await refresh();
 		} catch (err) {
-			listError = (err as Error).message || m('journeys_admin.error.save');
+			listError =
+				err instanceof journeys.JourneyActionError
+					? m(err.key)
+					: (err as Error).message || m('journeys_admin.error.save');
 		} finally {
-			toggling = null;
+			acting = null;
 		}
+	}
+
+	function askDiscard(j: Journey) {
+		pendingDiscard = j;
+		discardOpen = true;
+	}
+
+	async function confirmDiscard() {
+		discardOpen = false;
+		if (pendingDiscard) await act(pendingDiscard, 'discard');
+		pendingDiscard = null;
 	}
 
 	function askRemove(j: Journey) {
@@ -159,10 +180,16 @@
 									<a class="title" href="/admin/journeys/{j.id}"><strong>{t(j.title, code)}</strong></a>
 									<span class="sub">
 										{m('journeys.phases_n', j.phases?.length ?? 0)} ·
-										{m('journeys.steps_n', countedSteps(j.expand?.journey_steps_via_journey ?? []))}
+										{m('journeys.steps_n', countedSteps(stepsOf(j)))}
 									</span>
 								</td>
-								<td class="fit wide mono">{j.slug}</td>
+								<td class="fit wide mono">
+									{#if j.published}
+										<a class="slug" href="/journeys/{j.slug}" target="_blank" rel="noopener">{j.slug}</a>
+									{:else}
+										{j.slug}
+									{/if}
+								</td>
 								<td class="fit wide">{mapLabel(j.map)}</td>
 								<td class="fit">
 									<Pill status={j.published ? 'confirmed' : 'draft'}>
@@ -170,20 +197,31 @@
 											? m('journeys_admin.status.published')
 											: m('journeys_admin.status.draft')}
 									</Pill>
+									{#if changed(j)}
+										<span class="sub">{m('journeys_admin.status.changed')}</span>
+									{/if}
 								</td>
 								<td class="num">
-									<button
-										class="admin-action"
-										disabled={toggling === j.id || (!j.published && stepCount(j) === 0)}
-										title={!j.published && stepCount(j) === 0
-											? m('journeys_admin.error.no_steps')
-											: undefined}
-										onclick={() => togglePublished(j)}
-									>
-										{j.published
-											? m('journeys_admin.unpublish_lower')
-											: m('journeys_admin.publish_lower')}
-									</button>
+									{#if !j.published || changed(j)}
+										<button
+											class="admin-action"
+											disabled={acting === j.id || stepsOf(j).length === 0}
+											title={stepsOf(j).length === 0 ? m('journeys_admin.error.no_steps') : undefined}
+											onclick={() => act(j, 'publish')}
+										>
+											{m('journeys_admin.publish_lower')}
+										</button>
+									{/if}
+									{#if changed(j)}
+										<button class="admin-action" disabled={acting === j.id} onclick={() => askDiscard(j)}>
+											{m('journeys_admin.discard_lower')}
+										</button>
+									{/if}
+									{#if j.published}
+										<button class="admin-action" disabled={acting === j.id} onclick={() => act(j, 'unpublish')}>
+											{m('journeys_admin.unpublish_lower')}
+										</button>
+									{/if}
 									<a class="admin-action" href="/admin/journeys/{j.id}">{m('common.edit_lower')}</a>
 									<button class="admin-action danger" onclick={() => askRemove(j)}>
 										{m('common.remove_lower')}
@@ -249,6 +287,18 @@
 	onCancel={() => (pendingRemove = null)}
 />
 
+<ConfirmDialog
+	bind:open={discardOpen}
+	title={m('journeys_admin.confirm_discard_title')}
+	description={pendingDiscard?.published
+		? m('journeys_admin.confirm_discard_desc', t(pendingDiscard.published.title, code))
+		: ''}
+	confirmLabel={m('journeys_admin.discard')}
+	cancelLabel={m('common.cancel')}
+	onConfirm={confirmDiscard}
+	onCancel={() => (pendingDiscard = null)}
+/>
+
 <style>
 	.list-error {
 		margin-bottom: 1rem;
@@ -257,8 +307,12 @@
 		color: inherit;
 		text-decoration: none;
 	}
-	.title:hover {
+	.title:hover,
+	.slug:hover {
 		color: var(--accent);
+	}
+	.slug {
+		color: inherit;
 	}
 	.sub {
 		display: block;

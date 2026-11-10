@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { ChevronUp, ChevronDown, Plus } from '@lucide/svelte';
 	import { AppMeta, Button, ConfirmDialog, Dialog, LocalizedInput } from '$lib/components';
-	import { auth, requireAdmin, maps, type MapRecord } from '$lib/services';
+	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, type Localized } from '$lib/i18n';
 
 	requireAdmin();
@@ -102,10 +102,14 @@
 		removing = true;
 		removeError = '';
 		try {
+			// PocketBase refuses to clear a journey's edit; the copy on the site is the app's to guard.
+			if (await journeys.publishedOnMap(pendingRemove.id)) {
+				removeError = m('maps_admin.error.has_journeys');
+				return;
+			}
 			await maps.deleteMap(pendingRemove.id);
 			await refresh();
 		} catch {
-			// The only reference PocketBase refuses to clear is a journey's.
 			removeError = m('maps_admin.error.has_journeys');
 		} finally {
 			confirmOpen = false;

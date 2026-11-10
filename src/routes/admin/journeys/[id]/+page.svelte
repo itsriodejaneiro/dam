@@ -19,15 +19,18 @@
 		fullCamera,
 		liveHighlight,
 		phaseColor,
+		samePublished,
 		stepHighlight,
-		stepNumbers
+		stepNumbers,
+		toPublished
 	} from '$lib/journey';
-	import type { JourneyInput, StepInput } from '$lib/services/journeys';
+	import type { JourneyAction, JourneyInput, StepInput } from '$lib/services/journeys';
 	import type {
 		CameraState,
 		JourneyGraphData,
 		JourneyPhase,
 		JourneyStep,
+		PublishedJourney,
 		VisEdge,
 		VisNode
 	} from '$lib/types/journey';
@@ -45,8 +48,13 @@
 	let mapList = $state<MapRecord[]>([]);
 	let graph = $state.raw<JourneyGraphData>({ types: [], nodes: [], edges: [] });
 
+	// What the visitor reads, null while unpublished, and the saved edit in the same shape:
+	// the two differ when there are unpublished changes.
+	let published = $state.raw<PublishedJourney | null>(null);
+	let savedEdit = $state.raw<PublishedJourney | null>(null);
+	let savedSlug = $state('');
+
 	// The draft: everything below stays in the page until Save.
-	let published = $state(false);
 	let form = $state<JourneyInput>({
 		slug: '',
 		map: '',
@@ -68,7 +76,8 @@
 	let viewMoved = $state(false);
 
 	let saving = $state(false);
-	let publishing = $state(false);
+	let acting = $state<JourneyAction | null>(null);
+	const busy = $derived(saving || acting !== null);
 	let error = $state('');
 	let justSaved = $state(false);
 	let savedKey = $state('');
@@ -125,6 +134,11 @@
 
 	const draftKey = $derived(JSON.stringify([journeyPayload(), stepsPayload()]));
 	const dirty = $derived(!loading && !loadFailed && draftKey !== savedKey);
+	const changed = $derived(
+		published !== null && savedEdit !== null && !samePublished(savedEdit, published)
+	);
+	// Saved or not, what Publish would send and Discard would drop.
+	const unpublished = $derived(published !== null && (dirty || changed));
 
 	$effect(() => {
 		if (dirty) justSaved = false;
@@ -143,7 +157,7 @@
 		};
 	}
 
-	onMount(async () => {
+	async function load() {
 		try {
 			const [journey, stepRecords, allMaps] = await Promise.all([
 				journeys.getJourney(data.id),
@@ -152,6 +166,8 @@
 			]);
 			mapList = allMaps;
 			published = journey.published;
+			savedEdit = toPublished(journey, stepRecords);
+			savedSlug = journey.slug;
 			form = {
 				slug: journey.slug,
 				map: journey.map,
@@ -162,6 +178,7 @@
 			};
 			steps = stepRecords.map(draftOf);
 			knownStepIds = new Set(stepRecords.map((s) => s.id));
+			removedStepIds = [];
 			graph = await journeys.getJourneyGraph(journey.map);
 			// Before the saved key: what left the map goes with the next Save, and is no edit.
 			for (const s of steps) Object.assign(s, liveHighlight(s, graph));
@@ -172,7 +189,9 @@
 		} finally {
 			loading = false;
 		}
-	});
+	}
+
+	onMount(load);
 
 	// ── Graph: camera and highlight of the selected step ──
 
@@ -374,10 +393,13 @@
 		}
 		saving = true;
 		const key = draftKey;
+		const edit = toPublished(journeyPayload(), stepsPayload());
 		try {
 			await journeys.updateJourney(data.id, journeyPayload());
 			await journeys.saveSteps(data.id, stepsPayload(), knownStepIds, removedStepIds);
 			savedKey = key;
+			savedEdit = edit;
+			savedSlug = form.slug;
 			justSaved = true;
 			return true;
 		} catch (err) {
@@ -390,16 +412,21 @@
 		}
 	}
 
-	async function setPublished(next: boolean) {
+	/** Runs a publishing action on the server and keeps the copy it answers with. */
+	async function act(action: JourneyAction): Promise<boolean> {
 		error = '';
-		publishing = true;
+		acting = action;
 		try {
-			await journeys.updateJourney(data.id, { published: next });
-			published = next;
+			published = await journeys.runJourneyAction(data.id, action);
+			return true;
 		} catch (err) {
-			error = (err as Error).message || m('journeys_admin.error.save');
+			error =
+				err instanceof journeys.JourneyActionError
+					? m(err.key)
+					: (err as Error).message || m('journeys_admin.error.save');
+			return false;
 		} finally {
-			publishing = false;
+			acting = null;
 		}
 	}
 
@@ -408,20 +435,28 @@
 			error = m('journeys_admin.error.no_steps');
 			return;
 		}
-		if (await save()) await setPublished(true);
+		if (await save()) await act('publish');
 	}
 
 	let unpublishOpen = $state(false);
 
-	// Writes only the flag: an edit in progress stays in the page, away from the live journey.
+	// Empties the copy alone: an edit in progress stays in the page, unsaved.
 	function unpublish() {
 		if (dirty) unpublishOpen = true;
-		else void setPublished(false);
+		else void act('unpublish');
 	}
 
 	async function confirmUnpublish() {
 		unpublishOpen = false;
-		await setPublished(false);
+		await act('unpublish');
+	}
+
+	let discardOpen = $state(false);
+
+	// The server writes the copy back over the edit; the page then reads the edit again.
+	async function confirmDiscard() {
+		discardOpen = false;
+		if (await act('discard')) await load();
 	}
 
 	async function preview() {
@@ -472,26 +507,48 @@
 				<Pill status={published ? 'confirmed' : 'draft'}>
 					{published ? m('journeys_admin.status.published') : m('journeys_admin.status.draft')}
 				</Pill>
+				{#if published}
+					<a class="admin-action" href="/journeys/{savedSlug}" target="_blank" rel="noopener">
+						{m('journeys_admin.view_published')}
+					</a>
+				{/if}
 				{#if error}
 					<span class="admin-error">{error}</span>
-				{:else if dirty}
-					<span class="save-state">{m('journeys_admin.unsaved')}</span>
-				{:else if justSaved}
-					<span class="save-state saved">{m('journeys_admin.saved')}</span>
+				{:else}
+					{#if changed}
+						<span class="save-state">{m('journeys_admin.unpublished_changes')}</span>
+					{/if}
+					{#if dirty}
+						<span class="save-state">{m('journeys_admin.unsaved')}</span>
+					{:else if justSaved}
+						<span class="save-state saved">{m('journeys_admin.saved')}</span>
+					{/if}
 				{/if}
 				<span class="spacer"></span>
-				<Button variant="ghost" disabled={saving || publishing} onclick={preview}>
+				<Button variant="ghost" disabled={busy} onclick={preview}>
 					{m('journeys_admin.preview')}
 				</Button>
-				<Button
-					variant="secondary"
-					loading={publishing}
-					disabled={saving}
-					onclick={published ? unpublish : publish}
-				>
-					{published ? m('journeys_admin.unpublish') : m('journeys_admin.publish')}
-				</Button>
-				<Button loading={saving} disabled={!dirty || publishing} onclick={save}>
+				{#if unpublished}
+					<Button
+						variant="ghost"
+						loading={acting === 'discard'}
+						disabled={busy}
+						onclick={() => (discardOpen = true)}
+					>
+						{m('journeys_admin.discard')}
+					</Button>
+				{/if}
+				{#if published}
+					<Button variant="secondary" loading={acting === 'unpublish'} disabled={busy} onclick={unpublish}>
+						{m('journeys_admin.unpublish')}
+					</Button>
+				{/if}
+				{#if !published || unpublished}
+					<Button variant="secondary" loading={acting === 'publish'} disabled={busy} onclick={publish}>
+						{m('journeys_admin.publish')}
+					</Button>
+				{/if}
+				<Button loading={saving} disabled={!dirty || busy} onclick={save}>
 					{m('common.save')}
 				</Button>
 			</div>
@@ -786,6 +843,15 @@
 	confirmLabel={m('journeys_admin.unpublish')}
 	cancelLabel={m('common.cancel')}
 	onConfirm={confirmUnpublish}
+/>
+
+<ConfirmDialog
+	bind:open={discardOpen}
+	title={m('journeys_admin.confirm_discard_title')}
+	description={m('journeys_admin.confirm_discard_desc', t(published?.title ?? form.title, code))}
+	confirmLabel={m('journeys_admin.discard')}
+	cancelLabel={m('common.cancel')}
+	onConfirm={confirmDiscard}
 />
 
 <ConfirmDialog

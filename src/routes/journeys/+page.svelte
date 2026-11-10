@@ -21,13 +21,13 @@
 	</section>
 
 	<section class="journeys">
-		{#each data.journeys as journey (journey.id)}
-			<a href="/journeys/{journey.slug}" class="journey-card">
+		{#each data.journeys as { id, slug, published: journey } (id)}
+			<a href="/journeys/{slug}" class="journey-card">
 				<h2>{t(journey.title, code)}</h2>
 				<p>{t(journey.description, code)}</p>
 				<span class="journey-phases">
 					{m('journeys.phases_n', journey.phases.length)} ·
-					{m('journeys.steps_n', countedSteps(journey.expand?.journey_steps_via_journey ?? []))}
+					{m('journeys.steps_n', countedSteps(journey.steps))}
 				</span>
 			</a>
 		{:else}

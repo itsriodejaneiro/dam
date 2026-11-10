@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { JourneyStep } from '$lib/types/journey';
+	import type { PublishedStep } from '$lib/types/journey';
 	import { localesState, t } from '$lib/i18n';
 	import { sanitizeHtml } from '$lib/sanitize';
 
 	interface Props {
-		step: JourneyStep;
+		step: PublishedStep;
 		active: boolean;
 		phaseTitle: string;
 		phaseColor: string;

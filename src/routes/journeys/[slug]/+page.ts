@@ -10,7 +10,7 @@ export const load: PageLoad = async ({ params, parent }) => {
 	return {
 		titleKey: 'title.journey',
 		subtitleKey: 'nav.journeys',
-		journey,
-		steps: await journeys.getSteps(journey.id)
+		id: journey.id,
+		journey: journey.published
 	};
 };

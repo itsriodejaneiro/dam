@@ -6,8 +6,7 @@
 	import type {
 		CameraState,
 		DocumentState,
-		Journey,
-		JourneyStep,
+		PublishedJourney,
 		TimelineEntry,
 		VisNode,
 		VisEdge
@@ -33,11 +32,12 @@
 	import AppMeta from './AppMeta.svelte';
 
 	interface Props {
-		journey: Journey;
-		steps: JourneyStep[];
+		/** The published copy on the site; the edit, made into one, in the preview. */
+		journey: PublishedJourney;
 	}
 
-	let { journey, steps }: Props = $props();
+	let { journey }: Props = $props();
+	const steps = $derived(journey.steps);
 
 	const COMPLETION_ID = 'completion';
 	// Arrival is gold: finishing the journey does not inherit the last phase's

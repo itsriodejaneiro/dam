@@ -1184,6 +1184,48 @@ export const messages = {
 	'journeys_admin.unpublish': { pt: 'Despublicar', en: 'Unpublish', fr: 'Dépublier', es: 'Despublicar' },
 	'journeys_admin.publish_lower': { pt: 'publicar', en: 'publish', fr: 'publier', es: 'publicar' },
 	'journeys_admin.unpublish_lower': { pt: 'despublicar', en: 'unpublish', fr: 'dépublier', es: 'despublicar' },
+	'journeys_admin.discard': {
+		pt: 'Descartar edição',
+		en: 'Discard edit',
+		fr: 'Abandonner la modification',
+		es: 'Descartar edición'
+	},
+	'journeys_admin.discard_lower': {
+		pt: 'descartar edição',
+		en: 'discard edit',
+		fr: 'abandonner la modification',
+		es: 'descartar edición'
+	},
+	'journeys_admin.unpublished_changes': {
+		pt: 'Mudanças não publicadas',
+		en: 'Unpublished changes',
+		fr: 'Modifications non publiées',
+		es: 'Cambios sin publicar'
+	},
+	'journeys_admin.status.changed': {
+		pt: 'mudanças não publicadas',
+		en: 'unpublished changes',
+		fr: 'modifications non publiées',
+		es: 'cambios sin publicar'
+	},
+	'journeys_admin.view_published': {
+		pt: 'ver publicada',
+		en: 'view published',
+		fr: 'voir la version publiée',
+		es: 'ver publicado'
+	},
+	'journeys_admin.confirm_discard_title': {
+		pt: 'Descartar a edição?',
+		en: 'Discard the edit?',
+		fr: 'Abandonner la modification ?',
+		es: '¿Descartar la edición?'
+	},
+	'journeys_admin.confirm_discard_desc': {
+		pt: '"{0}" volta ao que o visitante lê agora. As mudanças feitas desde a publicação, salvas ou não, se perdem.',
+		en: '"{0}" goes back to what visitors read now. The changes made since it was published, saved or not, are lost.',
+		fr: '« {0} » revient à ce que lisent les visiteurs maintenant. Les modifications faites depuis la publication, enregistrées ou non, sont perdues.',
+		es: '"{0}" vuelve a lo que lee el visitante ahora. Los cambios hechos desde la publicación, guardados o no, se pierden.'
+	},
 	'journeys_admin.confirm_remove_title': {
 		pt: 'Remover jornada?',
 		en: 'Remove journey?',

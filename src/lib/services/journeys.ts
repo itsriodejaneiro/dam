@@ -1,3 +1,4 @@
+import { deserialize } from '$app/forms';
 import { pb } from './pb';
 import * as nodeTypes from './nodeTypes';
 import * as nodesApi from './nodes';
@@ -10,8 +11,11 @@ import type {
 	JourneyGraphData,
 	JourneyPhase,
 	JourneyStep,
+	PublishedJourney,
+	PublishedRecord,
 	VisEdge
 } from '$lib/types/journey';
+import type { MessageKey } from '$lib/i18n';
 import type { Localized, MapNode } from './types';
 
 export interface JourneyInput {
@@ -36,48 +40,86 @@ export type StepInput = Pick<
 	| 'highlight_edges'
 >;
 
-// The lists show a journey's counts; `fields` leaves the steps' texts out of the payload.
-const LIST_OPTIONS = {
-	sort: 'created',
-	expand: 'journey_steps_via_journey',
-	fields: '*,expand.journey_steps_via_journey.phase'
-};
-
+/** Every journey with its steps: the admin list compares each edit with its copy. */
 export async function getJourneys(): Promise<Journey[]> {
-	return await pb.collection('journeys').getFullList<Journey>(LIST_OPTIONS);
-}
-
-export async function getPublishedJourneys(): Promise<Journey[]> {
 	return await pb
 		.collection('journeys')
-		.getFullList<Journey>({ ...LIST_OPTIONS, filter: 'published = true' });
+		.getFullList<Journey>({ sort: 'created', expand: 'journey_steps_via_journey' });
 }
 
-export async function getJourney(id: string): Promise<Journey> {
-	return await pb.collection('journeys').getOne<Journey>(id);
+// The visitor's pages read the copy alone, never the edit.
+const PUBLISHED = { filter: 'published != null', fields: 'id,slug,published' };
+
+export async function getPublishedJourneys(): Promise<PublishedRecord[]> {
+	return await pb
+		.collection('journeys')
+		.getFullList<PublishedRecord>({ ...PUBLISHED, sort: 'created' });
 }
 
 /** null when there is no journey with that slug, or it is not published. */
-export async function getPublishedJourneyBySlug(slug: string): Promise<Journey | null> {
+export async function getPublishedJourneyBySlug(slug: string): Promise<PublishedRecord | null> {
 	try {
 		return await pb
 			.collection('journeys')
-			.getFirstListItem<Journey>(pb.filter('slug = {:slug} && published = true', { slug }));
+			.getFirstListItem<PublishedRecord>(
+				pb.filter(`slug = {:slug} && ${PUBLISHED.filter}`, { slug }),
+				{ fields: PUBLISHED.fields }
+			);
 	} catch (err) {
 		if ((err as { status?: number }).status === 404) return null;
 		throw err;
 	}
 }
 
-export async function createJourney(data: JourneyInput): Promise<Journey> {
-	return await pb.collection('journeys').create<Journey>({ ...data, published: false });
+/** True when a published copy shows this map: PocketBase guards only the edit's `map`. */
+export async function publishedOnMap(mapId: string): Promise<boolean> {
+	const { totalItems } = await pb
+		.collection('journeys')
+		.getList(1, 1, { filter: pb.filter('published.map = {:mapId}', { mapId }) });
+	return totalItems > 0;
 }
 
-export async function updateJourney(
-	id: string,
-	data: Partial<JourneyInput> & { published?: boolean }
-): Promise<Journey> {
+export async function getJourney(id: string): Promise<Journey> {
+	return await pb.collection('journeys').getOne<Journey>(id);
+}
+
+export async function createJourney(data: JourneyInput): Promise<Journey> {
+	return await pb.collection('journeys').create<Journey>(data);
+}
+
+/** Writes the edit; what the visitor reads changes only through `runJourneyAction`. */
+export async function updateJourney(id: string, data: Partial<JourneyInput>): Promise<Journey> {
 	return await pb.collection('journeys').update<Journey>(id, data);
+}
+
+export type JourneyAction = 'publish' | 'discard' | 'unpublish';
+
+/** A publishing action the server refused; `key` is the message that says why. */
+export class JourneyActionError extends Error {
+	constructor(readonly key: MessageKey) {
+		super(key);
+	}
+}
+
+/**
+ * Runs one of the server's publishing actions (`/admin/journeys/[id]`) with the signed-in
+ * account's token. Returns the journey's copy after it: null once unpublished.
+ */
+export async function runJourneyAction(
+	id: string,
+	action: JourneyAction
+): Promise<PublishedJourney | null> {
+	const body = new FormData();
+	body.set('token', pb.authStore.token);
+	const response = await fetch(`/admin/journeys/${id}?/${action}`, {
+		method: 'POST',
+		body,
+		headers: { 'x-sveltekit-action': 'true' }
+	});
+	const result = deserialize(await response.text());
+	if (result.type === 'success') return (result.data as { published: PublishedJourney | null }).published;
+	if (result.type === 'failure') throw new JourneyActionError((result.data as { error: MessageKey }).error);
+	throw new JourneyActionError('journeys_admin.error.save');
 }
 
 /** PocketBase refused the record for the unique index on `slug`. */
