@@ -1,6 +1,7 @@
 // Screens of "Writing a journey": a draft from the list to publication: details, phases, a
-// step framed and highlighted on the graph, documents, the preview. The draft is removed at
-// the end, so that the other scripts show only the example.
+// step framed and highlighted on the graph, documents, the preview, then an edit that stays
+// off the site until it is published or discarded. The journey is removed at the end, so
+// that the other scripts show only the example.
 import { expect, screens, signIn, test } from './lib';
 
 const TITLE = 'Renewing a domain';
@@ -62,13 +63,43 @@ test('writing a journey', async ({ page }) => {
 
 	await page.getByRole('link', { name: '← back to the editor' }).click();
 	await page.waitForURL(/\/admin\/journeys\/[a-z0-9]+$/);
+	await page.waitForLoadState('networkidle');
+	const editor = page.url();
 	await page.getByRole('button', { name: 'Publish' }).click();
 	await expect(page.getByRole('button', { name: 'Unpublish' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeHidden();
+	await expect(page.getByRole('link', { name: 'view published' })).toHaveAttribute('href', '/journeys/renewing-a-domain');
+
+	// a saved edit stays off the site: visitors read what was published
+	await page.locator('#journey-title-en').fill('Renewing a domain name');
+	await page.locator('#step-title-en').fill('Look up the registrar');
+	await page.getByRole('button', { name: 'Save' }).click();
+	await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+	await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+	await s.shot(page.getByText('Unpublished changes', { exact: true }));
+	await page.goto('/journeys/renewing-a-domain');
+	await expect(page.getByRole('heading', { level: 1, name: TITLE, exact: true })).toBeVisible();
+	await expect(page.locator('.step-card', { hasText: 'Find who registered the domain' })).toBeVisible();
+
+	// the list offers the same three actions
+	await page.goto('/admin/journeys');
+	const edited = page.locator('tr', { hasText: 'Renewing a domain name' });
+	await expect(edited.getByRole('button', { name: 'discard edit' })).toBeVisible();
+	await s.shot(edited.getByText('unpublished changes', { exact: true }));
+
+	// discarding the edit brings back what visitors read
+	await page.goto(editor);
+	await page.getByRole('button', { name: 'Discard edit' }).click();
+	const discard = page.getByRole('dialog').filter({ hasText: 'Discard the edit?' });
+	await discard.getByRole('button', { name: 'Discard edit' }).click();
+	await expect(page.locator('#journey-title-en')).toHaveValue(TITLE);
+	await expect(page.getByText('Unpublished changes', { exact: true })).toBeHidden();
+	await expect(page.getByRole('button', { name: 'Discard edit' })).toBeHidden();
+	await expect(page.locator('#step-title-en')).toHaveValue('Find who registered the domain');
 
 	await page.goto('/admin/journeys');
 	const row = page.locator('tr', { hasText: TITLE });
-	await s.shot(row.getByText('published', { exact: true }));
-
+	await expect(row.getByText('unpublished changes', { exact: true })).toBeHidden();
 	await row.getByRole('button', { name: 'remove' }).click();
 	await page.getByRole('dialog').filter({ hasText: 'Remove journey?' }).getByRole('button', { name: 'Remove' }).click();
 	await expect(row).toBeHidden();

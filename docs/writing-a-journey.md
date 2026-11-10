@@ -49,13 +49,25 @@ The bar at the top stays on screen while you work.
 
 ![The editor's bar, with the journey saved](/screens/writing-a-journey-6.png)
 
-- **Save** records the whole draft at once. The page holds everything until then and asks before you leave with unsaved changes.
-- **Preview** saves and opens the journey as a visitor sees it, published or not. **← back to the editor** returns.
+- **Save** records the whole edit at once. The page holds everything until then and asks before you leave with unsaved changes.
+- **Preview** saves and opens the edit as a visitor would see it once published. **← back to the editor** returns.
 
 ![The preview of a draft](/screens/writing-a-journey-7.png)
 
-- **Publish** makes the journey public. It needs at least one step. In a published journey, **Save** reaches visitors at once; **Unpublish** takes it back. With unsaved changes, **Unpublish** asks first, and the changes stay in the editor, unsaved.
+- **Publish** saves and copies the edit to the site: visitors read that copy. It needs at least one step.
 
-The list also publishes and unpublishes, and removes a journey with its steps.
+## Change a published journey
 
-![The list with a published journey](/screens/writing-a-journey-8.png)
+Visitors keep reading what was published while you edit and save. The bar says **Unpublished changes** when the saved edit differs from it, and **view published** opens the journey as visitors read it.
+
+![A published journey with unpublished changes](/screens/writing-a-journey-8.png)
+
+- **Publish** saves and puts the edit on the site.
+- **Discard edit** brings the edit back to what visitors read, after a confirmation. The changes made since the journey was published, saved or not, are lost.
+- **Unpublish** takes the journey off the site and keeps the edit. With unsaved changes, it asks first, and the changes stay in the editor, unsaved.
+
+The slug is the journey's address: saving a new slug moves the published journey at once.
+
+The list has the same three actions and marks a journey with **unpublished changes**. The slug of a published journey opens its page, and **remove** deletes a journey with its steps.
+
+![The list with a journey that has unpublished changes](/screens/writing-a-journey-9.png)

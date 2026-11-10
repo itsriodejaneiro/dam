@@ -4,7 +4,7 @@ A journey tells a process step by step over the map: as you read, the map moves 
 
 ![The list of journeys](/screens/journeys-1.png)
 
-Open a journey to read it at `/journeys/<slug>`. Only published journeys appear, and a deployment can [hide the section](./configure.md#the-fields).
+Open a journey to read it at `/journeys/<slug>`. Only published journeys appear, as they were last published: what their editors change reaches this page when they publish it. A deployment can [hide the section](./configure.md#the-fields).
 
 ![The opening of a journey](/screens/journeys-2.png)
 
