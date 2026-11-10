@@ -1,6 +1,6 @@
 /* The frame of an admin screen, used directly in the HTML: page width, heading, the block
    under it, the table with its row actions, the grid list, the search field, the small icon
-   buttons of a list, and the form of its dialog. */
+   buttons of a list, the form of its dialog, and the banner over a preview. */
 
 .admin-page {
   max-width: 1240px;
@@ -230,4 +230,22 @@
   .admin-action { display: block; margin: 0.3rem 0 0 auto; }
   /* A table cell stacks its actions on a phone; a list row keeps them inline. */
   .admin-row .col-actions .admin-action { margin: 0 0 0 0.8rem; }
+}
+
+/* Over an editor's preview: what the page shows, and the way back. */
+.preview-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1rem;
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+}
+.preview-banner + .admin-error {
+  padding: 4rem 2.5rem;
+  text-align: center;
 }

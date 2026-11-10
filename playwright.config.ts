@@ -20,7 +20,7 @@ export default defineConfig({
 		...devices['Desktop Chrome'],
 		baseURL: process.env.APP_URL,
 		locale: 'en-US',
-		// wide enough for the signed-in header to fit on one line (SiteHeader breaks at 1340px)
+		// wide enough for the signed-in header to fit on one line (SiteHeader breaks at 1435px)
 		viewport: { width: 1440, height: 900 },
 		deviceScaleFactor: 1.5,
 		trace: 'retain-on-failure'

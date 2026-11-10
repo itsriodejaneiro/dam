@@ -2,16 +2,25 @@
 	import { onDestroy } from 'svelte';
 	import { Editor } from '@tiptap/core';
 	import StarterKit from '@tiptap/starter-kit';
-	import Link from '@tiptap/extension-link';
-	import { Bold, Italic, Link as LinkIcon, List, ListOrdered } from '@lucide/svelte';
+	import {
+		Bold,
+		Heading2,
+		Heading3,
+		Italic,
+		Link as LinkIcon,
+		List,
+		ListOrdered
+	} from '@lucide/svelte';
 	import { m } from '$lib/i18n';
 
 	interface Props {
 		content: string;
 		placeholder?: string;
+		/** Section titles, h2 and h3: a page's text has them, a step's or an entity's does not. */
+		headings?: boolean;
 	}
 
-	let { content = $bindable(''), placeholder = '' }: Props = $props();
+	let { content = $bindable(''), placeholder = '', headings = false }: Props = $props();
 
 	let editorEl = $state<HTMLDivElement | null>(null);
 	let editor: Editor | null = null;
@@ -23,14 +32,15 @@
 			element: editorEl,
 			extensions: [
 				StarterKit.configure({
-					heading: false,
+					// sanitize.ts lets h2 and h3 through, and nothing else of the kind
+					heading: headings ? { levels: [2, 3] } : false,
 					strike: false,
 					code: false,
 					codeBlock: false,
 					blockquote: false,
-					horizontalRule: false
-				}),
-				Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true })
+					horizontalRule: false,
+					link: { openOnClick: false, autolink: true, linkOnPaste: true }
+				})
 			],
 			content,
 			// The page's CSP refuses the style element TipTap would inject; its rules are below.
@@ -75,6 +85,27 @@
 
 <div class="rte">
 	<div class="toolbar">
+		{#if headings}
+			<button
+				type="button"
+				class:active={isActive('heading', { level: 2 })}
+				onclick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+				aria-label={m('editor.heading_2')}
+				title={m('editor.heading_2')}
+			>
+				<Heading2 size={14} />
+			</button>
+			<button
+				type="button"
+				class:active={isActive('heading', { level: 3 })}
+				onclick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+				aria-label={m('editor.heading_3')}
+				title={m('editor.heading_3')}
+			>
+				<Heading3 size={14} />
+			</button>
+			<span class="sep" aria-hidden="true"></span>
+		{/if}
 		<button
 			type="button"
 			class:active={isActive('bold')}
@@ -253,6 +284,16 @@
 		color: var(--accent);
 		text-decoration: underline;
 		text-underline-offset: 2px;
+	}
+	.surface :global(.rte-editor-area h2) {
+		font-size: 1.25rem;
+		font-weight: 500;
+		margin: 0.4em 0 0.5em;
+	}
+	.surface :global(.rte-editor-area h3) {
+		font-size: 1.05rem;
+		font-weight: 600;
+		margin: 0.4em 0 0.4em;
 	}
 	.surface :global(.rte-editor-area strong) {
 		font-weight: 600;

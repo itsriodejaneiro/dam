@@ -21,5 +21,10 @@ export { default as JourneyNav } from './JourneyNav.svelte';
 export { default as StepCard } from './StepCard.svelte';
 export { default as DocInventory } from './DocInventory.svelte';
 export { default as PhaseTransitionCard } from './PhaseTransitionCard.svelte';
+export { default as PublishBar } from './PublishBar.svelte';
+export { default as LeaveGuard } from './LeaveGuard.svelte';
+export { default as LogoGrid } from './LogoGrid.svelte';
+export { default as PageBlocks } from './PageBlocks.svelte';
+export { default as HomeView } from './HomeView.svelte';
 
 export type { Status } from './types';

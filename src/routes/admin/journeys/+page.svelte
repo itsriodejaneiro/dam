@@ -5,8 +5,9 @@
 	import { AppMeta, Button, ConfirmDialog, Dialog, LocalizedInput, Pill } from '$lib/components';
 	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
-	import { countedSteps, samePublished, toPublished } from '$lib/journey';
-	import type { JourneyAction } from '$lib/services/journeys';
+	import { countedSteps, toPublished } from '$lib/journey';
+	import { samePublished } from '$lib/publish';
+	import { PublishActionError, type PublishAction } from '$lib/services/publishing';
 	import type { Journey } from '$lib/types/journey';
 
 	requireAdmin();
@@ -92,7 +93,7 @@
 		}
 	}
 
-	async function act(j: Journey, action: JourneyAction) {
+	async function act(j: Journey, action: PublishAction) {
 		acting = j.id;
 		listError = '';
 		try {
@@ -100,7 +101,7 @@
 			await refresh();
 		} catch (err) {
 			listError =
-				err instanceof journeys.JourneyActionError
+				err instanceof PublishActionError
 					? m(err.key)
 					: (err as Error).message || m('journeys_admin.error.save');
 		} finally {
@@ -200,8 +201,8 @@
 								<td class="fit">
 									<Pill status={j.published ? 'confirmed' : 'draft'}>
 										{j.published
-											? m('journeys_admin.status.published')
-											: m('journeys_admin.status.draft')}
+											? m('publish.status.published')
+											: m('publish.status.draft')}
 									</Pill>
 									{#if changed(j)}
 										<span class="sub">{m('journeys_admin.status.changed')}</span>
@@ -295,11 +296,11 @@
 
 <ConfirmDialog
 	bind:open={discardOpen}
-	title={m('journeys_admin.confirm_discard_title')}
+	title={m('publish.confirm_discard_title')}
 	description={pendingDiscard?.published
 		? m('journeys_admin.confirm_discard_desc', t(pendingDiscard.published.title, code))
 		: ''}
-	confirmLabel={m('journeys_admin.discard')}
+	confirmLabel={m('publish.discard')}
 	cancelLabel={m('common.cancel')}
 	onConfirm={confirmDiscard}
 	onCancel={() => (pendingDiscard = null)}

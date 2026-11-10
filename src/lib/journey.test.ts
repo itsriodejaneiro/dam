@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { fromPublished, samePublished, toPublished } from './journey';
+import { fromPublished, toPublished } from './journey';
+import { samePublished } from './publish';
 import type { Journey, JourneyStep } from './types/journey';
 
 const journey = {

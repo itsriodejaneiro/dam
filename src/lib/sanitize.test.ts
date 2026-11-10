@@ -6,7 +6,7 @@ const LINK = 'target="_blank" rel="noopener noreferrer nofollow"';
 
 /** Every `<` of a clean output opens one of the tags the module writes, in its exact form. */
 const STRANGER = new RegExp(
-	`<(?!/?(?:p|br|strong|b|em|i|u|ul|ol|li|a)>|a href="[^"<>]*" ${LINK}>|ol start="\\d+">)`
+	`<(?!/?(?:p|br|strong|b|em|i|u|ul|ol|li|a|h2|h3)>|a href="[^"<>]*" ${LINK}>|ol start="\\d+">)`
 );
 
 test('an attribute value cannot close its quotes or open a tag', () => {
@@ -20,9 +20,10 @@ test('an attribute value cannot close its quotes or open a tag', () => {
 
 test('what the editor writes comes through', () => {
 	const editor =
-		'<p>a <strong>b</strong> <em>c</em> <u>d</u><br>e &amp; f</p>' +
+		'<h2>a</h2><h3>b</h3><p>a <strong>b</strong> <em>c</em> <u>d</u><br>e &amp; f</p>' +
 		'<ul><li><p>g</p></li></ul><ol start="3"><li><p>h</p></li></ol>';
 	assert.equal(sanitizeHtml(editor), editor);
+	assert.equal(sanitizeHtml('<h1>a</h1><h4 id="x">b</h4><h2 class="x">c</h2>'), 'ab<h2>c</h2>');
 	assert.equal(
 		sanitizeHtml(
 			'<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://example.org/?a=1&amp;b=2">x</a></p>'

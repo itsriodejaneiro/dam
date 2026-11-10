@@ -11,4 +11,5 @@ export * as nodeTranslations from './nodeTranslations';
 export * as nodeTypeTranslations from './nodeTypeTranslations';
 export * as mapTranslations from './mapTranslations';
 export * as journeys from './journeys';
+export * as pages from './pages';
 export * as accounts from './accounts';

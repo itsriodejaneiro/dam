@@ -1,5 +1,5 @@
-import { deserialize } from '$app/forms';
 import { pb } from './pb';
+import { runPublishAction, type PublishAction } from './publishing';
 import * as nodeTypes from './nodeTypes';
 import * as nodesApi from './nodes';
 import * as edgesApi from './edges';
@@ -14,7 +14,6 @@ import type {
 	PublishedJourney,
 	VisEdge
 } from '$lib/types/journey';
-import type { MessageKey } from '$lib/i18n';
 import type { Localized, MapNode } from './types';
 
 export interface JourneyInput {
@@ -67,34 +66,15 @@ export async function updateJourney(id: string, data: Partial<JourneyInput>): Pr
 	return await pb.collection('journeys').update<Journey>(id, data);
 }
 
-export type JourneyAction = 'publish' | 'discard' | 'unpublish';
-
-/** A publishing action the server refused; `key` is the message that says why. */
-export class JourneyActionError extends Error {
-	constructor(readonly key: MessageKey) {
-		super(key);
-	}
-}
-
 /**
  * Runs one of the server's publishing actions (`/admin/journeys/[id]`) with the signed-in
  * account's token. Returns the journey's copy after it: null once unpublished.
  */
-export async function runJourneyAction(
+export function runJourneyAction(
 	id: string,
-	action: JourneyAction
+	action: PublishAction
 ): Promise<PublishedJourney | null> {
-	const body = new FormData();
-	body.set('token', pb.authStore.token);
-	const response = await fetch(`/admin/journeys/${id}?/${action}`, {
-		method: 'POST',
-		body,
-		headers: { 'x-sveltekit-action': 'true' }
-	});
-	const result = deserialize(await response.text());
-	if (result.type === 'success') return (result.data as { published: PublishedJourney | null }).published;
-	if (result.type === 'failure') throw new JourneyActionError((result.data as { error: MessageKey }).error);
-	throw new JourneyActionError('journeys_admin.error.save');
+	return runPublishAction(`/admin/journeys/${id}`, action, 'journeys_admin.error.save');
 }
 
 /** PocketBase refused the record for the unique index on `slug`. */

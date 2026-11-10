@@ -1,0 +1,36 @@
+/* A card that leads somewhere: a published journey in /journeys, a card block of the home.
+   The whole card is the link; a title (h2 or h3), a line of text and an optional meta line. */
+
+.link-card {
+  display: block;
+  padding: 1.8rem 2rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.link-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 16px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.link-card :is(h2, h3) {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+.link-card p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.link-card-meta {
+  display: block;
+  margin-top: 1rem;
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}

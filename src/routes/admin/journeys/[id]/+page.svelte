@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { beforeNavigate, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { ChevronDown, ChevronUp, Plus, Trash2, Video } from '@lucide/svelte';
 	import {
@@ -8,9 +8,10 @@
 		Button,
 		ConfirmDialog,
 		JourneyGraph,
+		LeaveGuard,
 		LocalizedInput,
 		LocalizedRichTextEditor,
-		Pill
+		PublishBar
 	} from '$lib/components';
 	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
@@ -19,12 +20,13 @@
 		fullCamera,
 		liveHighlight,
 		phaseColor,
-		samePublished,
 		stepHighlight,
 		stepNumbers,
 		toPublished
 	} from '$lib/journey';
-	import type { JourneyAction, JourneyInput, StepInput } from '$lib/services/journeys';
+	import { samePublished } from '$lib/publish';
+	import type { JourneyInput, StepInput } from '$lib/services/journeys';
+	import { PublishActionError, type PublishAction } from '$lib/services/publishing';
 	import type {
 		CameraState,
 		JourneyGraphData,
@@ -76,8 +78,7 @@
 	let viewMoved = $state(false);
 
 	let saving = $state(false);
-	let acting = $state<JourneyAction | null>(null);
-	const busy = $derived(saving || acting !== null);
+	let acting = $state<PublishAction | null>(null);
 	let error = $state('');
 	let justSaved = $state(false);
 	let savedKey = $state('');
@@ -137,8 +138,6 @@
 	const changed = $derived(
 		published !== null && savedEdit !== null && !samePublished(savedEdit, published)
 	);
-	// Saved or not, what Publish would send and Discard would drop.
-	const unpublished = $derived(published !== null && (dirty || changed));
 
 	$effect(() => {
 		if (dirty) justSaved = false;
@@ -413,7 +412,7 @@
 	}
 
 	/** Runs a publishing action on the server and keeps the copy it answers with. */
-	async function act(action: JourneyAction): Promise<boolean> {
+	async function act(action: PublishAction): Promise<boolean> {
 		error = '';
 		acting = action;
 		try {
@@ -421,7 +420,7 @@
 			return true;
 		} catch (err) {
 			error =
-				err instanceof journeys.JourneyActionError
+				err instanceof PublishActionError
 					? m(err.key)
 					: (err as Error).message || m('journeys_admin.error.save');
 			return false;
@@ -438,50 +437,13 @@
 		if (await save()) await act('publish');
 	}
 
-	let unpublishOpen = $state(false);
-
-	// Empties the copy alone: an edit in progress stays in the page, unsaved.
-	function unpublish() {
-		if (dirty) unpublishOpen = true;
-		else void act('unpublish');
-	}
-
-	async function confirmUnpublish() {
-		unpublishOpen = false;
-		await act('unpublish');
-	}
-
-	let discardOpen = $state(false);
-
 	// The server writes the copy back over the edit; the page then reads the edit again.
-	async function confirmDiscard() {
-		discardOpen = false;
+	async function discard() {
 		if (await act('discard')) await load();
 	}
 
 	async function preview() {
 		if (await save()) await goto(`/admin/journeys/${data.id}/preview`);
-	}
-
-	// ── Leaving with unsaved changes ──
-
-	let leaveOpen = $state(false);
-	let leaveTo = '';
-	let leaving = false;
-
-	beforeNavigate((nav) => {
-		if (!dirty || leaving) return;
-		nav.cancel();
-		// Closing the tab: the browser asks by itself.
-		if (nav.type === 'leave' || !nav.to) return;
-		leaveTo = nav.to.url.pathname + nav.to.url.search;
-		leaveOpen = true;
-	});
-
-	async function confirmLeave() {
-		leaving = true;
-		leaveOpen = false;
-		await goto(leaveTo);
 	}
 </script>
 
@@ -503,55 +465,26 @@
 				</div>
 			</section>
 
-			<div class="toolbar">
-				<Pill status={published ? 'confirmed' : 'draft'}>
-					{published ? m('journeys_admin.status.published') : m('journeys_admin.status.draft')}
-				</Pill>
-				{#if published}
-					<a class="admin-action" href="/journeys/{savedSlug}" target="_blank" rel="noopener">
-						{m('journeys_admin.view_published')}
-					</a>
-				{/if}
-				{#if error}
-					<span class="admin-error">{error}</span>
-				{:else}
-					{#if changed}
-						<span class="save-state">{m('journeys_admin.unpublished_changes')}</span>
-					{/if}
-					{#if dirty}
-						<span class="save-state">{m('journeys_admin.unsaved')}</span>
-					{:else if justSaved}
-						<span class="save-state saved">{m('journeys_admin.saved')}</span>
-					{/if}
-				{/if}
-				<span class="spacer"></span>
-				<Button variant="ghost" disabled={busy} onclick={preview}>
-					{m('journeys_admin.preview')}
-				</Button>
-				{#if unpublished}
-					<Button
-						variant="ghost"
-						loading={acting === 'discard'}
-						disabled={busy}
-						onclick={() => (discardOpen = true)}
-					>
-						{m('journeys_admin.discard')}
-					</Button>
-				{/if}
-				{#if published}
-					<Button variant="secondary" loading={acting === 'unpublish'} disabled={busy} onclick={unpublish}>
-						{m('journeys_admin.unpublish')}
-					</Button>
-				{/if}
-				{#if !published || unpublished}
-					<Button variant="secondary" loading={acting === 'publish'} disabled={busy} onclick={publish}>
-						{m('journeys_admin.publish')}
-					</Button>
-				{/if}
-				<Button loading={saving} disabled={!dirty || busy} onclick={save}>
-					{m('common.save')}
-				</Button>
-			</div>
+			<PublishBar
+				published={published !== null}
+				viewHref="/journeys/{savedSlug}"
+				{dirty}
+				{changed}
+				{justSaved}
+				{error}
+				{saving}
+				{acting}
+				discardDescription={m(
+					'journeys_admin.confirm_discard_desc',
+					t(published?.title ?? form.title, code)
+				)}
+				unpublishDescription={m('journeys_admin.confirm_unpublish_desc')}
+				onPreview={preview}
+				onSave={save}
+				onPublish={publish}
+				onDiscard={discard}
+				onUnpublish={() => act('unpublish')}
+			/>
 
 			<section class="admin-block">
 				<h2>{m('journeys_admin.section.details')}</h2>
@@ -836,32 +769,7 @@
 	onConfirm={confirmMap}
 />
 
-<ConfirmDialog
-	bind:open={unpublishOpen}
-	title={m('journeys_admin.confirm_unpublish_title')}
-	description={m('journeys_admin.confirm_unpublish_desc')}
-	confirmLabel={m('journeys_admin.unpublish')}
-	cancelLabel={m('common.cancel')}
-	onConfirm={confirmUnpublish}
-/>
-
-<ConfirmDialog
-	bind:open={discardOpen}
-	title={m('journeys_admin.confirm_discard_title')}
-	description={m('journeys_admin.confirm_discard_desc', t(published?.title ?? form.title, code))}
-	confirmLabel={m('journeys_admin.discard')}
-	cancelLabel={m('common.cancel')}
-	onConfirm={confirmDiscard}
-/>
-
-<ConfirmDialog
-	bind:open={leaveOpen}
-	title={m('journeys_admin.leave_title')}
-	description={m('journeys_admin.leave_desc')}
-	confirmLabel={m('journeys_admin.leave_action')}
-	cancelLabel={m('common.cancel')}
-	onConfirm={confirmLeave}
-/>
+<LeaveGuard {dirty} />
 
 <style>
 	.editor {
@@ -882,27 +790,8 @@
 		font-size: 0.88rem;
 	}
 
-	.toolbar {
-		position: sticky;
-		top: 4.5rem;
-		z-index: 20;
-		display: flex;
-		align-items: center;
-		gap: 0.8rem;
-		padding: 0.7rem 0;
-		background: var(--bg);
-		border-top: 1px solid var(--border);
-	}
 	.spacer {
 		flex: 1;
-	}
-	.save-state {
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.78rem;
-		color: var(--text-soft);
-	}
-	.save-state.saved {
-		color: var(--accent);
 	}
 
 	.columns {
@@ -1068,12 +957,6 @@
 		.columns,
 		.columns.three {
 			grid-template-columns: 1fr;
-		}
-	}
-	@media (max-width: 900px) {
-		.toolbar {
-			position: static;
-			flex-wrap: wrap;
 		}
 	}
 </style>

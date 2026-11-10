@@ -34,7 +34,7 @@ export function safeUrl(url: unknown): string | null {
 	}
 }
 
-const ALLOWED_TAGS = new Set(['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li', 'a']);
+const ALLOWED_TAGS = new Set(['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li', 'a', 'h2', 'h3']);
 /** Their content is code, not text: it goes with the tag. */
 const CODE_TAGS = new Set(['script', 'style']);
 

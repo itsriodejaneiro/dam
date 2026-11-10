@@ -63,6 +63,7 @@ export const messages = {
 	'nav.connections': { pt: 'conexões', en: 'connections', fr: 'connexions', es: 'conexiones' },
 	'nav.maps': { pt: 'mapas', en: 'maps', fr: 'cartes', es: 'mapas' },
 	'nav.categories': { pt: 'categorias', en: 'categories', fr: 'catégories', es: 'categorías' },
+	'nav.home': { pt: 'home', en: 'home', fr: 'accueil', es: 'portada' },
 	'nav.settings': { pt: 'configurações', en: 'settings', fr: 'paramètres', es: 'configuración' },
 	'nav.accounts': { pt: 'contas', en: 'accounts', fr: 'comptes', es: 'cuentas' },
 	'nav.locale': { pt: 'Idioma', en: 'Language', fr: 'Langue', es: 'Idioma' },
@@ -664,6 +665,8 @@ export const messages = {
 	// ──────────────────────────────────────────────
 	'editor.bold': { pt: 'Negrito', en: 'Bold', fr: 'Gras', es: 'Negrita' },
 	'editor.italic': { pt: 'Itálico', en: 'Italic', fr: 'Italique', es: 'Cursiva' },
+	'editor.heading_2': { pt: 'Título', en: 'Heading', fr: 'Titre', es: 'Título' },
+	'editor.heading_3': { pt: 'Subtítulo', en: 'Subheading', fr: 'Sous-titre', es: 'Subtítulo' },
 	'editor.link': { pt: 'Link', en: 'Link', fr: 'Lien', es: 'Enlace' },
 	'editor.bullet_list': { pt: 'Lista', en: 'Bullet list', fr: 'Liste à puces', es: 'Lista' },
 	'editor.ordered_list': { pt: 'Lista numerada', en: 'Numbered list', fr: 'Liste numérotée', es: 'Lista numerada' },
@@ -1091,6 +1094,61 @@ export const messages = {
 	},
 
 	// ──────────────────────────────────────────────
+	// PUBLISHING (the bar of an editor with a published copy)
+	// ──────────────────────────────────────────────
+	'publish.status.published': { pt: 'publicada', en: 'published', fr: 'publié', es: 'publicado' },
+	'publish.status.draft': { pt: 'rascunho', en: 'draft', fr: 'brouillon', es: 'borrador' },
+	'publish.view_published': {
+		pt: 'ver publicada',
+		en: 'view published',
+		fr: 'voir la version publiée',
+		es: 'ver publicado'
+	},
+	'publish.unpublished_changes': {
+		pt: 'Mudanças não publicadas',
+		en: 'Unpublished changes',
+		fr: 'Modifications non publiées',
+		es: 'Cambios sin publicar'
+	},
+	'publish.unsaved': {
+		pt: 'Alterações por salvar',
+		en: 'Unsaved changes',
+		fr: 'Modifications non enregistrées',
+		es: 'Cambios sin guardar'
+	},
+	'publish.saved': { pt: 'Salvo', en: 'Saved', fr: 'Enregistré', es: 'Guardado' },
+	'publish.preview': { pt: 'Pré-visualizar', en: 'Preview', fr: 'Aperçu', es: 'Vista previa' },
+	'publish.discard': {
+		pt: 'Descartar edição',
+		en: 'Discard edit',
+		fr: 'Abandonner la modification',
+		es: 'Descartar edición'
+	},
+	'publish.unpublish': { pt: 'Despublicar', en: 'Unpublish', fr: 'Dépublier', es: 'Despublicar' },
+	'publish.publish': { pt: 'Publicar', en: 'Publish', fr: 'Publier', es: 'Publicar' },
+	'publish.confirm_discard_title': {
+		pt: 'Descartar a edição?',
+		en: 'Discard the edit?',
+		fr: 'Abandonner la modification ?',
+		es: '¿Descartar la edición?'
+	},
+	'publish.confirm_unpublish_title': {
+		pt: 'Despublicar com alterações por salvar?',
+		en: 'Unpublish with unsaved changes?',
+		fr: 'Dépublier avec des modifications non enregistrées ?',
+		es: '¿Despublicar con cambios sin guardar?'
+	},
+	'publish.leave_title': { pt: 'Sair sem salvar?', en: 'Leave without saving?', fr: 'Quitter sans enregistrer ?', es: '¿Salir sin guardar?' },
+	'publish.leave_desc': {
+		pt: 'As alterações por salvar serão perdidas.',
+		en: 'Unsaved changes will be lost.',
+		fr: 'Les modifications non enregistrées seront perdues.',
+		es: 'Los cambios sin guardar se perderán.'
+	},
+	'publish.leave_action': { pt: 'Sair', en: 'Leave', fr: 'Quitter', es: 'Salir' },
+	'publish.back_to_editor': { pt: '← voltar ao editor', en: '← back to the editor', fr: "← retour à l'éditeur", es: '← volver al editor' },
+
+	// ──────────────────────────────────────────────
 	// JOURNEYS
 	// ──────────────────────────────────────────────
 	'journeys.title': { pt: 'Jornadas', en: 'Journeys', fr: 'Parcours', es: 'Recorridos' },
@@ -1178,47 +1236,19 @@ export const messages = {
 		es: 'Aún no hay recorridos.'
 	},
 	'journeys_admin.col_status': { pt: 'Estado', en: 'Status', fr: 'État', es: 'Estado' },
-	'journeys_admin.status.published': { pt: 'publicada', en: 'published', fr: 'publié', es: 'publicado' },
-	'journeys_admin.status.draft': { pt: 'rascunho', en: 'draft', fr: 'brouillon', es: 'borrador' },
-	'journeys_admin.publish': { pt: 'Publicar', en: 'Publish', fr: 'Publier', es: 'Publicar' },
-	'journeys_admin.unpublish': { pt: 'Despublicar', en: 'Unpublish', fr: 'Dépublier', es: 'Despublicar' },
 	'journeys_admin.publish_lower': { pt: 'publicar', en: 'publish', fr: 'publier', es: 'publicar' },
 	'journeys_admin.unpublish_lower': { pt: 'despublicar', en: 'unpublish', fr: 'dépublier', es: 'despublicar' },
-	'journeys_admin.discard': {
-		pt: 'Descartar edição',
-		en: 'Discard edit',
-		fr: 'Abandonner la modification',
-		es: 'Descartar edición'
-	},
 	'journeys_admin.discard_lower': {
 		pt: 'descartar edição',
 		en: 'discard edit',
 		fr: 'abandonner la modification',
 		es: 'descartar edición'
 	},
-	'journeys_admin.unpublished_changes': {
-		pt: 'Mudanças não publicadas',
-		en: 'Unpublished changes',
-		fr: 'Modifications non publiées',
-		es: 'Cambios sin publicar'
-	},
 	'journeys_admin.status.changed': {
 		pt: 'mudanças não publicadas',
 		en: 'unpublished changes',
 		fr: 'modifications non publiées',
 		es: 'cambios sin publicar'
-	},
-	'journeys_admin.view_published': {
-		pt: 'ver publicada',
-		en: 'view published',
-		fr: 'voir la version publiée',
-		es: 'ver publicado'
-	},
-	'journeys_admin.confirm_discard_title': {
-		pt: 'Descartar a edição?',
-		en: 'Discard the edit?',
-		fr: 'Abandonner la modification ?',
-		es: '¿Descartar la edición?'
 	},
 	'journeys_admin.confirm_discard_desc': {
 		pt: '"{0}" volta ao que o visitante lê agora. As mudanças feitas desde a publicação, salvas ou não, se perdem.',
@@ -1249,14 +1279,6 @@ export const messages = {
 	},
 	'journeys_admin.field.map': { pt: 'Mapa', en: 'Map', fr: 'Carte', es: 'Mapa' },
 	'journeys_admin.back': { pt: '← jornadas', en: '← journeys', fr: '← parcours', es: '← recorridos' },
-	'journeys_admin.preview': { pt: 'Pré-visualizar', en: 'Preview', fr: 'Aperçu', es: 'Vista previa' },
-	'journeys_admin.unsaved': {
-		pt: 'Alterações por salvar',
-		en: 'Unsaved changes',
-		fr: 'Modifications non enregistrées',
-		es: 'Cambios sin guardar'
-	},
-	'journeys_admin.saved': { pt: 'Salvo', en: 'Saved', fr: 'Enregistré', es: 'Guardado' },
 	'journeys_admin.untitled': { pt: 'Sem título', en: 'Untitled', fr: 'Sans titre', es: 'Sin título' },
 	'journeys_admin.section.details': { pt: 'Dados', en: 'Details', fr: 'Détails', es: 'Datos' },
 	'journeys_admin.section.phases': { pt: 'Fases', en: 'Phases', fr: 'Phases', es: 'Fases' },
@@ -1361,33 +1383,18 @@ export const messages = {
 		es: 'Las cámaras y los destacados de todos los pasos se borrarán: las posiciones son de cada mapa.'
 	},
 	'journeys_admin.confirm_map_action': { pt: 'Trocar', en: 'Change', fr: 'Changer', es: 'Cambiar' },
-	'journeys_admin.confirm_unpublish_title': {
-		pt: 'Despublicar com alterações por salvar?',
-		en: 'Unpublish with unsaved changes?',
-		fr: 'Dépublier avec des modifications non enregistrées ?',
-		es: '¿Despublicar con cambios sin guardar?'
-	},
 	'journeys_admin.confirm_unpublish_desc': {
 		pt: 'A jornada sai do site agora. As alterações ficam aqui no editor, por salvar.',
 		en: 'The journey leaves the site now. Your changes stay here in the editor, unsaved.',
 		fr: "Le parcours quitte le site maintenant. Vos modifications restent ici dans l'éditeur, non enregistrées.",
 		es: 'El recorrido sale del sitio ahora. Los cambios quedan aquí en el editor, sin guardar.'
 	},
-	'journeys_admin.leave_title': { pt: 'Sair sem salvar?', en: 'Leave without saving?', fr: 'Quitter sans enregistrer ?', es: '¿Salir sin guardar?' },
-	'journeys_admin.leave_desc': {
-		pt: 'As alterações por salvar serão perdidas.',
-		en: 'Unsaved changes will be lost.',
-		fr: 'Les modifications non enregistrées seront perdues.',
-		es: 'Los cambios sin guardar se perderán.'
-	},
-	'journeys_admin.leave_action': { pt: 'Sair', en: 'Leave', fr: 'Quitter', es: 'Salir' },
 	'journeys_admin.preview_banner': {
 		pt: 'Pré-visualização: a jornada como o visitante a vê.',
 		en: 'Preview: the journey as a visitor sees it.',
 		fr: 'Aperçu : le parcours tel que le visiteur le voit.',
 		es: 'Vista previa: el recorrido como lo ve el visitante.'
 	},
-	'journeys_admin.back_to_editor': { pt: '← voltar ao editor', en: '← back to the editor', fr: "← retour à l'éditeur", es: '← volver al editor' },
 	'journeys_admin.error.save': {
 		pt: 'Erro ao salvar a jornada.',
 		en: 'Failed to save the journey.',
@@ -1423,6 +1430,184 @@ export const messages = {
 		en: 'A journey with no steps cannot be published.',
 		fr: 'Un parcours sans étape ne peut pas être publié.',
 		es: 'Un recorrido sin pasos no se puede publicar.'
+	},
+
+	// ──────────────────────────────────────────────
+	// HOME ADMIN (/admin/home)
+	// ──────────────────────────────────────────────
+	'home_admin.title': { pt: 'Home', en: 'Home', fr: "Page d'accueil", es: 'Portada' },
+	'home_admin.lede': {
+		pt: 'O que a home mostra abaixo do título: blocos de texto, imagem, cartões e logotipos. O visitante lê a cópia publicada; salvar guarda a edição.',
+		en: 'What the home shows under its title: blocks of text, image, cards and logos. Visitors read the published copy; saving keeps the edit.',
+		fr: "Ce que la page d'accueil montre sous son titre : des blocs de texte, d'image, de cartes et de logos. Le visiteur lit la copie publiée ; enregistrer garde la modification.",
+		es: 'Lo que la portada muestra bajo su título: bloques de texto, imagen, tarjetas y logotipos. El visitante lee la copia publicada; guardar conserva la edición.'
+	},
+	'home_admin.filter': { pt: 'Idiomas exibidos', en: 'Languages shown', fr: 'Langues affichées', es: 'Idiomas mostrados' },
+	'home_admin.empty': {
+		pt: 'Nenhum bloco ainda: a home mostra só o título.',
+		en: 'No blocks yet: the home shows its title alone.',
+		fr: "Aucun bloc pour l'instant : la page d'accueil ne montre que son titre.",
+		es: 'Aún no hay bloques: la portada muestra solo su título.'
+	},
+	'home_admin.add_block': { pt: 'Adicionar bloco', en: 'Add block', fr: 'Ajouter un bloc', es: 'Añadir bloque' },
+	'home_admin.add_here': {
+		pt: 'Adicionar bloco aqui',
+		en: 'Add a block here',
+		fr: 'Ajouter un bloc ici',
+		es: 'Añadir un bloque aquí'
+	},
+	'home_admin.type.text': { pt: 'Texto', en: 'Text', fr: 'Texte', es: 'Texto' },
+	'home_admin.type.image': { pt: 'Imagem', en: 'Image', fr: 'Image', es: 'Imagen' },
+	'home_admin.type.cards': { pt: 'Cartões', en: 'Cards', fr: 'Cartes', es: 'Tarjetas' },
+	'home_admin.type.logos': { pt: 'Logotipos', en: 'Logos', fr: 'Logos', es: 'Logotipos' },
+	'home_admin.collapse': { pt: 'Recolher bloco', en: 'Collapse block', fr: 'Replier le bloc', es: 'Contraer bloque' },
+	'home_admin.expand': { pt: 'Abrir bloco', en: 'Expand block', fr: 'Déplier le bloc', es: 'Expandir bloque' },
+	// {0} = a locale's code, {1} = how many of the block's texts are blank in it
+	'home_admin.missing': { pt: '{0}: faltam {1}', en: '{0}: {1} missing', fr: '{0} : {1} manquant(s)', es: '{0}: faltan {1}' },
+	'home_admin.confirm_remove_title': {
+		pt: 'Remover o bloco?',
+		en: 'Remove the block?',
+		fr: 'Supprimer le bloc ?',
+		es: '¿Eliminar el bloque?'
+	},
+	'home_admin.confirm_remove_desc': {
+		pt: 'O bloco sai da edição. A home publicada muda só ao publicar.',
+		en: 'The block leaves the edit. The published home changes only when you publish.',
+		fr: "Le bloc quitte la modification. La page d'accueil publiée ne change qu'à la publication.",
+		es: 'El bloque sale de la edición. La portada publicada cambia solo al publicar.'
+	},
+	'home_admin.field.text': { pt: 'Texto', en: 'Text', fr: 'Texte', es: 'Texto' },
+	'home_admin.field.image': { pt: 'Arquivo', en: 'File', fr: 'Fichier', es: 'Archivo' },
+	'home_admin.field.alt': {
+		pt: 'Descrição para leitores de tela',
+		en: 'Description for screen readers',
+		fr: "Description pour les lecteurs d'écran",
+		es: 'Descripción para lectores de pantalla'
+	},
+	'home_admin.field.caption': { pt: 'Legenda', en: 'Caption', fr: 'Légende', es: 'Pie de foto' },
+	// {0} = the card's position in its block
+	'home_admin.card_n': { pt: 'Cartão {0}', en: 'Card {0}', fr: 'Carte {0}', es: 'Tarjeta {0}' },
+	'home_admin.field.card_title': { pt: 'Título', en: 'Title', fr: 'Titre', es: 'Título' },
+	'home_admin.field.card_text': { pt: 'Frase', en: 'Line', fr: 'Phrase', es: 'Frase' },
+	'home_admin.field.target': { pt: 'Leva a', en: 'Leads to', fr: 'Mène à', es: 'Lleva a' },
+	'home_admin.target.map': { pt: 'Um mapa', en: 'A map', fr: 'Une carte', es: 'Un mapa' },
+	'home_admin.target.journey': { pt: 'Uma jornada', en: 'A journey', fr: 'Un parcours', es: 'Un recorrido' },
+	'home_admin.target.url': { pt: 'Um endereço', en: 'An address', fr: 'Une adresse', es: 'Una dirección' },
+	'home_admin.target_gone': {
+		pt: '(removido ou fora do ar)',
+		en: '(removed or unpublished)',
+		fr: '(supprimé ou dépublié)',
+		es: '(eliminado o despublicado)'
+	},
+	'home_admin.no_journeys': {
+		pt: 'Nenhuma jornada publicada',
+		en: 'No published journey',
+		fr: 'Aucun parcours publié',
+		es: 'Ningún recorrido publicado'
+	},
+	'home_admin.add_card': { pt: 'Adicionar cartão', en: 'Add card', fr: 'Ajouter une carte', es: 'Añadir tarjeta' },
+	'home_admin.field.logo_file': { pt: 'Logotipo', en: 'Logo', fr: 'Logo', es: 'Logotipo' },
+	'home_admin.field.logo_name': { pt: 'Nome', en: 'Name', fr: 'Nom', es: 'Nombre' },
+	'home_admin.field.logo_url': { pt: 'Link (opcional)', en: 'Link (optional)', fr: 'Lien (facultatif)', es: 'Enlace (opcional)' },
+	'home_admin.add_logo': { pt: 'Adicionar logotipo', en: 'Add logo', fr: 'Ajouter un logo', es: 'Añadir logotipo' },
+	'home_admin.image_hint': {
+		pt: 'PNG, JPEG, WebP ou SVG, até 400 KB. O arquivo sobe ao ser escolhido.',
+		en: 'PNG, JPEG, WebP or SVG, up to 400 KB. The file uploads when chosen.',
+		fr: "PNG, JPEG, WebP ou SVG, jusqu'à 400 Ko. Le fichier est envoyé dès qu'il est choisi.",
+		es: 'PNG, JPEG, WebP o SVG, hasta 400 KB. El archivo se sube al elegirlo.'
+	},
+	'home_admin.uploading': { pt: 'Enviando…', en: 'Uploading…', fr: 'Envoi…', es: 'Subiendo…' },
+	'home_admin.confirm_discard_desc': {
+		pt: 'A edição volta a ser a home publicada; o que foi salvo depois dela se perde.',
+		en: 'The edit goes back to the published home; what was saved since is lost.',
+		fr: "La modification revient à la page d'accueil publiée ; ce qui a été enregistré depuis est perdu.",
+		es: 'La edición vuelve a ser la portada publicada; lo guardado desde entonces se pierde.'
+	},
+	'home_admin.confirm_unpublish_desc': {
+		pt: 'A home volta a mostrar só o título. As alterações não salvas continuam na página.',
+		en: 'The home goes back to its title alone. Unsaved changes stay in the page.',
+		fr: "La page d'accueil ne montre plus que son titre. Les modifications non enregistrées restent dans la page.",
+		es: 'La portada vuelve a mostrar solo su título. Los cambios sin guardar siguen en la página.'
+	},
+	'home_admin.preview_banner': {
+		pt: 'Pré-visualização: a home como o visitante a verá ao publicar.',
+		en: 'Preview: the home as a visitor will see it once published.',
+		fr: "Aperçu : la page d'accueil telle que le visiteur la verra une fois publiée.",
+		es: 'Vista previa: la portada como la verá el visitante al publicarla.'
+	},
+	'home_admin.error.load': {
+		pt: 'Não foi possível carregar a home.',
+		en: 'Could not load the home.',
+		fr: "Impossible de charger la page d'accueil.",
+		es: 'No se pudo cargar la portada.'
+	},
+	'home_admin.error.save': {
+		pt: 'Não foi possível salvar a home.',
+		en: 'Could not save the home.',
+		fr: "Impossible d'enregistrer la page d'accueil.",
+		es: 'No se pudo guardar la portada.'
+	},
+	'home_admin.error.no_blocks': {
+		pt: 'Uma home sem blocos não se publica: para mostrar só o título, tire do ar.',
+		en: 'A home without blocks cannot be published: to show the title alone, unpublish it.',
+		fr: "Une page d'accueil sans bloc ne se publie pas : pour ne montrer que le titre, dépubliez-la.",
+		es: 'Una portada sin bloques no se publica: para mostrar solo el título, despublíquela.'
+	},
+	'home_admin.error.image': {
+		pt: 'O arquivo precisa ser PNG, JPEG, WebP ou SVG, até 400 KB.',
+		en: 'The file must be PNG, JPEG, WebP or SVG, up to 400 KB.',
+		fr: "Le fichier doit être en PNG, JPEG, WebP ou SVG, jusqu'à 400 Ko.",
+		es: 'El archivo debe ser PNG, JPEG, WebP o SVG, hasta 400 KB.'
+	},
+	// {0} = the most files a page keeps; publishing removes the ones no block uses
+	'home_admin.error.too_many_images': {
+		pt: 'A home já guarda {0} arquivos. Publique para apagar os que nenhum bloco usa.',
+		en: 'The home already keeps {0} files. Publish to delete the ones no block uses.',
+		fr: "La page d'accueil garde déjà {0} fichiers. Publiez pour supprimer ceux qu'aucun bloc n'utilise.",
+		es: 'La portada ya guarda {0} archivos. Publique para borrar los que ningún bloque usa.'
+	},
+	// {0} = the default locale's code: what a block needs there before saving
+	'home_admin.problem.text': {
+		pt: 'Um bloco de texto precisa do texto em {0}.',
+		en: 'A text block needs its text in {0}.',
+		fr: 'Un bloc de texte a besoin de son texte en {0}.',
+		es: 'Un bloque de texto necesita su texto en {0}.'
+	},
+	'home_admin.problem.image': {
+		pt: 'Um bloco de imagem precisa de um arquivo.',
+		en: 'An image block needs a file.',
+		fr: "Un bloc d'image a besoin d'un fichier.",
+		es: 'Un bloque de imagen necesita un archivo.'
+	},
+	'home_admin.problem.card_title': {
+		pt: 'Todo cartão precisa de título em {0}.',
+		en: 'Every card needs a title in {0}.',
+		fr: "Chaque carte a besoin d'un titre en {0}.",
+		es: 'Toda tarjeta necesita un título en {0}.'
+	},
+	'home_admin.problem.card_target': {
+		pt: 'Todo cartão precisa levar a um mapa, a uma jornada ou a um endereço https:// ou /.',
+		en: 'Every card must lead to a map, a journey, or an https:// or / address.',
+		fr: 'Chaque carte doit mener à une carte, à un parcours ou à une adresse https:// ou /.',
+		es: 'Toda tarjeta debe llevar a un mapa, a un recorrido o a una dirección https:// o /.'
+	},
+	'home_admin.problem.logo_image': {
+		pt: 'Todo logotipo precisa de um arquivo.',
+		en: 'Every logo needs a file.',
+		fr: "Chaque logo a besoin d'un fichier.",
+		es: 'Todo logotipo necesita un archivo.'
+	},
+	'home_admin.problem.logo_name': {
+		pt: 'Todo logotipo precisa de um nome: é o que o leitor de tela diz.',
+		en: 'Every logo needs a name: it is what screen readers say.',
+		fr: "Chaque logo a besoin d'un nom : c'est ce que disent les lecteurs d'écran.",
+		es: 'Todo logotipo necesita un nombre: es lo que dicen los lectores de pantalla.'
+	},
+	'home_admin.problem.logo_url': {
+		pt: 'O link de um logotipo começa com https://.',
+		en: "A logo's link starts with https://.",
+		fr: "Le lien d'un logo commence par https://.",
+		es: 'El enlace de un logotipo empieza con https://.'
 	}
 } as const satisfies Record<string, Record<LocaleCode, string>>;
 

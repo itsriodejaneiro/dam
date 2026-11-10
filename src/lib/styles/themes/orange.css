@@ -43,6 +43,9 @@
   --grid-line:     rgba(26,29,36,0.06);
   --tooltip-bg:    rgba(255, 255, 255, 0.92);
   --tooltip-border: rgba(26, 29, 36, 0.14);
+  /* a partner's logo sits on white in both modes; light mode outlines it */
+  --logo-tile:        #ffffff;
+  --logo-tile-border: var(--border);
 }
 
 [data-theme='orange'][data-mode='dark'] {
@@ -73,4 +76,6 @@
   --grid-line:     rgba(240,234,224,0.05);
   --tooltip-bg:    rgba(10, 8, 5, 0.82);
   --tooltip-border: rgba(240, 234, 224, 0.14);
+  --logo-tile:        #ffffff;
+  --logo-tile-border: transparent;
 }

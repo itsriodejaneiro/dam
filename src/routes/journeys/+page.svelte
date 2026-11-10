@@ -22,10 +22,10 @@
 
 	<section class="journeys">
 		{#each data.journeys as { slug, published: journey } (slug)}
-			<a href="/journeys/{slug}" class="journey-card">
+			<a href="/journeys/{slug}" class="link-card">
 				<h2>{t(journey.title, code)}</h2>
 				<p>{t(journey.description, code)}</p>
-				<span class="journey-phases">
+				<span class="link-card-meta">
 					{m('journeys.phases_n', journey.phases.length)} ·
 					{m('journeys.steps_n', countedSteps(journey.steps))}
 				</span>
@@ -85,38 +85,5 @@
 		font-size: 0.85rem;
 		border: 1px dashed var(--border);
 		border-radius: 3px;
-	}
-	.journey-card {
-		display: block;
-		padding: 1.8rem 2rem;
-		background: var(--bg-elevated);
-		border: 1px solid var(--border);
-		border-radius: 4px;
-		text-decoration: none;
-		color: inherit;
-		transition: border-color 0.2s, box-shadow 0.2s;
-	}
-	.journey-card:hover {
-		border-color: var(--accent);
-		box-shadow: 0 2px 16px color-mix(in srgb, var(--accent) 10%, transparent);
-	}
-	.journey-phases {
-		display: block;
-		margin-top: 1rem;
-		font-family: 'Fira Mono', monospace;
-		font-size: 0.65rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--text-soft);
-	}
-	.journey-card h2 {
-		font-size: 1.3rem;
-		font-weight: 600;
-		margin: 0 0 0.5rem;
-	}
-	.journey-card p {
-		font-size: 0.88rem;
-		color: var(--text-muted);
-		line-height: 1.5;
 	}
 </style>

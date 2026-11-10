@@ -191,17 +191,3 @@ export function fromPublished(copy: PublishedJourney): {
 	const { steps, ...journey } = toPublished(copy, copy.steps);
 	return { journey, steps: steps.map((step, i) => ({ ...step, order: i + 1 })) };
 }
-
-/** JSON with each object's keys sorted, the order PocketBase stores a JSON field in. */
-function canonical(value: unknown): string {
-	return JSON.stringify(value, (_key, v: unknown) =>
-		v && typeof v === 'object' && !Array.isArray(v)
-			? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
-			: v
-	);
-}
-
-/** True when two copies say the same thing, whatever order their keys come in. */
-export function samePublished(a: PublishedJourney, b: PublishedJourney): boolean {
-	return canonical(a) === canonical(b);
-}

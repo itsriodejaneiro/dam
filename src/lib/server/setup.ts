@@ -3,21 +3,30 @@
    superuser; with no env dependency, it serves both the CLI
    (scripts/setup-collections.ts) and the web endpoint (/setup).
 
-   - setupCollections(pb): creates/updates every collection and the settings record,
-     and turns on the rate limit of the auth routes (idempotent).
+   - setupCollections(pb): creates/updates every collection, the settings record and the
+     home page record, and turns on the rate limit of the auth routes (idempotent).
    - seedBaseData(pb, locales): fills a new project with the base categories (node_types),
-     the main map and the example (seed-example.ts), in the deploy's locales. The
-     node_type slug comes from the label in the default locale (locales[0]).
+     the main map, the example and the home (seed-example.ts), in the deploy's locales.
+     The node_type slug comes from the label in the default locale (locales[0]).
    - isConfigured(pb): true if the schema already exists. */
 
 import type PocketBase from 'pocketbase';
 import { LOCALE_CODES, type LocaleCode } from '../i18n/messages';
 import { laneCenter } from '../journey';
+import { HOME, IMAGES_MAX } from '../page';
 import { ACCOUNT_ROLES } from '../roles';
 import { DEFAULT_SETTINGS, LOGO_MAX_BYTES, LOGO_TYPES } from '../settings';
+import type { Block, Page } from '../types/page';
 import { PACKS } from '../theme';
 import { NoStepsError, publishJourney } from './journeys';
-import { EXAMPLE_EDGES, EXAMPLE_JOURNEY, EXAMPLE_NODES, type ExampleNodeKey } from './seed-example';
+import { pageBySlug, publishPage } from './pages';
+import {
+	EXAMPLE_EDGES,
+	EXAMPLE_HOME,
+	EXAMPLE_JOURNEY,
+	EXAMPLE_NODES,
+	type ExampleNodeKey
+} from './seed-example';
 
 // ─────────────────────────────────────────────────────────
 // SCHEMA (collections)
@@ -44,10 +53,10 @@ const EDITORIAL_RULES = {
 	deleteRule: ADMIN_ONLY
 } as const;
 
-/* A journey and its steps are the edit, read by an admin alone. The visitor reads the copy,
-   `published`, through the site's server (server/journeys.ts): the API is always by token,
-   and nothing of a journey goes to the anonymous REST. */
-const JOURNEY_RULES = { ...EDITORIAL_RULES, listRule: ADMIN_ONLY, viewRule: ADMIN_ONLY } as const;
+/* A journey and its steps, and a page, are an edit read by an admin alone. The visitor reads
+   the copy, `published`, through the site's server (server/journeys.ts, server/pages.ts):
+   the API is always by token, and no edit goes to the anonymous REST. */
+const EDIT_RULES = { ...EDITORIAL_RULES, listRule: ADMIN_ONLY, viewRule: ADMIN_ONLY } as const;
 
 /** Creates the collection if missing; otherwise merges fields and indexes. Idempotent. */
 async function upsertCollection(
@@ -326,7 +335,7 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	const journeysId = await up('journeys', {
 		name: 'journeys',
 		type: 'base',
-		...JOURNEY_RULES,
+		...EDIT_RULES,
 		fields: [
 			...AUTODATE_FIELDS,
 			{ name: 'slug', type: 'text', required: true },
@@ -344,7 +353,7 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	await up('journey_steps', {
 		name: 'journey_steps',
 		type: 'base',
-		...JOURNEY_RULES,
+		...EDIT_RULES,
 		fields: [
 			...AUTODATE_FIELDS,
 			{ name: 'journey', type: 'relation', required: true, collectionId: journeysId, cascadeDelete: true, maxSelect: 1 },
@@ -360,6 +369,32 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 		indexes: ['CREATE INDEX idx_journey_steps_journey ON journey_steps (journey)']
 	});
 	if (flagged) await publishFlagged(pb, flagged, log);
+
+	// A page is a record: the home is the one the app has. Its files are the blocks'
+	// pictures, under the logo's limits; anyone with a file's address reads it.
+	await up('pages', {
+		name: 'pages',
+		type: 'base',
+		...EDIT_RULES,
+		fields: [
+			...AUTODATE_FIELDS,
+			{ name: 'slug', type: 'text', required: true },
+			{ name: 'blocks', type: 'json', maxSize: 2000000 },
+			{ name: 'published', type: 'json', maxSize: 2000000 },
+			{
+				name: 'images',
+				type: 'file',
+				maxSelect: IMAGES_MAX,
+				maxSize: LOGO_MAX_BYTES,
+				mimeTypes: LOGO_TYPES
+			}
+		],
+		indexes: ['CREATE UNIQUE INDEX idx_pages_slug ON pages (slug)']
+	});
+	if (!(await pageBySlug(pb, HOME))) {
+		await pb.collection('pages').create({ slug: HOME, blocks: [], published: null });
+		log('  + page: home');
+	}
 }
 
 /**
@@ -559,18 +594,21 @@ export async function createMainMap(
 	return id;
 }
 
+/** A text of the example in the deploy's locales. */
+const inLocales = (byLocale: Record<LocaleCode, string>, locales: string[]) =>
+	Object.fromEntries(locales.map((loc) => [loc, pickLabel(byLocale, loc)!]));
+
 /** Writes the example: the nodes in their place on the map, the connections, and the
     journey through them. The journey is published last, once it is whole: its copy is
-    the edit the seed wrote. */
+    the edit the seed wrote. Returns the journey's id. */
 async function seedExample(
 	pb: PocketBase,
 	mapId: string,
 	nodeTypeIds: string[],
 	locales: string[],
 	log: Logger
-): Promise<void> {
-	const inDeploy = (byLocale: Record<LocaleCode, string>) =>
-		Object.fromEntries(locales.map((loc) => [loc, pickLabel(byLocale, loc)!]));
+): Promise<string> {
+	const inDeploy = (byLocale: Record<LocaleCode, string>) => inLocales(byLocale, locales);
 
 	const nodeIds = new Map<ExampleNodeKey, string>();
 	for (const [i, example] of EXAMPLE_NODES.entries()) {
@@ -645,14 +683,65 @@ async function seedExample(
 	});
 	await publishJourney(pb, journey.id);
 	log(`  + journey: ${slug}`);
+	return journey.id;
+}
+
+/** True once the home holds an edit or a copy: a project's own home is never seeded over. */
+const homeWritten = (home: Page | null): boolean =>
+	(Array.isArray(home?.blocks) && home.blocks.length > 0) || home?.published != null;
+
+/** Writes the home of the example, published: a text, a picture and cards to the main map
+    and to the journey. The picture goes first, since a block names its file. */
+async function seedHome(
+	pb: PocketBase,
+	ids: { map: string; journey: string },
+	locales: string[],
+	log: Logger
+): Promise<void> {
+	const home = await pageBySlug(pb, HOME);
+	if (!home) return;
+	const inDeploy = (byLocale: Record<LocaleCode, string>) => inLocales(byLocale, locales);
+	const { text, image, cards } = EXAMPLE_HOME;
+
+	const file = new File([image.svg], image.name, { type: 'image/svg+xml' });
+	const { images } = await pb.collection('pages').update<Page>(home.id, { images: [file] });
+	const blocks: Block[] = [
+		{ id: 'about', type: 'text', body: inDeploy(text) },
+		{
+			id: 'picture',
+			type: 'image',
+			image: images[0],
+			alt: inDeploy(image.alt),
+			caption: inDeploy(image.caption)
+		},
+		{
+			id: 'start',
+			type: 'cards',
+			cards: [
+				{
+					title: inDeploy(cards.map.title),
+					text: inDeploy(cards.map.text),
+					target: { kind: 'map', id: ids.map }
+				},
+				{
+					title: inDeploy(cards.journey.title),
+					text: inDeploy(cards.journey.text),
+					target: { kind: 'journey', id: ids.journey }
+				}
+			]
+		}
+	];
+	await pb.collection('pages').update(home.id, { blocks });
+	await publishPage(pb, HOME);
+	log('  + home');
 }
 
 /**
- * Seeds a new project: categories (node_types + translations), the main map and the
- * example. Writes nothing once the project has a map, a node or a journey. The main map
- * cannot be removed from the app, so a seeded project always has one and what its admin
- * deleted stays deleted. The node_type slug comes from the label in the default locale
- * (locales[0]); every translation covers the deploy's locales.
+ * Seeds a new project: categories (node_types + translations), the main map, the example
+ * and the home. Writes nothing once the project has a map, a node, a journey or a home with
+ * blocks or a copy. The main map cannot be removed from the app, so a seeded project always
+ * has one and what its admin deleted stays deleted. The node_type slug comes from the label
+ * in the default locale (locales[0]); every translation covers the deploy's locales.
  */
 export async function seedBaseData(
 	pb: PocketBase,
@@ -664,6 +753,10 @@ export async function seedBaseData(
 			log('  ~ base data: this project already has its own');
 			return;
 		}
+	}
+	if (homeWritten(await pageBySlug(pb, HOME))) {
+		log('  ~ base data: this project already has its own home');
+		return;
 	}
 
 	const defaultLocale = locales[0] ?? 'en';
@@ -703,11 +796,13 @@ export async function seedBaseData(
 	}
 
 	const mapId = await createMainMap(pb, locales, log);
-	await seedExample(pb, mapId, nodeTypeIds, locales, log);
+	const journeyId = await seedExample(pb, mapId, nodeTypeIds, locales, log);
+	await seedHome(pb, { map: mapId, journey: journeyId }, locales, log);
 }
 
 /** Deletion order: dependants before parents (avoids relation errors). */
 const RESET_ORDER = [
+	'pages',
 	'journey_steps',
 	'journeys',
 	'node_type_translations',

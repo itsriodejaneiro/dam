@@ -2,7 +2,8 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph } from '$lib/components';
+	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph, PageBlocks, PublishBar } from '$lib/components';
+	import type { ResolvedBlock } from '$lib/types/page';
 	import type { DocumentState, GraphHighlight, PhaseTransition, JourneyDocument, VisEdge, VisNode } from '$lib/types/journey';
 	import { fullCamera, laneCenter } from '$lib/journey';
 	import { auth, requireAdmin, type NodeType } from '$lib/services';
@@ -142,6 +143,49 @@
 	};
 
 	let rteContent = $state(m('ds.editor_content'));
+
+	// PageBlocks mock: a text, two cards and three logos, the marks drawn here as data: URIs.
+	const mockMark = (color: string, shape: string) =>
+		`data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">${shape.replaceAll('C', color)}</svg>`)}`;
+	const mockBlocks: ResolvedBlock[] = [
+		{
+			id: 'text',
+			type: 'text',
+			body: {
+				pt: '<h2>Quem cuida do quê</h2><p>Cada ponto do mapa é uma entidade, e cada linha uma dependência.</p>',
+				en: '<h2>Who looks after what</h2><p>Each point on the map is an entity, and each line a dependency.</p>',
+				fr: '<h2>Qui s’occupe de quoi</h2><p>Chaque point de la carte est une entité, et chaque ligne une dépendance.</p>',
+				es: '<h2>Quién se ocupa de qué</h2><p>Cada punto del mapa es una entidad, y cada línea una dependencia.</p>'
+			}
+		},
+		{
+			id: 'cards',
+			type: 'cards',
+			cards: [
+				{
+					title: { pt: 'Explore o mapa', en: 'Explore the map', fr: 'Explorez la carte', es: 'Explore el mapa' },
+					text: { pt: 'Entidades e conexões.', en: 'Entities and connections.', fr: 'Entités et connexions.', es: 'Entidades y conexiones.' },
+					href: '#',
+					external: false
+				},
+				{
+					title: { pt: 'Siga uma jornada', en: 'Follow a journey', fr: 'Suivez un parcours', es: 'Siga un recorrido' },
+					text: { pt: 'Passo a passo.', en: 'Step by step.', fr: 'Pas à pas.', es: 'Paso a paso.' },
+					href: '#',
+					external: false
+				}
+			]
+		},
+		{
+			id: 'logos',
+			type: 'logos',
+			logos: [
+				{ src: mockMark('#1f4e79', '<polygon points="10,52 35,8 60,52" fill="C"/><rect x="70" y="22" width="40" height="16" fill="C"/>'), name: 'Triangle', url: '' },
+				{ src: mockMark('#b5462a', '<circle cx="60" cy="30" r="22" fill="none" stroke="C" stroke-width="8"/>'), name: 'Ring', url: '' },
+				{ src: mockMark('#e8e2d0', '<rect x="20" y="10" width="80" height="40" rx="8" fill="C"/>'), name: 'Pale', url: '' }
+			]
+		}
+	];
 </script>
 
 {#if auth.isAdmin}
@@ -332,6 +376,32 @@
 						highlight={mockHighlight}
 					/>
 				</div>
+			</div>
+
+			<div class="comp-card span-2">
+				<h3>PublishBar</h3>
+				<PublishBar
+					published
+					viewHref="#"
+					dirty={false}
+					changed
+					justSaved={false}
+					error=""
+					saving={false}
+					acting={null}
+					discardDescription={m('home_admin.confirm_discard_desc')}
+					unpublishDescription={m('home_admin.confirm_unpublish_desc')}
+					onPreview={() => {}}
+					onSave={() => {}}
+					onPublish={() => {}}
+					onDiscard={() => {}}
+					onUnpublish={() => {}}
+				/>
+			</div>
+
+			<div class="comp-card span-2">
+				<h3>PageBlocks · LogoGrid</h3>
+				<PageBlocks blocks={mockBlocks} />
 			</div>
 		</div>
 	</section>

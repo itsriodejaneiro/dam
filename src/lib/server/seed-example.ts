@@ -1,8 +1,8 @@
 /* The example a new project starts from: a fictional digital infrastructure with one node
    per base category, the connections among them and a journey through them, in every
-   supported locale. A person learns the shape of a node, a connection and a journey by
-   editing it, so it names no real place or organization. seedBaseData (setup.ts) writes
-   it in the deploy's locales. Relative imports only: the CLI runs outside Vite. */
+   supported locale, and the home that presents them. A person learns the shape of a node,
+   a connection, a journey and a home by editing it, so it names no real place or
+   organization. seedBaseData (setup.ts) writes it in the deploy's locales. Relative imports only: the CLI runs outside Vite. */
 
 import type { LocaleCode } from '../i18n/messages';
 
@@ -554,4 +554,89 @@ export const EXAMPLE_JOURNEY = {
 	phases,
 	documents,
 	steps
+};
+
+/** Where each example node sits on the home's picture, in its category's colour. */
+const PICTURE_NODES: Record<ExampleNodeKey, [x: number, y: number, color: string]> = {
+	agency: [150, 130, '#e8743b'],
+	service: [380, 90, '#e6b422'],
+	domain: [560, 210, '#9ccc2e'],
+	hosting: [730, 110, '#d2455a'],
+	environment: [890, 240, '#3fb68b'],
+	repository: [1050, 130, '#2fa3a8'],
+	credential: [900, 390, '#3b82d6'],
+	person: [430, 370, '#5b5fc7']
+};
+
+/** The home's picture: the example's nodes and connections, drawn plain. */
+function examplePicture(): string {
+	const at = (key: ExampleNodeKey) => PICTURE_NODES[key];
+	const lines = EXAMPLE_EDGES.map(([a, b]) => {
+		const [x1, y1] = at(a);
+		const [x2, y2] = at(b);
+		return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+	}).join('');
+	const dots = Object.values(PICTURE_NODES)
+		.map(([x, y, color]) => `<circle cx="${x}" cy="${y}" r="22" fill="${color}"/>`)
+		.join('');
+	return (
+		'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="1200" height="480">' +
+		`<g stroke="#8b8599" stroke-width="3" stroke-linecap="round">${lines}</g>${dots}</svg>`
+	);
+}
+
+/** The home of the example: a text on what the map is, a picture and two cards. */
+export const EXAMPLE_HOME = {
+	text: {
+		pt: '<h2>O que este mapa mostra</h2><p>Por trás de um serviço público digital há uma cadeia: o órgão que responde por ele, os domínios e a hospedagem onde ele roda, o código, as credenciais e as pessoas que guardam as chaves. Cada ponto do mapa é uma entidade, e cada linha, uma dependência.</p><p>Esta página é um exemplo. Troque os textos, a imagem e os cartões em Home, no admin.</p>',
+		en: '<h2>What this map shows</h2><p>Behind a digital public service there is a chain: the agency that answers for it, the domains and hosting it runs on, the code, the credentials and the people who hold the keys. Each point on the map is an entity, and each line a dependency.</p><p>This page is an example. Change its texts, picture and cards under Home, in the admin.</p>',
+		fr: "<h2>Ce que montre cette carte</h2><p>Derrière un service public numérique, il y a une chaîne : l'organisme qui en répond, les domaines et l'hébergement où il tourne, le code, les identifiants et les personnes qui détiennent les clés. Chaque point de la carte est une entité, et chaque ligne une dépendance.</p><p>Cette page est un exemple. Changez ses textes, son image et ses cartes dans Page d'accueil, dans l'administration.</p>",
+		es: '<h2>Qué muestra este mapa</h2><p>Detrás de un servicio público digital hay una cadena: el organismo que responde por él, los dominios y el alojamiento donde funciona, el código, las credenciales y las personas que guardan las llaves. Cada punto del mapa es una entidad, y cada línea, una dependencia.</p><p>Esta página es un ejemplo. Cambie sus textos, su imagen y sus tarjetas en Portada, en la administración.</p>'
+	} satisfies Translated,
+	image: {
+		name: 'example-map.svg',
+		svg: examplePicture(),
+		alt: {
+			pt: 'Oito pontos coloridos ligados por linhas cinzentas',
+			en: 'Eight coloured points linked by grey lines',
+			fr: 'Huit points colorés reliés par des lignes grises',
+			es: 'Ocho puntos de colores unidos por líneas grises'
+		} satisfies Translated,
+		caption: {
+			pt: 'As entidades do exemplo e as conexões entre elas, uma cor por categoria.',
+			en: 'The example entities and the connections between them, one colour per category.',
+			fr: "Les entités de l'exemple et les connexions entre elles, une couleur par catégorie.",
+			es: 'Las entidades del ejemplo y las conexiones entre ellas, un color por categoría.'
+		} satisfies Translated
+	},
+	cards: {
+		map: {
+			title: {
+				pt: 'Explore o mapa',
+				en: 'Explore the map',
+				fr: 'Explorer la carte',
+				es: 'Explore el mapa'
+			} satisfies Translated,
+			text: {
+				pt: 'Todas as entidades e as conexões entre elas.',
+				en: 'Every entity and the connections between them.',
+				fr: 'Toutes les entités et les connexions entre elles.',
+				es: 'Todas las entidades y las conexiones entre ellas.'
+			} satisfies Translated
+		},
+		journey: {
+			title: {
+				pt: 'Siga uma jornada',
+				en: 'Follow a journey',
+				fr: 'Suivre un parcours',
+				es: 'Siga un recorrido'
+			} satisfies Translated,
+			text: {
+				pt: 'Do órgão à pessoa que guarda as chaves, passo a passo.',
+				en: 'From the agency to the person who holds the keys, step by step.',
+				fr: "De l'organisme à la personne qui détient les clés, pas à pas.",
+				es: 'Del organismo a la persona que guarda las llaves, paso a paso.'
+			} satisfies Translated
+		}
+	}
 };

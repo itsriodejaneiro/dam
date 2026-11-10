@@ -69,6 +69,9 @@
 			<a href="/admin/categories" class:active={page.url.pathname === '/admin/categories'}>
 				{m('nav.categories')}
 			</a>
+			<a href="/admin/home" class:active={page.url.pathname.startsWith('/admin/home')}>
+				{m('nav.home')}
+			</a>
 			<a href="/admin/settings" class:active={page.url.pathname === '/admin/settings'}>
 				{m('nav.settings')}
 			</a>
@@ -133,6 +136,9 @@
 					</a>
 					<a href="/admin/categories" class:active={page.url.pathname === '/admin/categories'}>
 						{m('nav.categories')}
+					</a>
+					<a href="/admin/home" class:active={page.url.pathname.startsWith('/admin/home')}>
+						{m('nav.home')}
 					</a>
 					<a href="/admin/settings" class:active={page.url.pathname === '/admin/settings'}>
 						{m('nav.settings')}
@@ -312,7 +318,7 @@
 	}
 
 	/* The signed-in nav is long: tighter first, the drawer when even that does not fit. */
-	@media (max-width: 1520px) {
+	@media (max-width: 1620px) {
 		.site {
 			padding-inline: 1.5rem;
 			gap: 1rem;
@@ -325,7 +331,7 @@
 		}
 	}
 
-	@media (max-width: 1340px) {
+	@media (max-width: 1435px) {
 		.site {
 			grid-template-columns: 1fr auto;
 			padding: 0.9rem 1.2rem;

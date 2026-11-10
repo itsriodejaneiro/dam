@@ -1,7 +1,7 @@
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = ({ params }) => ({
-	titleKey: 'journeys_admin.preview',
+	titleKey: 'publish.preview',
 	subtitleKey: 'nav.journeys',
 	id: params.id
 });

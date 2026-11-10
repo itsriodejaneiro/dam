@@ -101,10 +101,22 @@ test('every screen opens and works with no CSP violation', async ({ page }) => {
 		'/admin/settings',
 		'/admin/accounts',
 		'/admin/journeys',
-		`/admin/journeys/${journey.id}/preview`
+		`/admin/journeys/${journey.id}/preview`,
+		'/admin/home/preview'
 	]) {
 		await page.goto(path);
 	}
+
+	// the home's editor: the type menu, the language filter, a heading, then the question
+	// on leaving with the change unsaved
+	await page.goto('/admin/home');
+	await page.getByRole('button', { name: 'Add block', exact: true }).click();
+	await page.getByRole('group', { name: 'Languages shown' }).getByRole('button', { name: 'FR' }).click();
+	await page.locator('.ProseMirror').first().click();
+	await page.getByRole('button', { name: 'Subheading' }).first().click();
+	await page.getByRole('link', { name: 'entities', exact: true }).click();
+	await page.getByRole('button', { name: 'Leave' }).click();
+	await page.waitForURL('**/admin/entities');
 
 	// the editor frames each step on the graph, highlights nodes and edits the step's text
 	await page.goto(`/admin/journeys/${journey.id}`);
