@@ -30,10 +30,10 @@
 		onCancel
 	}: Props = $props();
 
+	// Dialog calls onCancel as it closes.
 	function cancel() {
 		if (loading) return;
 		open = false;
-		onCancel?.();
 	}
 
 	async function confirm() {

@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import { Editor } from '@tiptap/core';
-	import StarterKit from '@tiptap/starter-kit';
+	import { onMount } from 'svelte';
+	import type { Editor } from '@tiptap/core';
 	import {
 		Bold,
 		Heading2,
@@ -26,43 +25,50 @@
 	let editor: Editor | null = null;
 	let tick = $state(0);
 
-	$effect(() => {
-		if (!editorEl || editor) return;
-		editor = new Editor({
-			element: editorEl,
-			extensions: [
-				StarterKit.configure({
-					// sanitize.ts lets h2 and h3 through, and nothing else of the kind
-					heading: headings ? { levels: [2, 3] } : false,
-					strike: false,
-					code: false,
-					codeBlock: false,
-					blockquote: false,
-					horizontalRule: false,
-					link: { openOnClick: false, autolink: true, linkOnPaste: true }
-				})
-			],
-			content,
-			// The page's CSP refuses the style element TipTap would inject; its rules are below.
-			injectCSS: false,
-			editorProps: {
-				attributes: {
-					class: 'rte-editor-area',
-					'data-placeholder': placeholder
-				}
-			},
-			onUpdate: ({ editor }) => {
-				content = editor.getHTML();
-			},
-			onTransaction: () => {
+	// TipTap loads with the first editor on screen: this component sits in the components
+	// chunk that every page loads, the visitor's included.
+	onMount(() => {
+		let destroyed = false;
+		Promise.all([import('@tiptap/core'), import('@tiptap/starter-kit')]).then(
+			([{ Editor }, { default: StarterKit }]) => {
+				if (destroyed || !editorEl) return;
+				editor = new Editor({
+					element: editorEl,
+					extensions: [
+						StarterKit.configure({
+							// sanitize.ts lets h2 and h3 through, and nothing else of the kind
+							heading: headings ? { levels: [2, 3] } : false,
+							strike: false,
+							code: false,
+							codeBlock: false,
+							blockquote: false,
+							horizontalRule: false,
+							link: { openOnClick: false, autolink: true, linkOnPaste: true }
+						})
+					],
+					content,
+					// The page's CSP refuses the style element TipTap would inject; its rules are below.
+					injectCSS: false,
+					editorProps: {
+						attributes: {
+							class: 'rte-editor-area',
+							'data-placeholder': placeholder
+						}
+					},
+					onUpdate: ({ editor }) => {
+						content = editor.getHTML();
+					},
+					onTransaction: () => {
+						tick++;
+					}
+				});
 				tick++;
 			}
-		});
-		tick++;
-	});
-
-	onDestroy(() => {
-		editor?.destroy();
+		);
+		return () => {
+			destroyed = true;
+			editor?.destroy();
+		};
 	});
 
 	function isActive(name: string, attrs?: Record<string, unknown>): boolean {

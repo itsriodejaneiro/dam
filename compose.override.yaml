@@ -7,6 +7,12 @@ services:
       - image
 
   dam-pocketbase:
+    # A local image, never pulled, shared by every checkout with the same build files, so a
+    # new worktree builds nothing. `bun run dev` tags it with PocketBase's version and a hash
+    # of the Dockerfile and the entrypoint: a change to any of the three is a tag no image
+    # has yet, which `up` builds, and none works offline. By hand: `up -d --build`.
+    image: dam-pocketbase:${PB_IMAGE_TAG:-dev}
+    pull_policy: never
     # A forgotten container stays down when the Docker engine comes back, and frees its port.
     restart: "no"
     # Each checkout publishes the port of its own .env, on loopback only.

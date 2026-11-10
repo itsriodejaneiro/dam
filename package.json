@@ -36,7 +36,6 @@
 	"dependencies": {
 		"@lucide/svelte": "^1.14.0",
 		"@tiptap/core": "^3.22.5",
-		"@tiptap/extension-link": "^3.22.5",
 		"@tiptap/pm": "^3.22.5",
 		"@tiptap/starter-kit": "^3.22.5",
 		"d3-drag": "^3.0.0",
