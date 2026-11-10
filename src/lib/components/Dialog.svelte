@@ -44,12 +44,15 @@
 
 	function close() {
 		open = false;
-		onclose?.();
 	}
 
-	// `close` arrives a task after `dialog.close()`: a dialog reopened in between is not closing.
+	// The one path to onclose, whatever closes the dialog (the X, the backdrop, Escape, the
+	// parent): the effect closes the element, and its `close` event arrives here a task
+	// later, so a dialog reopened in between is not closing.
 	function onNativeClose() {
-		if (!dialogEl?.open) close();
+		if (dialogEl?.open) return;
+		open = false;
+		onclose?.();
 	}
 </script>
 
