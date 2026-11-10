@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { pushState } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Pencil, Plus, X } from '@lucide/svelte';
 	import {
@@ -157,9 +158,10 @@
 		if ((n?.id ?? null) === (selected?.id ?? null)) return;
 		selected = n;
 		const search = n ? `?node=${encodeURIComponent(n.id)}` : '';
-		history.pushState({}, '', `${location.pathname}${search}${location.hash}`);
+		pushState(`${location.pathname}${search}${location.hash}`, {});
 	}
 
+	// `location`, not `page.url`: a shallow entry keeps page.url at the address the page loaded.
 	function syncSelectedFromUrl() {
 		const id = new URLSearchParams(location.search).get('node');
 		const found = id ? (visNodes.find((n) => n.id === id) ?? null) : null;
