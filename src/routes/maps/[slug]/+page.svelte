@@ -788,21 +788,23 @@
 	</section>
 </main>
 
-<NodeDialog
-	bind:open={nodeDialogOpen}
-	{types}
-	editing={editingNode}
-	onSaved={onNodeSaved}
-	availableMaps={allMaps}
-	defaultMapId={currentMapId}
-/>
-<EdgeDialog
-	bind:open={edgeDialogOpen}
-	nodes={rawNodes}
-	{types}
-	defaultSource={defaultEdgeSource}
-	onSaved={onEdgeSaved}
-/>
+{#if auth.isAdmin}
+	<NodeDialog
+		bind:open={nodeDialogOpen}
+		{types}
+		editing={editingNode}
+		onSaved={onNodeSaved}
+		availableMaps={allMaps}
+		defaultMapId={currentMapId}
+	/>
+	<EdgeDialog
+		bind:open={edgeDialogOpen}
+		nodes={rawNodes}
+		{types}
+		defaultSource={defaultEdgeSource}
+		onSaved={onEdgeSaved}
+	/>
+{/if}
 
 <style>
 	main {
