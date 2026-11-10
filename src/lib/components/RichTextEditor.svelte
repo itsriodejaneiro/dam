@@ -2,7 +2,6 @@
 	import { onDestroy } from 'svelte';
 	import { Editor } from '@tiptap/core';
 	import StarterKit from '@tiptap/starter-kit';
-	import Link from '@tiptap/extension-link';
 	import { Bold, Italic, Link as LinkIcon, List, ListOrdered } from '@lucide/svelte';
 	import { m } from '$lib/i18n';
 
@@ -28,9 +27,9 @@
 					code: false,
 					codeBlock: false,
 					blockquote: false,
-					horizontalRule: false
-				}),
-				Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true })
+					horizontalRule: false,
+					link: { openOnClick: false, autolink: true, linkOnPaste: true }
+				})
 			],
 			content,
 			// The page's CSP refuses the style element TipTap would inject; its rules are below.
