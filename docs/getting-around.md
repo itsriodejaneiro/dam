@@ -1,6 +1,6 @@
 # Getting around
 
-The home page, at `/`, names the deployment and what it maps. The header is the same on every page.
+The home page, at `/`, names the deployment and what it maps, with the texts, cards and logos the deployment writes under it ([The home page](./home.md)). The header is the same on every page.
 
 ![The home page of a deployment](/screens/getting-around-1.png)
 
@@ -33,6 +33,7 @@ The header adds the editing pages, the **log out** button and a **⋮** menu.
 | **maps** | [Maps](./maps.md) |
 | **journeys** | [Writing a journey](./writing-a-journey.md) |
 | **categories** | [Categories](./categories.md) |
+| **home** | [The home page](./home.md) |
 | **settings** | [Configure your deployment](./configure.md) |
 | **accounts** | [Accounts](./accounts.md) |
 | **⋮** | [Design system](./design-system.md) and, for a superuser, [Setup](./install.md#start-over) |

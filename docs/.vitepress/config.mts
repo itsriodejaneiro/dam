@@ -39,7 +39,8 @@ export default defineConfig({
 				items: [
 					{ text: 'Introduction', link: '/introduction' },
 					{ text: 'Install', link: '/install' },
-					{ text: 'Configure your deployment', link: '/configure' }
+					{ text: 'Configure your deployment', link: '/configure' },
+					{ text: 'The home page', link: '/home' }
 				]
 			},
 			{
