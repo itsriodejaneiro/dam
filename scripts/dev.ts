@@ -44,7 +44,9 @@ const APP_PORT = Number(new URL(APP_URL).port) || 5173;
 
 // compose.yaml requires ORIGIN on every command, `logs` included, and a checkout's .env may lack it.
 if (!process.env.ORIGIN) {
-	appendFileSync(ENV, `ORIGIN=${APP_URL}\n`);
+	// A .env saved without a final newline would take ORIGIN into its last line.
+	const text = readFileSync(ENV, 'utf8');
+	appendFileSync(ENV, `${text && !text.endsWith('\n') ? '\n' : ''}ORIGIN=${APP_URL}\n`);
 	process.env.ORIGIN = APP_URL;
 	console.log('✓ ORIGIN added to .env');
 }
