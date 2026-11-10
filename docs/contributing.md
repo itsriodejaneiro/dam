@@ -11,6 +11,7 @@ Open a pull request against `main`. A change that alters a screen also changes t
 - The PocketBase schema is defined once, in `src/lib/server/setup.ts`.
 - Colors come from tokens, as in `var(--accent)`. See [Design system](./design-system.md).
 - Nothing from one country enters the code: a deployment is [configuration and content](./configure.md).
+- Every page carries a Content-Security-Policy (`kit.csp` in `svelte.config.js`). An inline script goes in `src/app.html` with `nonce="%sveltekit.nonce%"`; a component creates no `<style>` element, and a computed style goes in a `style` attribute. With the stack up, `bun run e2e:security` checks the headers and opens every screen looking for a violation; `APP_URL=… bun run e2e:security` runs it against a production build, the only one that enforces `style-src`.
 
 ## Where the manual lives
 

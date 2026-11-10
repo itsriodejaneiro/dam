@@ -33,6 +33,8 @@
 				Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true })
 			],
 			content,
+			// The page's CSP refuses the style element TipTap would inject; its rules are below.
+			injectCSS: false,
 			editorProps: {
 				attributes: {
 					class: 'rte-editor-area',
@@ -175,6 +177,58 @@
 		min-height: 9rem;
 		font-size: 0.92rem;
 		line-height: 1.55;
+	}
+
+	/* ProseMirror's own rules, which TipTap injects by default (@tiptap/core's style.ts). */
+	.surface :global(.ProseMirror) {
+		position: relative;
+		word-wrap: break-word;
+		white-space: pre-wrap;
+		white-space: break-spaces;
+		font-variant-ligatures: none;
+		font-feature-settings: 'liga' 0;
+	}
+	.surface :global(.ProseMirror [contenteditable='false']) {
+		white-space: normal;
+	}
+	.surface :global(.ProseMirror [contenteditable='false'] [contenteditable='true']) {
+		white-space: pre-wrap;
+	}
+	.surface :global(img.ProseMirror-separator) {
+		display: inline !important;
+		border: none !important;
+		margin: 0 !important;
+		width: 0 !important;
+		height: 0 !important;
+	}
+	.surface :global(.ProseMirror-gapcursor) {
+		display: none;
+		pointer-events: none;
+		position: absolute;
+		margin: 0;
+	}
+	.surface :global(.ProseMirror-gapcursor::after) {
+		content: '';
+		display: block;
+		position: absolute;
+		top: -2px;
+		width: 20px;
+		border-top: 1px solid var(--text);
+		animation: gapcursor-blink 1.1s steps(2, start) infinite;
+	}
+	@keyframes gapcursor-blink {
+		to {
+			visibility: hidden;
+		}
+	}
+	.surface :global(.ProseMirror-focused .ProseMirror-gapcursor) {
+		display: block;
+	}
+	.surface :global(.ProseMirror-hideselection *::selection) {
+		background: transparent;
+	}
+	.surface :global(.ProseMirror-hideselection *) {
+		caret-color: transparent;
 	}
 
 	.surface :global(.rte-editor-area) {

@@ -12,7 +12,8 @@
 		"docs:dev": "vitepress dev docs",
 		"docs:build": "vitepress build docs",
 		"docs:preview": "vitepress preview docs",
-		"shots": "playwright test",
+		"shots": "playwright test --project=screens",
+		"e2e:security": "playwright test --project=security",
 		"db:setup": "bun run scripts/setup-collections.ts",
 		"db:reset": "bun run scripts/reset-db.ts",
 		"db:seed-maps": "bun run scripts/seed-main-map.ts"

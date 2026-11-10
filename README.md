@@ -61,6 +61,8 @@ Name the files with `-f`: a bare `docker compose up` also merges `compose.overri
 
 On a server, put a reverse proxy with TLS in front of `app` (port 3000) and `dam-pocketbase` (port 8090), and set `ORIGIN` and `PUBLIC_POCKETBASE_URL` to the two public URLs.
 
+The app sends its own security headers: a `Content-Security-Policy` with a new nonce on every page, `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy`. Let the proxy, and a CDN in front of it, pass them on as they are. A second policy added on the way also applies, and the page's nonce does not satisfy it; a feature that injects scripts into the page, such as Cloudflare's Rocket Loader or e-mail obfuscation, is blocked. The policy lets the browser reach PocketBase at the origin of `PUBLIC_POCKETBASE_URL`, so that variable is the PocketBase address the browser really uses.
+
 Each deployment on a server needs its own Compose project, which also names its internal PocketBase address: `COMPOSE_PROJECT_NAME=dam-acme` in `.env` gives `dam-acme-pocketbase`.
 
 **Data and backups.** The database and the uploaded files live in the named volume `pb_data`. Rebuilding and `down` keep it; `down -v` deletes it. PocketBase has its own scheduled backups in its admin, under Settings, Backups. For a copy of the whole volume:

@@ -46,6 +46,8 @@ Name the files with `-f`: a bare `docker compose up` also merges `compose.overri
 
 The [README](https://github.com/itsriodejaneiro/dam#install) has the steps for a server: the reverse proxy, Dokploy, and the backup of the database.
 
+The app sends a `Content-Security-Policy`, with a new nonce on every page, and the other security headers itself. A reverse proxy or CDN in front passes them on as they are, adds no policy of its own and injects no script into the pages. The policy lets the browser reach PocketBase at the origin of `PUBLIC_POCKETBASE_URL`, and needs nothing else from you.
+
 ## The `.env` file
 
 `.env` holds infrastructure only: addresses, ports and the superuser, the account that installs and can do everything. The first boot of a new database creates the superuser from `PB_SUPERUSER_EMAIL` and `PB_SUPERUSER_PASSWORD`, at least 8 characters long, and the app's server side signs in with them, so they stay set. The defaults in `.env.example` are for development: set your own on a server.
