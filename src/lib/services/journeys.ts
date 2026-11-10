@@ -12,7 +12,6 @@ import type {
 	JourneyPhase,
 	JourneyStep,
 	PublishedJourney,
-	PublishedRecord,
 	VisEdge
 } from '$lib/types/journey';
 import type { MessageKey } from '$lib/i18n';
@@ -45,30 +44,6 @@ export async function getJourneys(): Promise<Journey[]> {
 	return await pb
 		.collection('journeys')
 		.getFullList<Journey>({ sort: 'created', expand: 'journey_steps_via_journey' });
-}
-
-// The visitor's pages read the copy alone, never the edit.
-const PUBLISHED = { filter: 'published != null', fields: 'id,slug,published' };
-
-export async function getPublishedJourneys(): Promise<PublishedRecord[]> {
-	return await pb
-		.collection('journeys')
-		.getFullList<PublishedRecord>({ ...PUBLISHED, sort: 'created' });
-}
-
-/** null when there is no journey with that slug, or it is not published. */
-export async function getPublishedJourneyBySlug(slug: string): Promise<PublishedRecord | null> {
-	try {
-		return await pb
-			.collection('journeys')
-			.getFirstListItem<PublishedRecord>(
-				pb.filter(`slug = {:slug} && ${PUBLISHED.filter}`, { slug }),
-				{ fields: PUBLISHED.fields }
-			);
-	} catch (err) {
-		if ((err as { status?: number }).status === 404) return null;
-		throw err;
-	}
 }
 
 /** True when a published copy shows this map: PocketBase guards only the edit's `map`. */

@@ -21,7 +21,7 @@
 	</section>
 
 	<section class="journeys">
-		{#each data.journeys as { id, slug, published: journey } (id)}
+		{#each data.journeys as { slug, published: journey } (slug)}
 			<a href="/journeys/{slug}" class="journey-card">
 				<h2>{t(journey.title, code)}</h2>
 				<p>{t(journey.description, code)}</p>

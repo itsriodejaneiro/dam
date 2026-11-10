@@ -70,7 +70,7 @@ test('an inline event handler that reaches the page does not run', async ({ page
 test('every screen opens and works with no CSP violation', async ({ page }) => {
 	const pb = await superuserClient();
 	const map = await pb.collection('maps').getFirstListItem('');
-	const journey = await pb.collection('journeys').getFirstListItem('published = true');
+	const journey = await pb.collection('journeys').getFirstListItem('published != null');
 	const violations = await watchCsp(page);
 
 	await page.goto('/');

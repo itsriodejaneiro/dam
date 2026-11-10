@@ -1,12 +1,42 @@
-/* Publishing a journey, on the server only. The edit is the record's fields and its
-   journey_steps; `published` is the copy the visitor reads. These writes stay apart from
-   the edit's (services/journeys.ts), so that an API can offer those and refuse these.
-   Each takes a client signed in as whoever acts, and the collection's rules decide.
-   Relative imports: the CLI setup runs this module outside SvelteKit. */
+/* A journey on the server only: the copy the visitor reads, and the writes that publish it.
+   The edit is the record's fields and its journey_steps; `published` is the copy. The
+   writes stay apart from the edit's (services/journeys.ts), so that an API can offer those
+   and refuse these. Each function takes a client signed in as whoever acts, and the
+   collection's rules decide. Relative imports: the CLI setup runs this module outside
+   SvelteKit. */
 
 import type PocketBase from 'pocketbase';
 import { fromPublished, toPublished } from '../journey';
-import type { Journey, JourneyStep, PublishedJourney } from '../types/journey';
+import type { Journey, JourneyStep, PublishedJourney, PublishedRecord } from '../types/journey';
+
+// What leaves for the visitor: the address and the copy, never the edit.
+const PUBLISHED = { filter: 'published != null', fields: 'slug,published' };
+
+/** The published journeys, oldest first. */
+export async function publishedJourneys(pb: PocketBase): Promise<PublishedRecord[]> {
+	return await pb
+		.collection('journeys')
+		.getFullList<PublishedRecord>({ ...PUBLISHED, sort: 'created' });
+}
+
+/** The copy of the journey at that slug; null when there is none, or it is unpublished. */
+export async function publishedJourney(
+	pb: PocketBase,
+	slug: string
+): Promise<PublishedJourney | null> {
+	try {
+		const record = await pb
+			.collection('journeys')
+			.getFirstListItem<PublishedRecord>(
+				pb.filter(`slug = {:slug} && ${PUBLISHED.filter}`, { slug }),
+				{ fields: PUBLISHED.fields }
+			);
+		return record.published;
+	} catch (err) {
+		if ((err as { status?: number }).status === 404) return null;
+		throw err;
+	}
+}
 
 /** Publish refuses a journey with no steps: the visitor would open an empty page. */
 export class NoStepsError extends Error {}

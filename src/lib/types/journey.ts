@@ -96,8 +96,8 @@ export interface Journey extends RecordModel {
 	expand?: { journey_steps_via_journey?: JourneyStep[] };
 }
 
-/** What the visitor's pages read of a published journey. */
-export type PublishedRecord = Pick<Journey, 'id' | 'slug'> & { published: PublishedJourney };
+/** What the visitor's list reads of a published journey: its address and its copy. */
+export type PublishedRecord = Pick<Journey, 'slug'> & { published: PublishedJourney };
 
 /** What the side timeline reads from a step or from a phase-end milestone. */
 export type TimelineEntry = Pick<JourneyStep, 'id' | 'phase' | 'title'>;

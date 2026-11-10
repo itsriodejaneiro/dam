@@ -44,15 +44,10 @@ const EDITORIAL_RULES = {
 	deleteRule: ADMIN_ONLY
 } as const;
 
-/* The visitor reads a journey through its copy, `published`, null until Publish and after
-   Unpublish; `!= null` is PocketBase's test for a JSON field that holds a value. The steps
-   are the edit, and the copy carries them: only an admin reads them. */
-const JOURNEY_RULES = {
-	...EDITORIAL_RULES,
-	listRule: `published != null || ${ADMIN_ONLY}`,
-	viewRule: `published != null || ${ADMIN_ONLY}`
-} as const;
-const JOURNEY_STEP_RULES = { ...EDITORIAL_RULES, listRule: ADMIN_ONLY, viewRule: ADMIN_ONLY } as const;
+/* A journey and its steps are the edit, read by an admin alone. The visitor reads the copy,
+   `published`, through the site's server (server/journeys.ts): the API is always by token,
+   and nothing of a journey goes to the anonymous REST. */
+const JOURNEY_RULES = { ...EDITORIAL_RULES, listRule: ADMIN_ONLY, viewRule: ADMIN_ONLY } as const;
 
 /** Creates the collection if missing; otherwise merges fields and indexes. Idempotent. */
 async function upsertCollection(
@@ -349,7 +344,7 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	await up('journey_steps', {
 		name: 'journey_steps',
 		type: 'base',
-		...JOURNEY_STEP_RULES,
+		...JOURNEY_RULES,
 		fields: [
 			...AUTODATE_FIELDS,
 			{ name: 'journey', type: 'relation', required: true, collectionId: journeysId, cascadeDelete: true, maxSelect: 1 },
