@@ -80,6 +80,17 @@ async function walk(page: Page) {
 	await expect(page.getByRole('button', { name: 'Unpublish' })).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeHidden();
 
+	// Discard edit brings the editors back to the copy
+	const heading = text.locator('.ProseMirror').first();
+	await heading.click();
+	await page.keyboard.press('End');
+	await page.keyboard.type(' and friends');
+	await page.getByRole('button', { name: 'Save', exact: true }).click();
+	await page.getByRole('button', { name: 'Discard edit' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Discard edit' }).click();
+	await expect(page.getByRole('button', { name: 'Discard edit' })).toBeHidden();
+	await expect(heading).toHaveText('Nos partenaires');
+
 	await page.goto('/');
 	const partners = page.getByRole('img', { name: 'Orbit Foundation' });
 	await partners.scrollIntoViewIfNeeded();

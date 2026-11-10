@@ -72,6 +72,9 @@
 	let error = $state('');
 	let justSaved = $state(false);
 	let savedKey = $state('');
+	// A text editor takes its content once: each load draws the blocks anew, so that Discard
+	// shows the copy in the editors whose block ids it keeps.
+	let loads = $state(0);
 
 	const draftKey = $derived(JSON.stringify(blocks.map(cleanBlock)));
 	const dirty = $derived(!loading && !loadFailed && draftKey !== savedKey);
@@ -97,6 +100,7 @@
 			savedEdit = parseBlocks(home.blocks);
 			blocks = structuredClone(savedEdit);
 			savedKey = JSON.stringify(blocks.map(cleanBlock));
+			loads++;
 		} catch {
 			loadFailed = true;
 		} finally {
@@ -418,7 +422,7 @@
 				{#if blocks.length === 0}
 					<p class="admin-empty">{m('home_admin.empty')}</p>
 				{/if}
-				{#each blocks as block, i (block.id)}
+				{#each blocks as block, i (`${loads}:${block.id}`)}
 					{@const Icon = TYPE_ICONS[block.type]}
 					{#if i > 0}{@render adder(i, false)}{/if}
 					<article class="block-card" data-type={block.type}>
