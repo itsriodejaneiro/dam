@@ -1,6 +1,6 @@
 # Digital Assets Map
 
-The Digital Assets Map (DAM) is an interactive map of a country's digital infrastructure: identity, credentials, information systems and public services, organised in hierarchical layers, with guided journeys through them. It is the new, international version of the *Mapa da Informação* (ITS Rio, 2018), and any country can deploy it.
+The Digital Assets Map (DAM) is an interactive map of a country's digital infrastructure: identity, credentials, information systems and public services, organised in hierarchical layers, with guided journeys through them. It is the new, international version of the [*Mapa da Informação*](https://github.com/itsriodejaneiro/mapa-da-informacao/tree/v1) (ITS Rio, 2018), and any country can deploy it.
 
 Each deployment runs its own app and its own PocketBase. A country is configuration and content, kept in that PocketBase and edited in the app.
 

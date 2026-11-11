@@ -1,6 +1,6 @@
 # Introduction
 
-The Digital Assets Map (DAM) is an interactive map of a country's digital infrastructure: its agencies, public services, domains, hosting, code, credentials and the people who hold them. It shows what depends on what, and who answers for it. It is the international version of the *Mapa da Informação* (ITS Rio, 2018), and any country can deploy it.
+The Digital Assets Map (DAM) is an interactive map of a country's digital infrastructure: its agencies, public services, domains, hosting, code, credentials and the people who hold them. It shows what depends on what, and who answers for it. It is the international version of the [*Mapa da Informação*](https://github.com/itsriodejaneiro/mapa-da-informacao/tree/v1) (ITS Rio, 2018), and any country can deploy it.
 
 ![The home page of a deployment](/screens/getting-around-1.png)
 
