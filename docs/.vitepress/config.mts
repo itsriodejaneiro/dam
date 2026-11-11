@@ -39,8 +39,7 @@ export default defineConfig({
 				items: [
 					{ text: 'Introduction', link: '/introduction' },
 					{ text: 'Install', link: '/install' },
-					{ text: 'Configure your deployment', link: '/configure' },
-					{ text: 'The home page', link: '/home' }
+					{ text: 'Configure your deployment', link: '/configure' }
 				]
 			},
 			{
@@ -57,7 +56,8 @@ export default defineConfig({
 					{ text: 'Entities', link: '/entities' },
 					{ text: 'Connections', link: '/connections' },
 					{ text: 'Categories', link: '/categories' },
-					{ text: 'Maps', link: '/maps' }
+					{ text: 'Maps', link: '/maps' },
+					{ text: 'The home page', link: '/home' }
 				]
 			},
 			{
