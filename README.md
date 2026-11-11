@@ -166,3 +166,9 @@ Everything that identifies a deployment lives in the `settings` record: its name
 Set up as in [By hand](#by-hand) and open a pull request against `main`. Code, comments and commit messages are in English, and commits follow [Conventional Commits](https://www.conventionalcommits.org) (`feat: add a filter to the map`). Run `bun run check` and `bun run build` before you push; CI runs both on every pull request.
 
 Text on screen goes through `m('key')` in `src/lib/i18n/messages.ts`, in every locale. The PocketBase schema is defined once, in `src/lib/server/setup.ts`.
+
+## License
+
+Copyright (C) 2026 Instituto de Tecnologia e Sociedade do Rio de Janeiro (ITS Rio)
+
+The DAM is free software under the [GNU Affero General Public License v3.0](LICENSE). Anyone may install, adapt and run it, commercially too; whoever offers a modified version to the public, including as a website, publishes the modifications under the same license. [AUTHORS](AUTHORS) lists the people who write it.

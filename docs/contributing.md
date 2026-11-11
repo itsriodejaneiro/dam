@@ -2,6 +2,8 @@
 
 Open a pull request against `main`. A change that alters a screen also changes this manual, in the same pull request.
 
+The DAM is licensed under the [GNU Affero General Public License v3.0](https://github.com/itsriodejaneiro/dam/blob/main/LICENSE), and a contribution arrives under the same license: opening a pull request publishes your change under it.
+
 ## Rules of the code
 
 - Code, comments, commit messages and this manual are in English.
