@@ -4,6 +4,8 @@ All notable changes to the Digital Assets Map are in this file. The format follo
 
 ## Unreleased
 
+## 0.1.0 - 2026-11-12
+
 The first release of the Digital Assets Map: the international version of ITS Rio's *Mapa da Informação* (2018), ready for any country to deploy.
 
 ### Added
