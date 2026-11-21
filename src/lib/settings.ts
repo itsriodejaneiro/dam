@@ -59,11 +59,11 @@ export function storedName(stored: unknown): Record<string, string> {
 	return name;
 }
 
-/** The name that fills "of {0}" texts. Null when the deploy names no place of its own:
-    blank, or still the product's name, and the texts take their generic form. */
-export function placeName(settings: DeploySettings, locale: string): string | null {
+/** The deploy's name in that locale, for the header and the tab: the default locale's when
+    that one is blank, and the product's name when the deploy has none. */
+export function deployName(settings: DeploySettings, locale: string): string {
 	const name = (settings.name[locale] || settings.name[settings.defaultLocale] || '').trim();
-	return name && name !== DEFAULT_NAME ? name : null;
+	return name || DEFAULT_NAME;
 }
 
 /** The deploy's mark, for the favicon and the header: the logo wins over the flag. */

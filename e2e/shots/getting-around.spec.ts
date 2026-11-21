@@ -4,7 +4,7 @@ import { expect, screens, signIn, test } from './lib';
 test('the home page and the header', async ({ page }) => {
 	const s = screens(page, 'getting-around');
 	await page.goto('/');
-	await s.shot(page.getByRole('heading', { name: /of the digital infrastructure of Exampleland/ }));
+	await s.shot(page.getByRole('heading', { name: /The chain behind a digital public service/ }));
 
 	const header = page.locator('header.site');
 	await expect(page.getByRole('button', { name: 'FR' })).toBeVisible();

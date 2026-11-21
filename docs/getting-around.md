@@ -1,6 +1,6 @@
 # Getting around
 
-The home page, at `/`, names the deployment and what it maps, with the texts, cards and logos the deployment writes under it ([The home page](./home.md)). The header is the same on every page.
+The home page, at `/`, opens with the title and lede the deployment writes, and the texts, cards and logos under them ([The home page](./home.md)). The header is the same on every page.
 
 ![The home page of a deployment](/screens/getting-around-1.png)
 
@@ -10,7 +10,7 @@ The home page, at `/`, names the deployment and what it maps, with the texts, ca
 
 | Part | What it does |
 |---|---|
-| the mark and the title | return to the home page. The mark is the deployment's logo or flag |
+| the mark and the title | return to the home page. The mark is the deployment's logo or flag, and the title its [name](./configure.md#the-fields), in the page's language |
 | **start** | the home page |
 | **maps** | [the map](./map.md) |
 | **journeys** | [the journeys](./journeys.md), when the deployment shows them |

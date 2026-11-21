@@ -51,7 +51,7 @@ curl -O https://raw.githubusercontent.com/itsriodejaneiro/dam/main/compose.deplo
 docker compose -f compose.deploy.yaml up -d
 ```
 
-`DAM_VERSION` in `.env` pins a release, such as `DAM_VERSION=1.2.0`, or its minor, `1.2`, for the newest patch of it; without it, the images are the `latest` ones. To update, change `DAM_VERSION` and run `up -d` again; on `latest` or a minor, run `docker compose -f compose.deploy.yaml pull` first.
+`DAM_VERSION` in `.env` pins a release, such as `DAM_VERSION=1.2.0`, or its minor, `1.2`, for the newest patch of it; without it, the images are the `latest` ones. To update, change `DAM_VERSION` and run `up -d` again; on `latest` or a minor, run `docker compose -f compose.deploy.yaml pull` first. Nothing else: see [Updating](#updating).
 
 The file publishes no port, like `compose.yaml`: on one machine, fetch `compose.local.yaml` too and add `-f compose.local.yaml`; on a server, a reverse proxy reaches the two services.
 
@@ -60,6 +60,10 @@ The file publishes no port, like `compose.yaml`: on one machine, fetch `compose.
 The [README](https://github.com/itsriodejaneiro/dam#install) has the steps for a server: the reverse proxy, Dokploy, and the backup of the database.
 
 The app sends a `Content-Security-Policy`, with a new nonce on every page, and the other security headers itself. A reverse proxy or CDN in front passes them on as they are, adds no policy of its own and injects no script into the pages. The policy lets the browser reach PocketBase at the origin of `PUBLIC_POCKETBASE_URL`, and needs nothing else from you.
+
+## Updating
+
+Updating is changing the version. From the published images, set `DAM_VERSION` in `.env` and run `up -d` again, with `pull` first on `latest` or a minor; with Docker, pull the repository and run `up --build` again; in Dokploy, deploy again. When it starts, the app brings the database schema to its version and writes what it changed to its log, `docker compose logs app`: one line per change and one at the end, `[schema] up to date` or `[schema] updated: 2 changes`. There is nothing to run after that, and your data stays.
 
 ## The `.env` file
 
@@ -87,5 +91,5 @@ The same from the command line:
 
 | Command | What it does |
 |---|---|
-| `bun run db:setup` | creates or updates the collections, and seeds an empty project |
+| `bun run db:setup` | creates or updates the collections, as the app does when it starts, and seeds an empty project |
 | `bun run db:reset --yes` | deletes the collections and their data |

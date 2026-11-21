@@ -33,7 +33,6 @@
 	} from '$lib/services';
 	import { localesState, localizedNode, localizedNodeType, localizedMap, t, m } from '$lib/i18n';
 	import { safeUrl, sanitizeHtml } from '$lib/sanitize';
-	import { placeName } from '$lib/settings';
 	import { canvasHeight, heightInLane, laneTops, LAYER_H, VIS_W } from '$lib/journey';
 
 	const slug = $derived(page.data.slug as string);
@@ -140,7 +139,6 @@
 	let selected = $state<VisNode | null>(null);
 
 	const code = $derived(localesState.current);
-	const place = $derived(placeName(page.data.settings, code));
 
 	// Localized, indexed views: recomputed only when the locale or the raw nodes/types change.
 	const viewByNodeId = $derived.by(() => {
@@ -535,7 +533,7 @@
 		<AppMeta section={m('meta.datavis')} />
 		<div>
 			<h1>{m('map_view.title')}</h1>
-			<p class="lede">{place ? m('map_view.lede', place) : m('map_view.lede_generic')}</p>
+			<p class="lede">{m('map_view.lede')}</p>
 		</div>
 	</section>
 

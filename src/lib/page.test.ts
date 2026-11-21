@@ -4,10 +4,15 @@ import {
 	blockProblem,
 	CARDS_MAX,
 	cleanBlock,
+	cleanTop,
+	hasContent,
 	LOGOS_MAX,
 	missingByLocale,
 	parseBlocks,
+	parseCopy,
+	parseTop,
 	resolveBlocks,
+	topMissingByLocale,
 	unusedImages,
 	type Lookups
 } from './page';
@@ -35,6 +40,31 @@ const blocks: Block[] = [
 		]
 	}
 ];
+
+test('the stored top keeps the title as HTML and the lede as text, blank locales out', () => {
+	const top = parseTop({
+		title: { en: '<p>The <em>map</em>.</p>', fr: '<p></p>', pt: 5 },
+		lede: { en: ' What it maps. ', fr: '  ' },
+		blocks: []
+	});
+	assert.deepEqual(top, { title: { en: '<p>The <em>map</em>.</p>' }, lede: { en: 'What it maps.' } });
+	assert.deepEqual(parseTop(null), { title: {}, lede: {} });
+	assert.deepEqual(cleanTop({ title: { en: '<p></p>' }, lede: { en: ' A ' } }), { title: {}, lede: { en: 'A' } });
+});
+
+test('a copy written before the top had fields is its blocks alone', () => {
+	assert.deepEqual(parseCopy(blocks), { title: {}, lede: {}, blocks });
+	const copy = { title: { en: '<p>T</p>' }, lede: {}, blocks };
+	assert.deepEqual(parseCopy(JSON.parse(JSON.stringify(copy))), copy);
+	assert.deepEqual(parseCopy(null), { title: {}, lede: {}, blocks: [] });
+});
+
+test('a copy has content with a title, a lede or a block', () => {
+	assert.equal(hasContent({ title: {}, lede: {}, blocks: [] }), false);
+	assert.equal(hasContent({ title: { en: '<p>T</p>' }, lede: {}, blocks: [] }), true);
+	assert.equal(hasContent({ title: {}, lede: { en: 'L' }, blocks: [] }), true);
+	assert.equal(hasContent({ title: {}, lede: {}, blocks: [blocks[0]] }), true);
+});
 
 test('stored blocks read back as they were written', () => {
 	assert.deepEqual(parseBlocks(blocks), blocks);
@@ -137,6 +167,7 @@ test('a locale lacks a text written in another, never one blank in all', () => {
 	assert.deepEqual(missingByLocale(blocks[3], ['en', 'fr']), { en: 0, fr: 0 });
 	const empty: Block = { id: 't', type: 'text', body: { en: '<p></p>', fr: '<p>Oui</p>' } };
 	assert.deepEqual(missingByLocale(empty, ['en', 'fr']), { en: 1, fr: 0 });
+	assert.deepEqual(topMissingByLocale({ title: { en: '<p>T</p>', fr: '<p></p>' }, lede: {} }, ['en', 'fr']), { en: 0, fr: 1 });
 });
 
 test('Publish removes the files no block uses', () => {

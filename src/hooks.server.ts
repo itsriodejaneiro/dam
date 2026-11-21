@@ -1,10 +1,16 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, ServerInit } from '@sveltejs/kit';
 import { env } from '$env/dynamic/public';
 import { escapeAttribute } from '$lib/sanitize';
 import { isApiPath } from '$lib/api';
 import { guardApi } from '$lib/server/api/guard';
+import { updateSchemaOnBoot } from '$lib/server/boot';
 import { secureHeaders } from '$lib/server/headers';
 import { getSettings } from '$lib/server/settings';
+
+/** Once, before the first request: the schema at this version (server/boot.ts). */
+export const init: ServerInit = async () => {
+	await updateSchemaOnBoot();
+};
 
 // The theme pack and default locale come from the settings record, injected into
 // app.html's %theme%/%lang% placeholders before paint (no FOUC). Escaped here whatever

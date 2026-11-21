@@ -17,9 +17,11 @@
 		placeholder?: string;
 		/** Section titles, h2 and h3: a page's text has them, a step's or an entity's does not. */
 		headings?: boolean;
+		/** A title: italic and line breaks alone, and Enter breaks the line within one paragraph. */
+		inline?: boolean;
 	}
 
-	let { content = $bindable(''), placeholder = '', headings = false }: Props = $props();
+	let { content = $bindable(''), placeholder = '', headings = false, inline = false }: Props = $props();
 
 	let editorEl = $state<HTMLDivElement | null>(null);
 	let editor: Editor | null = null;
@@ -30,21 +32,34 @@
 	onMount(() => {
 		let destroyed = false;
 		Promise.all([import('@tiptap/core'), import('@tiptap/starter-kit')]).then(
-			([{ Editor }, { default: StarterKit }]) => {
+			([{ Editor, Extension }, { default: StarterKit }]) => {
 				if (destroyed || !editorEl) return;
+				// Before the core keymap, which would split the paragraph.
+				const enterBreaks = Extension.create({
+					name: 'enterBreaks',
+					priority: 1001,
+					addKeyboardShortcuts() {
+						return { Enter: () => this.editor.commands.setHardBreak() };
+					}
+				});
 				editor = new Editor({
 					element: editorEl,
 					extensions: [
 						StarterKit.configure({
 							// sanitize.ts lets h2 and h3 through, and nothing else of the kind
-							heading: headings ? { levels: [2, 3] } : false,
+							heading: headings && !inline ? { levels: [2, 3] } : false,
 							strike: false,
 							code: false,
 							codeBlock: false,
 							blockquote: false,
 							horizontalRule: false,
-							link: { openOnClick: false, autolink: true, linkOnPaste: true }
-						})
+							bold: inline ? false : undefined,
+							bulletList: inline ? false : undefined,
+							orderedList: inline ? false : undefined,
+							listItem: inline ? false : undefined,
+							link: inline ? false : { openOnClick: false, autolink: true, linkOnPaste: true }
+						}),
+						...(inline ? [enterBreaks] : [])
 					],
 					content,
 					// The page's CSP refuses the style element TipTap would inject; its rules are below.
@@ -71,6 +86,9 @@
 		};
 	});
 
+	/** A toolbar button acts on the selection: the mousedown must not take the focus from it. */
+	const keepFocus = (e: MouseEvent) => e.preventDefault();
+
 	function isActive(name: string, attrs?: Record<string, unknown>): boolean {
 		void tick;
 		return editor?.isActive(name, attrs ?? {}) ?? false;
@@ -89,11 +107,12 @@
 	}
 </script>
 
-<div class="rte">
+<div class="rte" class:inline>
 	<div class="toolbar">
-		{#if headings}
+		{#if headings && !inline}
 			<button
 				type="button"
+				onmousedown={keepFocus}
 				class:active={isActive('heading', { level: 2 })}
 				onclick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
 				aria-label={m('editor.heading_2')}
@@ -103,6 +122,7 @@
 			</button>
 			<button
 				type="button"
+				onmousedown={keepFocus}
 				class:active={isActive('heading', { level: 3 })}
 				onclick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
 				aria-label={m('editor.heading_3')}
@@ -112,17 +132,21 @@
 			</button>
 			<span class="sep" aria-hidden="true"></span>
 		{/if}
+		{#if !inline}
+			<button
+				type="button"
+				onmousedown={keepFocus}
+				class:active={isActive('bold')}
+				onclick={() => editor?.chain().focus().toggleBold().run()}
+				aria-label={m('editor.bold')}
+				title={`${m('editor.bold')} (⌘B)`}
+			>
+				<Bold size={14} />
+			</button>
+		{/if}
 		<button
 			type="button"
-			class:active={isActive('bold')}
-			onclick={() => editor?.chain().focus().toggleBold().run()}
-			aria-label={m('editor.bold')}
-			title={`${m('editor.bold')} (⌘B)`}
-		>
-			<Bold size={14} />
-		</button>
-		<button
-			type="button"
+			onmousedown={keepFocus}
 			class:active={isActive('italic')}
 			onclick={() => editor?.chain().focus().toggleItalic().run()}
 			aria-label={m('editor.italic')}
@@ -130,34 +154,39 @@
 		>
 			<Italic size={14} />
 		</button>
-		<button
-			type="button"
-			class:active={isActive('link')}
-			onclick={setLink}
-			aria-label={m('editor.link')}
-			title={m('editor.link')}
-		>
-			<LinkIcon size={14} />
-		</button>
-		<span class="sep" aria-hidden="true"></span>
-		<button
-			type="button"
-			class:active={isActive('bulletList')}
-			onclick={() => editor?.chain().focus().toggleBulletList().run()}
-			aria-label={m('editor.bullet_list')}
-			title={m('editor.bullet_list')}
-		>
-			<List size={14} />
-		</button>
-		<button
-			type="button"
-			class:active={isActive('orderedList')}
-			onclick={() => editor?.chain().focus().toggleOrderedList().run()}
-			aria-label={m('editor.ordered_list')}
-			title={m('editor.ordered_list')}
-		>
-			<ListOrdered size={14} />
-		</button>
+		{#if !inline}
+			<button
+				type="button"
+				onmousedown={keepFocus}
+				class:active={isActive('link')}
+				onclick={setLink}
+				aria-label={m('editor.link')}
+				title={m('editor.link')}
+			>
+				<LinkIcon size={14} />
+			</button>
+			<span class="sep" aria-hidden="true"></span>
+			<button
+				type="button"
+				onmousedown={keepFocus}
+				class:active={isActive('bulletList')}
+				onclick={() => editor?.chain().focus().toggleBulletList().run()}
+				aria-label={m('editor.bullet_list')}
+				title={m('editor.bullet_list')}
+			>
+				<List size={14} />
+			</button>
+			<button
+				type="button"
+				onmousedown={keepFocus}
+				class:active={isActive('orderedList')}
+				onclick={() => editor?.chain().focus().toggleOrderedList().run()}
+				aria-label={m('editor.ordered_list')}
+				title={m('editor.ordered_list')}
+			>
+				<ListOrdered size={14} />
+			</button>
+		{/if}
 	</div>
 	<div bind:this={editorEl} class="surface"></div>
 </div>
@@ -271,6 +300,11 @@
 	.surface :global(.rte-editor-area) {
 		outline: none;
 		min-height: 7rem;
+	}
+	/* a title is a line or two */
+	.inline .surface,
+	.inline .surface :global(.rte-editor-area) {
+		min-height: 3.4rem;
 	}
 	.surface :global(.rte-editor-area p) {
 		margin: 0 0 0.6em;

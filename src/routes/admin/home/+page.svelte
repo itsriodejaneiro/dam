@@ -29,16 +29,31 @@
 		blockProblem,
 		CARDS_MAX,
 		cleanBlock,
+		cleanTop,
+		hasContent,
 		IMAGES_MAX,
 		LOGOS_MAX,
 		missingByLocale,
-		parseBlocks
+		parseBlocks,
+		parseCopy,
+		parseTop,
+		topMissingByLocale
 	} from '$lib/page';
 	import { samePublished } from '$lib/publish';
 	import { PublishActionError, type PublishAction } from '$lib/services/publishing';
 	import { LOGO_MAX_BYTES, LOGO_TYPES } from '$lib/settings';
 	import { getActivePack, type ThemePack } from '$lib/theme';
-	import type { Block, BlockType, CardTarget, CardsBlock, LinkCard, Logo, Page } from '$lib/types/page';
+	import type {
+		Block,
+		BlockType,
+		CardTarget,
+		CardsBlock,
+		LinkCard,
+		Logo,
+		Page,
+		PageCopy,
+		PageTop
+	} from '$lib/types/page';
 
 	requireAdmin();
 
@@ -54,10 +69,11 @@
 
 	// What the visitor reads, null while unpublished, and the saved edit: the two differ when
 	// there are unpublished changes.
-	let published = $state.raw<Block[] | null>(null);
-	let savedEdit = $state.raw<Block[]>([]);
+	let published = $state.raw<PageCopy | null>(null);
+	let savedEdit = $state.raw<PageCopy>({ title: {}, lede: {}, blocks: [] });
 
 	// The draft: everything below stays in the page until Save.
+	let top = $state<PageTop>({ title: {}, lede: {} });
 	let blocks = $state<Block[]>([]);
 	let collapsed = $state<Record<string, boolean>>({});
 	// One locale's lines alone, or every locale's (null).
@@ -76,7 +92,8 @@
 	// shows the copy in the editors whose block ids it keeps.
 	let loads = $state(0);
 
-	const draftKey = $derived(JSON.stringify(blocks.map(cleanBlock)));
+	const draft = (): PageCopy => ({ ...cleanTop(top), blocks: blocks.map(cleanBlock) });
+	const draftKey = $derived(JSON.stringify(draft()));
 	const dirty = $derived(!loading && !loadFailed && draftKey !== savedKey);
 	const changed = $derived(published !== null && !samePublished(savedEdit, published));
 
@@ -96,10 +113,11 @@
 			journeyList = allJourneys.flatMap((j) =>
 				j.published ? [{ id: j.id, title: j.published.title }] : []
 			);
-			published = home.published && parseBlocks(home.published);
-			savedEdit = parseBlocks(home.blocks);
-			blocks = structuredClone(savedEdit);
-			savedKey = JSON.stringify(blocks.map(cleanBlock));
+			published = home.published && parseCopy(home.published);
+			savedEdit = { ...parseTop(home), blocks: parseBlocks(home.blocks) };
+			top = { title: structuredClone(savedEdit.title), lede: structuredClone(savedEdit.lede) };
+			blocks = structuredClone(savedEdit.blocks);
+			savedKey = JSON.stringify(draft());
 			loads++;
 		} catch {
 			loadFailed = true;
@@ -182,10 +200,11 @@
 		}
 	}
 
-	function missing(block: Block): [string, number][] {
-		const counts = missingByLocale(block, localesState.all.map((l) => l.code));
-		return Object.entries(counts).filter(([, n]) => n > 0);
-	}
+	const withMissing = (counts: Record<string, number>): [string, number][] =>
+		Object.entries(counts).filter(([, n]) => n > 0);
+	const allCodes = $derived(localesState.all.map((l) => l.code));
+	const missing = (block: Block) => withMissing(missingByLocale(block, allCodes));
+	const topMissing = $derived(withMissing(topMissingByLocale(top, allCodes)));
 
 	// ── Cards ──
 
@@ -262,9 +281,9 @@
 		if (!record) return false;
 		saving = true;
 		const key = draftKey;
-		const edit = blocks.map(cleanBlock);
+		const edit = draft();
 		try {
-			await pages.saveBlocks(record.id, edit);
+			await pages.saveEdit(record.id, edit);
 			savedKey = key;
 			savedEdit = edit;
 			justSaved = true;
@@ -298,8 +317,8 @@
 	}
 
 	async function publish() {
-		if (blocks.length === 0) {
-			error = m('home_admin.error.no_blocks');
+		if (!hasContent(draft())) {
+			error = m('home_admin.error.empty');
 			return;
 		}
 		if (await save()) await act('publish');
@@ -419,6 +438,30 @@
 			{/if}
 
 			<section class="blocks">
+				<article class="block-card top">
+					<header class="block-head">
+						<span class="block-type">{m('home_admin.top')}</span>
+						<span class="block-summary">{m('home_admin.top_hint')}</span>
+						{#each topMissing as [loc, n] (loc)}
+							<span class="missing">{m('home_admin.missing', loc.toUpperCase(), n)}</span>
+						{/each}
+					</header>
+					<div class="block-body">
+						<div class="admin-field">
+							<span class="field-label">{m('home_admin.field.title')}</span>
+							<LocalizedRichTextEditor
+								bind:value={top.title}
+								inline
+								resetKey={loads}
+								locales={shownLocales}
+							/>
+						</div>
+						<div class="admin-field">
+							<span class="field-label">{m('home_admin.field.lede')}</span>
+							<LocalizedInput id="top-lede" bind:value={top.lede} required={false} multiline locales={shownLocales} />
+						</div>
+					</div>
+				</article>
 				{#if blocks.length === 0}
 					<p class="admin-empty">{m('home_admin.empty')}</p>
 				{/if}
@@ -716,6 +759,12 @@
 		display: flex;
 		flex-direction: column;
 		margin-top: 1.4rem;
+	}
+	.top {
+		margin-bottom: 1rem;
+	}
+	.top .block-head {
+		padding-left: 1.2rem;
 	}
 
 	.block-card {

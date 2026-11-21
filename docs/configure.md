@@ -9,7 +9,7 @@
 | Field | What it does |
 |---|---|
 | **Languages** | the languages the site offers, out of Português, English, Français and Español. Choose at least one, and mark one as **Default**: the site opens in it |
-| **Name** | the country, city or sector being mapped, in each language. It completes the texts of the home page and of the map ("of the digital infrastructure of …"). Left blank, the map uses generic texts |
+| **Name** | what this deployment is called, in each language: a country, a state, a city or a sector. It shows beside the mark in the header and in the browser tab's title. Left blank, the site is called Digital Assets Map |
 | **Theme** | the color set of the site: `legacy`, `green` or `orange`. To create another, see [Add a theme](./add-a-theme.md) |
 | **Flag** | a two-letter ISO country code. The flag appears beside the title in the header, and as the browser tab's icon |
 | **Logo** | PNG, JPEG, WebP or SVG, up to 400 KB. It takes the flag's place when there are both |

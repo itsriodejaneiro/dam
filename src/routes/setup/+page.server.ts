@@ -14,7 +14,7 @@ export const load: PageServerLoad = async () => {
 	try {
 		const pb = await getSuperuserClient();
 		// isConfigured's record route takes a revoked token for a guest. This route answers
-		// it with the 401 that signs in again, and exists with no schema, unlike maps' own.
+		// it with the 401 that signs in again, and exists with no schema, unlike settings' own.
 		await pb.collections.getList(1, 1, { skipTotal: true });
 		configured = await isConfigured(pb);
 	} catch {

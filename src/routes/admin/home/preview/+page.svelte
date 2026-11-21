@@ -4,13 +4,14 @@
 	import { HomeView } from '$lib/components';
 	import { auth, requireAdmin, journeys, maps, pages } from '$lib/services';
 	import { m } from '$lib/i18n';
-	import { parseBlocks, resolveBlocks } from '$lib/page';
-	import type { ResolvedBlock } from '$lib/types/page';
+	import { parseBlocks, parseTop, resolveBlocks } from '$lib/page';
+	import type { PageTop, ResolvedBlock } from '$lib/types/page';
 
 	requireAdmin();
 
 	// The edit, not the copy: the preview shows what Publish would put on the site, with the
 	// cards that would lead somewhere there.
+	let top = $state.raw<PageTop | null>(null);
 	let blocks = $state.raw<ResolvedBlock[] | null>(null);
 	let failed = $state(false);
 
@@ -31,6 +32,7 @@
 				)
 			};
 			const images = new Set(home.images);
+			top = parseTop(home);
 			blocks = resolveBlocks(parseBlocks(home.blocks), {
 				image: (name) => (images.has(name) ? pages.imageUrl(home, name) : null),
 				target: (kind, id) => addresses[kind].get(id) ?? null
@@ -48,7 +50,7 @@
 	</div>
 	{#if failed}
 		<p class="admin-error">{m('home_admin.error.load')}</p>
-	{:else if blocks}
-		<HomeView {blocks} />
+	{:else if top && blocks}
+		<HomeView title={top.title} lede={top.lede} {blocks} />
 	{/if}
 {/if}

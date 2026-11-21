@@ -100,7 +100,7 @@ The `.env` holds the same four variables as [With Docker](#with-docker), plus `D
 DAM_VERSION=1.2.0
 ```
 
-Each image carries three tags: the version (`1.2.0`), its minor (`1.2`, the newest patch of it) and `latest`, the default. The PocketBase image also carries the PocketBase version it runs (`pocketbase-0.39.7`). To update, change `DAM_VERSION` and run `up -d` again; on `latest` or a minor, `docker compose -f compose.deploy.yaml pull` comes first.
+Each image carries three tags: the version (`1.2.0`), its minor (`1.2`, the newest patch of it) and `latest`, the default. The PocketBase image also carries the PocketBase version it runs (`pocketbase-0.39.7`). To update, change `DAM_VERSION` and run `up -d` again; on `latest` or a minor, `docker compose -f compose.deploy.yaml pull` comes first. The app updates the database schema when it starts and logs what changed: there is nothing to run after `up -d`.
 
 Like `compose.yaml`, the file publishes no port: on a server, the reverse proxy reaches both services, as in [With Docker](#with-docker). To try it on one machine, fetch `compose.local.yaml` too and add `-f compose.local.yaml`. A panel such as Dokploy, Coolify or Portainer takes the file as it is, pasted as a Compose stack, with the variables in its environment, `DAM_VERSION` among them, and a domain on each service.
 
@@ -159,7 +159,7 @@ Everything that identifies a deployment lives in the `settings` record: its name
 | `bun run dev` | the whole development environment: Docker, PocketBase and the app |
 | `bun run build` | production build |
 | `bun run check` | type-check |
-| `bun run db:setup` | creates or updates the collections, and seeds an empty project |
+| `bun run db:setup` | creates or updates the collections, as the app does when it starts, and seeds an empty project |
 | `bun run db:reset --yes` | deletes the collections (destructive) |
 | `bun run db:seed-maps` | adds every node to the main map |
 

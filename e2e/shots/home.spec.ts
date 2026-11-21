@@ -1,4 +1,4 @@
-// Screens of "The home page": the editor with the example's blocks, a block of partners' logos
+// Screens of "The home page": the top card, the editor with the example's blocks, a block of partners' logos
 // with their preview in both modes, the language filter on a text written in one language,
 // then the published home in both modes. The home goes back to the example at the end, so
 // that the other scripts show only the example.
@@ -41,7 +41,9 @@ async function walk(page: Page) {
 	const s = screens(page, 'home');
 	await signIn(page);
 	await page.goto('/admin/home');
-	const blocks = page.locator('.block-card');
+	const top = page.locator('.block-card.top');
+	await s.shot(top.getByText('digital public service').first(), { of: top });
+	const blocks = page.locator('.block-card:not(.top)');
 	await s.shot(blocks.filter({ hasText: 'Explore the map' }));
 
 	// the logos: each file uploads as soon as it is chosen

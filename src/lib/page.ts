@@ -1,7 +1,7 @@
-/* A page in blocks (the home): what the stored JSON may hold, what the editor asks before it
-   saves, what each locale still lacks, which images the blocks use, and the blocks as the
-   visitor's page draws them. Shared by the editor, the server and the CLI seed. Relative
-   imports only: the CLI setup runs outside Vite. */
+/* A page (the home): its top and its blocks. What the stored JSON may hold, what the editor
+   asks before it saves, what each locale still lacks, which images the blocks use, and the
+   blocks as the visitor's page draws them. Shared by the editor, the server and the CLI
+   seed. Relative imports only: the CLI setup runs outside Vite. */
 
 import { LOCALE_CODES } from './i18n/messages';
 import type { Localized } from './i18n/types';
@@ -12,6 +12,8 @@ import type {
 	CardTarget,
 	LinkCard,
 	Logo,
+	PageCopy,
+	PageTop,
 	ResolvedBlock,
 	ResolvedCard
 } from './types/page';
@@ -125,6 +127,32 @@ export function parseBlocks(value: unknown): Block[] {
 	return blocks;
 }
 
+/** The stored top: the title's HTML and the lede's text, under known locales, blank ones out. */
+export function parseTop(value: unknown): PageTop {
+	const top = isObject(value) ? value : {};
+	return { title: localized(top.title, true), lede: localized(top.lede) };
+}
+
+/**
+ * The stored copy as the app reads it. A copy written before the top had fields is the
+ * list of blocks alone: its top is empty, and the page shows the generic text.
+ */
+export function parseCopy(value: unknown): PageCopy {
+	if (Array.isArray(value)) return { title: {}, lede: {}, blocks: parseBlocks(value) };
+	return { ...parseTop(value), blocks: parseBlocks(isObject(value) ? value.blocks : null) };
+}
+
+/** True when the copy shows something of its own: a title, a lede or a block. Publish
+    refuses an empty one, since unpublishing already shows the generic top alone. */
+export function hasContent(copy: PageCopy): boolean {
+	return (
+		copy.blocks.length > 0 || Object.keys(copy.title).length > 0 || Object.keys(copy.lede).length > 0
+	);
+}
+
+/** The editor's top as it is saved: blank locales out. */
+export const cleanTop = (draft: PageTop): PageTop => parseTop(draft);
+
 /**
  * The editor's draft as it is saved: blank locales out, the structure as it stands, so that
  * an empty block still counts as a change.
@@ -227,18 +255,35 @@ function localizedFields(draft: Block): { value: Localized; rich: boolean }[] {
 }
 
 /**
- * How many of the block's texts each locale lacks: a text written in some locale and blank
- * in this one. A text blank in every locale is optional, and nobody's to translate.
+ * How many of the texts each locale lacks: a text written in some locale and blank in this
+ * one. A text blank in every locale is optional, and nobody's to translate.
  */
-export function missingByLocale(draft: Block, locales: string[]): Record<string, number> {
+function missingTexts(
+	fields: { value: Localized; rich: boolean }[],
+	locales: string[]
+): Record<string, number> {
 	const missing = Object.fromEntries(locales.map((code) => [code, 0]));
-	for (const { value, rich } of localizedFields(draft)) {
+	for (const { value, rich } of fields) {
 		const written = locales.filter((code) => !isBlank(value[code] ?? '', rich));
 		if (written.length === 0) continue;
 		for (const code of locales) if (!written.includes(code)) missing[code] += 1;
 	}
 	return missing;
 }
+
+/** How many of the block's texts each locale lacks. */
+export const missingByLocale = (draft: Block, locales: string[]): Record<string, number> =>
+	missingTexts(localizedFields(draft), locales);
+
+/** How many of the top's two texts each locale lacks. */
+export const topMissingByLocale = (top: PageTop, locales: string[]): Record<string, number> =>
+	missingTexts(
+		[
+			{ value: top.title, rich: true },
+			{ value: top.lede, rich: false }
+		],
+		locales
+	);
 
 /** The files of `images` the blocks point at. */
 export function usedImages(blocks: Block[]): Set<string> {

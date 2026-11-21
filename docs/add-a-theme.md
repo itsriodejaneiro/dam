@@ -16,7 +16,7 @@ A theme, or pack, is a set of colors a deployment chooses in [Settings](./config
 2. Replace `legacy` with the name of your pack in the file's selectors.
 3. Import the file in `src/lib/styles/themes/index.css`.
 4. Add the name to `PACKS` in `src/lib/theme.ts` and to `KNOWN` in `src/app.html`.
-5. Run `bun run db:setup` to add the name to the options of the `theme` field.
+5. Start the app (`bun run dev`): on boot it adds the name to the options of the `theme` field.
 6. List the pack in the table above and in the **Theme** row of [Configure your deployment](./configure.md), so the manual stays complete.
 
 The pack then appears under **Theme** in the settings, and in the [design system page](./design-system.md).

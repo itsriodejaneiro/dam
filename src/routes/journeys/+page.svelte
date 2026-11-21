@@ -1,14 +1,11 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { AppMeta } from '$lib/components';
 	import { localesState, m, t } from '$lib/i18n';
 	import { countedSteps } from '$lib/journey';
-	import { placeName } from '$lib/settings';
 
 	let { data } = $props();
 
 	const code = $derived(localesState.current);
-	const place = $derived(placeName(page.data.settings, code));
 </script>
 
 <main>
@@ -16,7 +13,7 @@
 		<AppMeta section={m('meta.context')} />
 		<div>
 			<h1>{m('journeys.title')}</h1>
-			<p class="lede">{place ? m('journeys.lede', place) : m('journeys.lede_generic')}</p>
+			<p class="lede">{m('journeys.lede')}</p>
 		</div>
 	</section>
 

@@ -1,20 +1,26 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import AppMeta from './AppMeta.svelte';
 	import PageBlocks from './PageBlocks.svelte';
-	import { localesState, m } from '$lib/i18n';
-	import { placeName } from '$lib/settings';
+	import { localesState, m, t, type Localized } from '$lib/i18n';
+	import { sanitizeHtml } from '$lib/sanitize';
 	import type { ResolvedBlock } from '$lib/types/page';
 
-	/* The home: the top from the settings, the same on every deploy, and below it the blocks
-	   of the copy, or of the edit in the preview. */
+	/* The home: the top the deploy writes, title and lede per locale, and below it the blocks
+	   of the copy, or of the edit in the preview. A top blank in every locale shows the
+	   generic text, so a fresh deploy reads as the product. */
 	interface Props {
+		title: Localized;
+		lede: Localized;
 		blocks: ResolvedBlock[];
 	}
 
-	let { blocks }: Props = $props();
+	let { title, lede, blocks }: Props = $props();
 
-	let place = $derived(placeName(page.data.settings, localesState.current));
+	const code = $derived(localesState.current);
+	// The title is the editor's HTML, italic and line breaks: cleaned on its way in, as every
+	// stored rich text is.
+	const heading = $derived(sanitizeHtml(t(title, code)));
+	const intro = $derived(t(lede, code));
 </script>
 
 <main>
@@ -22,12 +28,9 @@
 		<AppMeta />
 		<div>
 			<h1>
-				{m('nav.brand')}<br />
-				{#if place}{m('home.title_b')} <em>{place}</em>.{:else}{m('home.title_b_generic')}.{/if}
+				{#if heading}{@html heading}{:else}{m('home.title_a')}<br />{m('home.title_b')}.{/if}
 			</h1>
-			<p class="lede">
-				{place ? m('home.lede', place) : m('home.lede_generic')}
-			</p>
+			<p class="lede">{intro || m('home.lede')}</p>
 		</div>
 	</section>
 	{#if blocks.length > 0}
@@ -56,10 +59,14 @@
 		line-height: 1.02;
 		max-width: 18ch;
 	}
-	.hero h1 em {
+	.hero h1 :global(em) {
 		font-style: italic;
 		color: var(--accent);
 		font-weight: 400;
+	}
+	/* the editor wraps the title in a paragraph; a second one is one more line */
+	.hero h1 :global(p) {
+		margin: 0;
 	}
 	.lede {
 		margin-top: 1.8rem;
