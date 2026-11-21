@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { beforeEach, test } from 'node:test';
 import { harness, IDS, ORIGIN, type Harness } from './testing';
+import { ToolError } from './tools';
 
 /* The write tools over the memory store: saving twice leaves the map as it is, the rules
    the screens enforce hold here too, HTML is cleaned before it is stored, and the line of
@@ -39,6 +40,19 @@ test('save_entities: the same sheet twice leaves the map as it is; with no id, t
 	const portalMaps = rows('map_nodes').filter((p) => p.node === IDS.portal);
 	assert.deepEqual(portalMaps.map((p) => p.map).sort(), [IDS.main, IDS.other].sort());
 	assert.equal(portalMaps.find((p) => p.map === IDS.main)?.id, 'mn0000000000002');
+});
+
+test('save_entities and save_category: a batch PocketBase refuses comes back with its cause and, for the sheet, what is saved', async () => {
+	const refusal = new ToolError('internal', 'PocketBase refused the batch write (403 Batch requests are not allowed.): its Batch API is off. Restart the app.');
+	const ids = await ok('save_entities', { entities: [registry] });
+	const store = h.store;
+	const real = store.batch.bind(store);
+	let calls = 0;
+	store.batch = async (ops) => (++calls === 2 ? Promise.reject(refusal) : real(ops));
+	const result = await refused('save_entities', { entities: [{ ...registry, label: { en: 'Civil Registry' } }, { category: 'service', label: { en: 'Tax Portal' }, maps: ['main'] }] }, 'internal', /entities\[1\] failed to save\. PocketBase refused the batch write \(403 Batch requests are not allowed\.\).*Restart the app\. The entities before it are saved: /);
+	assert.deepEqual(result.saved.map((i: { id: string }) => i.id), [ids.items[0].id]);
+	store.batch = async () => Promise.reject(refusal);
+	await refused('save_category', { slug: 'court', color_slot: 3, label: { en: 'Court' } }, 'internal', /^PocketBase refused the batch write/);
 });
 
 test('save_entities: an entity arrives whole, its HTML cleaned, its maps the full set, with its given id', async () => {

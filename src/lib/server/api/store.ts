@@ -2,7 +2,8 @@
    tools list whole collections and choose in memory: a map has hundreds of records, and the
    PocketBase filter language stays out of the tools. A batch is one transaction. */
 import type PocketBase from 'pocketbase';
-import type { RecordModel } from 'pocketbase';
+import { ClientResponseError, type RecordModel } from 'pocketbase';
+import { ToolError } from './tools/types';
 
 export type Data = Record<string, unknown>;
 
@@ -28,6 +29,23 @@ export interface Store {
 }
 
 const notFound = (err: unknown) => (err as { status?: number }).status === 404;
+
+/** PocketBase's answer when its Batch API is off (403, "Batch requests are not allowed.")
+    or the batch is larger than its limit (400, a refusal of the `requests` list itself,
+    where a failed record comes under `requests.<index>`): the deployment's setting, not the
+    agent's request. The boot turns the batch on (server/setup.ts, ensureBatchOn), so a
+    restart is the fix without the panel. The refusal the agent reads, or null. */
+export function batchRefusal(err: unknown): ToolError | null {
+	if (!(err instanceof ClientResponseError)) return null;
+	const data = err.response.data as Record<string, unknown> | undefined;
+	const requests = data?.requests as Record<string, unknown> | undefined;
+	const refused = err.status === 403 || (err.status === 400 && typeof requests?.code === 'string');
+	if (!refused) return null;
+	return new ToolError(
+		'internal',
+		`PocketBase refused the batch write (${err.status} ${err.message}): its Batch API is off, or below the size the API needs. Restart the app, which turns it on when it boots, or turn it on in the PocketBase panel (Settings > Application); then send the request again.`
+	);
+}
 
 export class PocketBaseStore implements Store {
 	constructor(private readonly pb: PocketBase) {}
@@ -66,6 +84,13 @@ export class PocketBaseStore implements Store {
 			else if (op.op === 'update') sub.update(op.id, op.data);
 			else sub.delete(op.id);
 		}
-		await batch.send();
+		try {
+			await batch.send();
+		} catch (err) {
+			const refusal = batchRefusal(err);
+			if (!refusal) throw err;
+			console.error('[api] pocketbase refused the batch', err);
+			throw refusal;
+		}
 	}
 }

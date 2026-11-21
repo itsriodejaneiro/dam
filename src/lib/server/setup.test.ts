@@ -1,7 +1,9 @@
-// What a boot writes to a collection: only what differs from the definition, named.
+// What a boot writes to a collection: only what differs from the definition, named; and
+// what it writes to PocketBase's settings: the batch, only when it is off or short.
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { collectionChanges } from './setup';
+import type PocketBase from 'pocketbase';
+import { BATCH, collectionChanges, ensureBatchOn } from './setup';
 
 // As PocketBase writes a collection back: every field key filled in, the index quoted.
 const held = {
@@ -84,5 +86,39 @@ describe('collectionChanges', () => {
 		const update = collectionChanges({ ...held, manageRule: 'x' }, { ...definition, createRule: null });
 		assert.deepEqual(update?.changes, ['~createRule']);
 		assert.equal('manageRule' in (update?.payload ?? {}), false);
+	});
+});
+
+/** A PocketBase whose settings hold `batch`, keeping what an update sends. */
+function withSettings(batch: Record<string, unknown>) {
+	const updates: Record<string, unknown>[] = [];
+	const pb = { settings: { async getAll() { return { batch, trustedProxy: { headers: ['CF-Connecting-IP'] } }; }, async update(data: Record<string, unknown>) { updates.push(data); } } } as unknown as PocketBase;
+	return { pb, updates };
+}
+
+describe('ensureBatchOn', () => {
+	test('a batch that is off goes on, by its key alone, and the log says so', async () => {
+		const { pb, updates } = withSettings({ ...BATCH, enabled: false });
+		const lines: string[] = [];
+		await ensureBatchOn(pb, (l) => lines.push(l.trim()));
+		assert.deepEqual(updates, [{ batch: BATCH }]);
+		assert.deepEqual(lines, ['~ batch api on']);
+	});
+
+	test('a batch that is on, at the size the API needs or more, is left alone', async () => {
+		const bigger = withSettings({ ...BATCH, maxRequests: 100, timeout: 30 });
+		await ensureBatchOn(bigger.pb, () => assert.fail('nothing to log'));
+		assert.deepEqual(bigger.updates, []);
+		const exact = withSettings({ ...BATCH });
+		await ensureBatchOn(exact.pb);
+		assert.deepEqual(exact.updates, []);
+	});
+
+	test('a batch below the size the API needs is raised to it', async () => {
+		for (const short of [{ maxRequests: 10 }, { timeout: 5 }, { maxBodySize: 1000 }]) {
+			const { pb, updates } = withSettings({ ...BATCH, ...short });
+			await ensureBatchOn(pb);
+			assert.deepEqual(updates, [{ batch: BATCH }], JSON.stringify(short));
+		}
 	});
 });

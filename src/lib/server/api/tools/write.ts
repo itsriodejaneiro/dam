@@ -255,8 +255,10 @@ export const saveEntities = tool({
 				await ctx.record({ tool: 'save_entities', collection: 'nodes', record: id, action: current ? 'update' : 'create', previous: current });
 				await ctx.store.batch(ops);
 			} catch (err) {
-				console.error('[api] save_entities failed', plan.at, err);
-				throw new ToolError('internal', `${plan.at} failed to save; the entities before it are saved: ${items.map((i) => i.id).join(', ') || 'none'}. Send the rest again.`, { saved: items });
+				// a refusal the store already named (the batch off) keeps its message; the rest is logged here
+				if (!(err instanceof ToolError)) console.error('[api] save_entities failed', plan.at, err);
+				const why = err instanceof ToolError ? ` ${err.message}` : '';
+				throw new ToolError('internal', `${plan.at} failed to save.${why} The entities before it are saved: ${items.map((i) => i.id).join(', ') || 'none'}. Send the rest again.`, { saved: items });
 			}
 			items.push({ id, created: !current, label: plan.texts[defaultLocale].label });
 		}

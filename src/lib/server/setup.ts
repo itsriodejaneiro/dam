@@ -4,11 +4,12 @@
    (scripts/setup-collections.ts) and the web endpoint (/setup).
 
    - setupSchema(pb): creates/updates every collection, with the data a change carries, the
-     home page record and the agents' API's service account: what the app runs when it
-     boots (boot.ts). Idempotent.
+     home page record, the agents' API's service account and PocketBase's batch on: what the
+     app runs when it boots (boot.ts). Idempotent.
    - setupCollections(pb): the schema, PocketBase's own settings (the rate limit of the auth
-     routes, the batch on), the settings record and, in a project nobody set up, the removal
-     of the accounts that came before it: what /setup and the CLI run. Idempotent.
+     routes, the proxy header, the batch), the settings record and, in a project nobody set
+     up, the removal of the accounts that came before it: what /setup and the CLI run.
+     Idempotent.
    - seedBaseData(pb, locales): fills a new project with the base categories (node_types),
      the main map, the example and the home (seed-example.ts), in the deploy's locales.
      The node_type slug comes from the label in the default locale (locales[0]).
@@ -214,7 +215,28 @@ const AUTH_RATE_LIMITS = [
 /** The agents' API writes an entity, its translations and its places on the maps in one
     transactional `POST /api/batch` (server/api): the batch ships off, and this turns it on.
     The size is one entity's: its record, a translation per locale and a row per map. */
-const BATCH = { enabled: true, maxRequests: 50, timeout: 10, maxBodySize: 0 };
+export const BATCH = { enabled: true, maxRequests: 50, timeout: 10, maxBodySize: 0 };
+
+type BatchSettings = Partial<typeof BATCH>;
+
+/** What a batch of the API's size needs: on, and with the room and the time of BATCH. A body
+    limit of 0 is PocketBase's "none". */
+export function batchBelow(batch: BatchSettings | undefined): boolean {
+	if (!batch?.enabled) return true;
+	return (batch.maxRequests ?? 0) < BATCH.maxRequests || (batch.timeout ?? 0) < BATCH.timeout || (batch.maxBodySize ?? 0) !== BATCH.maxBodySize;
+}
+
+/** The batch is the one PocketBase setting the boot owns: the API's writes fail without it,
+    and nobody tunes it by hand, so turning it on undoes no one's work. The rest of the
+    settings a deploy may adjust in the panel (the proxy header behind a CDN, a rate limit),
+    and the boot leaves them as they are: /setup and `db:setup` write them whole. PocketBase
+    merges a partial update, so only the `batch` key goes, and only when it is off or short. */
+export async function ensureBatchOn(pb: PocketBase, log: Logger = noop): Promise<void> {
+	const { batch } = (await pb.settings.getAll()) as { batch?: BatchSettings };
+	if (!batchBelow(batch)) return;
+	await pb.settings.update({ batch: BATCH });
+	log('  ~ batch api on');
+}
 
 /** PocketBase ships with rate limits off, and its stock rule list would limit every route
     once on, so the list is written whole. A deploy sits behind one reverse proxy, the only
@@ -292,8 +314,9 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 }
 
 /** Creates/updates every collection, with the data a change carries (a field swapped, the
-    home record the editor opens). Idempotent, and what the app runs when it boots
-    (boot.ts), so a deploy on a new version has its schema before the first request. */
+    home record the editor opens), and what the agents' API needs around them: its account
+    and PocketBase's batch on. Idempotent, and what the app runs when it boots (boot.ts), so
+    a deploy on a new version has its schema before the first request. */
 export async function setupSchema(pb: PocketBase, log: Logger = noop): Promise<void> {
 	const up = (name: string, definition: Definition) => upsertCollection(pb, name, definition, log);
 
@@ -547,6 +570,7 @@ export async function setupSchema(pb: PocketBase, log: Logger = noop): Promise<v
 	});
 
 	await ensureServiceAccount(pb, log);
+	await ensureBatchOn(pb, log);
 }
 
 /**
