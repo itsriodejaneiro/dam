@@ -100,6 +100,7 @@ interface RecordWithNodeTypeTranslations {
 	color_slot: number;
 	layer_order: number;
 	base_size: number;
+	show_labels: boolean;
 	expand?: { node_type_translations_via_node_type?: NodeTypeTranslation[] };
 	label?: string;
 	label_plural?: string;
@@ -114,6 +115,7 @@ export function localizedNodeType(nt: RecordWithNodeTypeTranslations, code: stri
 		color_slot: nt.color_slot,
 		layer_order: nt.layer_order,
 		base_size: nt.base_size,
+		show_labels: nt.show_labels,
 		label: pick?.label ?? nt.label ?? '',
 		label_plural: pick?.label_plural ?? nt.label_plural ?? '',
 		is_fallback: isFallback(pick, code)

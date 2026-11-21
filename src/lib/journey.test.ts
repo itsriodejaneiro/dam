@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { fromPublished, toPublished } from './journey';
+import { fromPublished, labelShown, toPublished } from './journey';
 import { samePublished } from './publish';
 import type { Journey, JourneyStep } from './types/journey';
 
@@ -96,4 +96,16 @@ test('a change in a text, the order or a highlight is a change', () => {
 		toPublished({ ...journey, map: 'm2' }, steps)
 	];
 	for (const other of changed) assert.equal(samePublished(copy, other), false);
+});
+
+test('labelShown: a category with the switch on names its nodes always; off, only while someone looks at the node', () => {
+	const always = { show_labels: true };
+	const onDemand = { show_labels: false };
+	assert.equal(labelShown(always, {}), true);
+	assert.equal(labelShown(always, { hovered: false, focused: false, selected: false, highlighted: false }), true);
+	assert.equal(labelShown(onDemand, {}), false);
+	assert.equal(labelShown(onDemand, { hovered: false, focused: false, selected: false, highlighted: false, matched: false }), false);
+	for (const key of ['hovered', 'focused', 'selected', 'highlighted', 'matched'] as const) {
+		assert.equal(labelShown(onDemand, { [key]: true }), true, key);
+	}
 });

@@ -67,6 +67,7 @@ const CategoryInput = z.strictObject({
 	color_slot: z.int().min(1).max(8).describe('one of the 8 colours of the theme'),
 	layer_order: z.int().min(1).optional().describe('its lane on the map, from the top; a new category goes last'),
 	base_size: z.int().min(8).max(80).optional().describe('the size of its nodes, 24 by default'),
+	show_labels: z.boolean().optional().describe('whether its nodes carry their name on the map, true by default; off, the name shows on hover, focus, selection and highlight'),
 	label: LocalizedText,
 	label_plural: LocalizedText.optional()
 });
@@ -74,7 +75,7 @@ const CategoryInput = z.strictObject({
 export const saveCategory = tool({
 	name: 'save_category',
 	title: 'Save a category',
-	description: 'Creates or updates a category (a lane of the map): slug, colour, size, order, label and plural per locale. With no id, the slug finds it.',
+	description: 'Creates or updates a category (a lane of the map): slug, colour, size, order, whether its nodes show their labels, label and plural per locale. With no id, the slug finds it.',
 	input: CategoryInput,
 	annotations: { idempotentHint: true },
 	async run(ctx, input) {
@@ -89,7 +90,8 @@ export const saveCategory = tool({
 			slug: input.slug,
 			color_slot: input.color_slot,
 			layer_order: input.layer_order ?? current?.layer_order ?? Math.max(0, ...categories.map((c) => c.layer_order)) + 1,
-			base_size: input.base_size ?? current?.base_size ?? 24
+			base_size: input.base_size ?? current?.base_size ?? 24,
+			show_labels: input.show_labels ?? current?.show_labels ?? true
 		};
 		const existing = await ctx.store.list<Translation>('node_type_translations');
 		const texts = textsByLocale(ctx, label, 'label', { label_plural: plural });

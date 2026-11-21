@@ -25,8 +25,8 @@ export const IDS = {
 /** Two categories, two maps, two entities on the main map, one connection and one journey. */
 export function seedMap(store: MemoryStore) {
 	store.seed('settings', { id: 'set000000000001', name: { en: 'Exampleland' }, locales: ['en', 'pt'], default_locale: 'en', theme: 'legacy', flag: '', journeys: true });
-	store.seed('node_types', { id: IDS.agency, slug: 'agency', color_slot: 1, layer_order: 1, base_size: 26 });
-	store.seed('node_types', { id: IDS.service, slug: 'service', color_slot: 2, layer_order: 2, base_size: 24 });
+	store.seed('node_types', { id: IDS.agency, slug: 'agency', color_slot: 1, layer_order: 1, base_size: 26, show_labels: true });
+	store.seed('node_types', { id: IDS.service, slug: 'service', color_slot: 2, layer_order: 2, base_size: 24, show_labels: true });
 	store.seed('node_type_translations', { id: 'ctt0000000000a1', node_type: IDS.agency, locale: 'en', label: 'Agency', label_plural: 'Agencies' });
 	store.seed('node_type_translations', { id: 'ctt0000000000a2', node_type: IDS.agency, locale: 'pt', label: 'Órgão', label_plural: 'Órgãos' });
 	store.seed('node_type_translations', { id: 'ctt0000000000s1', node_type: IDS.service, locale: 'en', label: 'Service', label_plural: 'Services' });

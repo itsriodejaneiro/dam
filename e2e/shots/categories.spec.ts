@@ -10,7 +10,7 @@ test('the categories of the graph', async ({ page }) => {
 	const firstRow = page.locator('.admin-row', { hasText: 'Agencies' });
 	await firstRow.getByRole('button', { name: 'edit' }).click();
 	const form = page.getByRole('dialog').filter({ hasText: 'Edit category' });
-	await s.shot(form.getByText('Base size'), { of: form });
+	await s.shot(form.getByText('Show the labels'), { of: form });
 	await form.getByRole('button', { name: 'Cancel' }).click();
 
 	await firstRow.getByRole('button', { name: 'remove' }).click();

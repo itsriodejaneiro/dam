@@ -36,6 +36,12 @@ The map fills the width of the window. To see more detail, use your browser's zo
 
 A deployment with more than one map shows a tab for each above the graph. See [Maps](./maps.md).
 
+## Names on hover
+
+Every entity carries its name under its circle. A crowded [category](./categories.md#the-form) can keep its names for when you look: with **Show the labels** off, the name appears when you point at the entity, focus it with the keyboard or select it, and goes away when you leave it.
+
+![A layer that names its entities on hover: the name of the one under the pointer shows, the others stay quiet](/screens/map-4.png)
+
 ## For those who edit
 
 Signed in, the panel adds two buttons, and the position of the entity appears beside **release position**.

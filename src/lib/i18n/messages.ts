@@ -1004,6 +1004,24 @@ export const messages = {
 		fr: 'Taille de base',
 		es: 'Tamaño base'
 	},
+	'categories.field.show_labels': {
+		pt: 'Mostrar os rótulos',
+		en: 'Show the labels',
+		fr: 'Afficher les libellés',
+		es: 'Mostrar las etiquetas'
+	},
+	'categories.field.show_labels_hint': {
+		pt: 'Desligado, o nome de um nó desta categoria aparece só ao apontar, no foco, na seleção e quando uma jornada o destaca.',
+		en: 'Off, the name of a node of this category shows only on hover, focus, selection and when a journey highlights it.',
+		fr: "Désactivé, le nom d'un nœud de cette catégorie n'apparaît qu'au survol, au focus, à la sélection et quand un parcours le met en avant.",
+		es: 'Apagado, el nombre de un nodo de esta categoría aparece solo al apuntar, con el foco, al seleccionarlo y cuando un recorrido lo destaca.'
+	},
+	'categories.labels_on_demand': {
+		pt: 'rótulos só ao apontar',
+		en: 'labels on hover',
+		fr: 'libellés au survol',
+		es: 'etiquetas al apuntar'
+	},
 	'categories.error.save': {
 		pt: 'Erro ao salvar categoria.',
 		en: 'Failed to save category.',

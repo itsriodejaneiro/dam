@@ -30,7 +30,8 @@
 		label: {} as Localized,
 		label_plural: {} as Localized,
 		color_slot: 1,
-		base_size: 8
+		base_size: 8,
+		show_labels: true
 	});
 	let saving = $state(false);
 	let error = $state('');
@@ -65,7 +66,8 @@
 			label: {} as Localized,
 			label_plural: {} as Localized,
 			color_slot: 1,
-			base_size: 8
+			base_size: 8,
+			show_labels: true
 		};
 		error = '';
 		dialogOpen = true;
@@ -87,7 +89,8 @@
 			label: labelByLocale,
 			label_plural: labelPluralByLocale,
 			color_slot: t.color_slot,
-			base_size: t.base_size
+			base_size: t.base_size,
+			show_labels: t.show_labels
 		};
 		error = '';
 		dialogOpen = true;
@@ -113,7 +116,8 @@
 					{
 						slug: form.slug,
 						color_slot: form.color_slot,
-						base_size: form.base_size
+						base_size: form.base_size,
+						show_labels: form.show_labels
 					},
 					translations
 				);
@@ -125,6 +129,7 @@
 						slug: form.slug,
 						color_slot: form.color_slot,
 						base_size: form.base_size,
+						show_labels: form.show_labels,
 						layer_order: nextOrder
 					},
 					translations
@@ -260,7 +265,12 @@
 									<span class="sub">{tv.label_plural}</span>
 								{/if}
 							</span>
-							<span class="col-slug">{t.slug}</span>
+							<span class="col-slug">
+								{t.slug}
+								{#if !t.show_labels}
+									<span class="sub">{m('categories.labels_on_demand')}</span>
+								{/if}
+							</span>
 							<span class="col-color">
 								<span
 									class="color-dot"
@@ -361,6 +371,13 @@
 				required
 			/>
 		</div>
+		<div class="admin-field">
+			<label class="check">
+				<input type="checkbox" bind:checked={form.show_labels} />
+				{m('categories.field.show_labels')}
+			</label>
+			<p class="hint">{m('categories.field.show_labels_hint')}</p>
+		</div>
 		{#if error}
 			<p class="admin-error">{error}</p>
 		{/if}
@@ -435,7 +452,8 @@
 		grid-template-columns: 3rem 1fr 1fr 3rem auto;
 	}
 
-	.col-label .sub {
+	.col-label .sub,
+	.col-slug .sub {
 		display: block;
 		font-size: 0.78rem;
 		color: var(--text-soft);

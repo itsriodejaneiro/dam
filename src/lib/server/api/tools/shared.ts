@@ -93,6 +93,7 @@ export interface CategoryView {
 	color_slot: number;
 	layer_order: number;
 	base_size: number;
+	show_labels: boolean;
 	label: Localized;
 	label_plural: Localized;
 }
@@ -116,6 +117,7 @@ export async function loadCategories(store: Store): Promise<CategoryView[]> {
 			color_slot: Number(t.color_slot),
 			layer_order: Number(t.layer_order),
 			base_size: Number(t.base_size),
+			show_labels: Boolean(t.show_labels),
 			label: localized(texts.get(t.id), 'label'),
 			label_plural: localized(texts.get(t.id), 'label_plural')
 		}))

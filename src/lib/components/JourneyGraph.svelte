@@ -2,7 +2,7 @@
 	import type { NodeType } from '$lib/services/types';
 	import type { CameraState, GraphHighlight, VisNode, VisEdge } from '$lib/types/journey';
 	import { localesState, localizedNode, localizedNodeType, m } from '$lib/i18n';
-	import { canvasHeight, laneTops, VIS_W } from '$lib/journey';
+	import { canvasHeight, labelShown, laneTops, VIS_W } from '$lib/journey';
 
 	interface Props {
 		nodes: VisNode[];
@@ -162,11 +162,21 @@
 		return `${label(e.source)} → ${label(e.target)}`;
 	}
 
+	// The node under the pointer and the one with keyboard focus: a category with the
+	// labels switch off names a node only then (labelShown).
+	let hoveredId = $state<string | null>(null);
+	let focusedId = $state<string | null>(null);
+
+	function focusNode(ev: FocusEvent, n: VisNode) {
+		focusedId = (ev.currentTarget as Element).matches(':focus-visible') ? n.id : null;
+	}
+
 	// Tooltip
 	let containerEl = $state<HTMLDivElement | null>(null);
 	let tooltip = $state({ x: 0, y: 0, visible: false, label: '' });
 
 	function showTooltip(ev: PointerEvent, n: VisNode) {
+		hoveredId = n.id;
 		if (!containerEl) return;
 		const rect = containerEl.getBoundingClientRect();
 		const v = viewByNodeId.get(n.id);
@@ -186,6 +196,7 @@
 	}
 
 	function hideTooltip() {
+		hoveredId = null;
 		tooltip.visible = false;
 	}
 </script>
@@ -280,6 +291,8 @@
 						onpointerenter={reacts ? (ev: PointerEvent) => showTooltip(ev, n) : undefined}
 						onpointermove={reacts ? moveTooltip : undefined}
 						onpointerleave={reacts ? hideTooltip : undefined}
+						onfocus={reacts ? (ev: FocusEvent) => focusNode(ev, n) : undefined}
+						onblur={reacts ? () => (focusedId = null) : undefined}
 						role={reacts ? 'button' : undefined}
 						tabindex={reacts ? 0 : undefined}
 						aria-label={reacts
@@ -304,6 +317,12 @@
 						></circle>
 						<text
 							class="node-label"
+							class:on-demand={!n.type.show_labels}
+							class:named={labelShown(n.type, {
+								hovered: hoveredId === n.id,
+								focused: focusedId === n.id,
+								highlighted: hl
+							})}
 							x={n.x ?? 0}
 							y={(n.y ?? 0) + sizeOf(n) + 14}
 							text-anchor="middle"
@@ -432,6 +451,17 @@
 	.vis-node.dim .node-label {
 		opacity: 0.15;
 	}
+	/* A category with the labels switch off names a node only while someone looks at it. */
+	.vis-node .node-label.on-demand {
+		opacity: 0;
+		transition: opacity 0.15s ease;
+	}
+	.vis-node .node-label.on-demand.named {
+		opacity: 1;
+	}
+	.vis-node.dim .node-label.on-demand.named {
+		opacity: 0.15;
+	}
 	.node-label {
 		font-family: 'Fira Sans', sans-serif;
 		font-size: 11px;
@@ -475,7 +505,7 @@
 		.camera {
 			transition: none;
 		}
-		.edge, .vis-node, .node-circle, .node-label {
+		.edge, .vis-node, .node-circle, .node-label, .vis-node .node-label.on-demand {
 			transition: none;
 		}
 	}

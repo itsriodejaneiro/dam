@@ -23,6 +23,8 @@ export interface NodeType extends RecordModel {
 	color_slot: number;
 	layer_order: number;
 	base_size: number;
+	/** Off, its nodes carry their name only on hover, focus, selection and highlight. */
+	show_labels: boolean;
 	expand?: { node_type_translations_via_node_type?: NodeTypeTranslation[] };
 }
 
@@ -85,6 +87,7 @@ export interface NodeTypeView {
 	color_slot: number;
 	layer_order: number;
 	base_size: number;
+	show_labels: boolean;
 	label: string;
 	label_plural: string;
 }

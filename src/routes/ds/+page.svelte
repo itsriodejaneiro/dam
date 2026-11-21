@@ -81,6 +81,7 @@
 		layer_order,
 		color_slot,
 		base_size: 10,
+		show_labels: true,
 		expand: {
 			node_type_translations_via_node_type: Object.entries(label).map(([locale, text]) => ({
 				...mockRecord(`${id}-${locale}`),

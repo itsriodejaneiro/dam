@@ -331,6 +331,7 @@ export async function setupSchema(pb: PocketBase, log: Logger = noop): Promise<v
 		]
 	});
 
+	const labelsSwitchIsNew = await categoriesPredateShowLabels(pb);
 	const nodeTypesId = await up('node_types', {
 		name: 'node_types',
 		type: 'base',
@@ -340,10 +341,13 @@ export async function setupSchema(pb: PocketBase, log: Logger = noop): Promise<v
 			{ name: 'slug', type: 'text', required: true },
 			{ name: 'color_slot', type: 'number', required: true, min: 1, max: 8 },
 			{ name: 'layer_order', type: 'number', required: true },
-			{ name: 'base_size', type: 'number', required: true }
+			{ name: 'base_size', type: 'number', required: true },
+			// Off, a node of the category carries its name only on hover, focus, selection and highlight.
+			{ name: 'show_labels', type: 'bool' }
 		],
 		indexes: ['CREATE UNIQUE INDEX idx_node_types_slug ON node_types (slug)']
 	});
+	if (labelsSwitchIsNew) await keepLabelsShowing(pb, log);
 
 	const nodesId = await up('nodes', {
 		name: 'nodes',
@@ -589,6 +593,25 @@ async function journeysPublishedByFlag(pb: PocketBase): Promise<string[] | null>
 	}
 	const flagged = await pb.collection('journeys').getFullList({ filter: 'published = true', fields: 'id' });
 	return flagged.map((r) => r.id);
+}
+
+/** True when `node_types` exists without `show_labels`: the switch is new to this database. */
+async function categoriesPredateShowLabels(pb: PocketBase): Promise<boolean> {
+	try {
+		const { fields } = await pb.collections.getOne('node_types');
+		return !(fields as { name: string }[]).some((f) => f.name === 'show_labels');
+	} catch (err: unknown) {
+		if (is404(err)) return false;
+		throw err;
+	}
+}
+
+/** A bool field a PocketBase adds reads false: the categories that predate the switch get it
+    on, as their labels showed before it existed. */
+async function keepLabelsShowing(pb: PocketBase, log: Logger): Promise<void> {
+	const rows = await pb.collection('node_types').getFullList({ fields: 'id' });
+	for (const row of rows) await pb.collection('node_types').update(row.id, { show_labels: true });
+	if (rows.length > 0) log(`  ~ node_types: show_labels on, ${rows.length} categories`);
 }
 
 /** A journey published by the flag gets its copy from the edit, as Publish writes it. */
@@ -948,7 +971,8 @@ export async function seedBaseData(
 				slug,
 				color_slot: cat.color_slot,
 				layer_order: cat.layer_order,
-				base_size: cat.base_size
+				base_size: cat.base_size,
+				show_labels: true
 			});
 			ntId = created.id;
 			log(`  + category: ${slug}`);

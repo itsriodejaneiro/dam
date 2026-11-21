@@ -1,5 +1,6 @@
-// Screens of "The map": the graph for a visitor, a node's panel, and what an editor adds.
-import { expect, screens, signIn, test } from './lib';
+// Screens of "The map": the graph for a visitor, a node's panel, a layer with its names on
+// hover, and what an editor adds.
+import { expect, screens, signIn, superuserClient, test } from './lib';
 
 test('the map, for a visitor and for an editor', async ({ page }) => {
 	const s = screens(page, 'map');
@@ -15,6 +16,23 @@ test('the map, for a visitor and for an editor', async ({ page }) => {
 
 	await node.click();
 	await s.shot(page.locator('aside.info h3', { hasText: 'Public portal' }));
+
+	// the credentials layer keeps its names for hover, for the length of one picture
+	const pb = await superuserClient();
+	const credential = await pb.collection('node_types').getFirstListItem('slug = "credential"');
+	await pb.collection('node_types').update(credential.id, { show_labels: false });
+	try {
+		await page.goto('/maps/main');
+		const account = page.locator('.vis-node', { hasText: 'Administrator account' });
+		const name = account.locator('.node-label');
+		await expect(name).toHaveClass(/on-demand/);
+		await expect(name).not.toHaveClass(/named/);
+		await account.hover();
+		await expect(name).toHaveClass(/named/);
+		await s.shot(page.locator('.tooltip.visible'), { hover: true });
+	} finally {
+		await pb.collection('node_types').update(credential.id, { show_labels: true });
+	}
 
 	await signIn(page);
 	await page.goto('/maps/main');

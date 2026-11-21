@@ -110,6 +110,14 @@ test('save_category and save_map: the slug finds the record, the main map is not
 	assert.deepEqual([updated.created, updated.id], [false, created.id]);
 	assert.deepEqual(updated.category.label, { en: 'Domain', pt: 'Domínio' });
 	await refused('save_category', { id: IDS.service, slug: 'agency', color_slot: 1, label: { en: 'X' } }, 'conflict');
+	// the labels switch: on by default, kept when the sheet leaves it out, read back by get_deployment
+	assert.equal(created.category.show_labels, true);
+	const quiet = await ok('save_category', { slug: 'domain', color_slot: 4, show_labels: false, label: { en: 'Domain' } });
+	assert.equal(quiet.category.show_labels, false);
+	const kept = await ok('save_category', { slug: 'domain', color_slot: 4, label: { en: 'Domain' } });
+	assert.equal(kept.category.show_labels, false);
+	const deployment = await ok('get_deployment', {});
+	assert.deepEqual(deployment.categories.map((c: any) => [c.slug, c.show_labels]), [['agency', true], ['service', true], ['domain', false]]);
 	await refused('save_map', { slug: 'main', label: { en: 'Renamed' } }, 'bad_request', /main map/);
 	await refused('save_map', { id: IDS.main, slug: 'principal', label: { en: 'Renamed' } }, 'bad_request', /main map/);
 	const map = await ok('save_map', { slug: 'regional', label: { en: 'Regional' } });

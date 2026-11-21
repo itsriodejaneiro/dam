@@ -96,6 +96,30 @@ export function liveHighlight(
 	};
 }
 
+/** What a graph knows of a node when it draws the node's label. */
+export interface LabelState {
+	/** The pointer is over it. */
+	hovered?: boolean;
+	/** It has keyboard focus. */
+	focused?: boolean;
+	/** It is the selected node of the map. */
+	selected?: boolean;
+	/** A journey step highlights it. */
+	highlighted?: boolean;
+	/** A search found it. */
+	matched?: boolean;
+}
+
+/**
+ * Whether a node's label shows. A category with `show_labels` names its nodes always; one
+ * without names a node only while someone looks at it, so a dense lane stays quiet and no
+ * node is ever nameless. Both graphs, the map's and the journey's, ask this.
+ */
+export function labelShown(type: Pick<NodeType, 'show_labels'>, state: LabelState): boolean {
+	if (type.show_labels) return true;
+	return Boolean(state.hovered || state.focused || state.selected || state.highlighted || state.matched);
+}
+
 /** What a step lights up; null when it chooses nothing, and the whole graph shows. */
 export function stepHighlight(step: StepHighlight): GraphHighlight | null {
 	if (step.highlight_nodes.length === 0 && step.highlight_edges.length === 0) return null;

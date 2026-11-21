@@ -4,7 +4,7 @@ A category is a kind of entity and a layer of [the map](./map.md). `/admin/categ
 
 ![The list of categories](/screens/categories-1.png)
 
-The arrows of a row move the category up or down, which moves its whole layer on the map.
+The arrows of a row move the category up or down, which moves its whole layer on the map. A category that keeps its names for hover says **labels on hover** under its slug.
 
 ## The form
 
@@ -19,6 +19,7 @@ The arrows of a row move the category up or down, which moves its whole layer on
 | **Slug** | the identifier in the address of a filter: lowercase letters, numbers and hyphens |
 | **Color** | one of the eight colors of the [theme](./configure.md#the-fields) |
 | **Base size** | the size of the circle of an entity with no connections |
+| **Show the labels** | on, every entity of the category carries its name on the map; off, the name appears only when you point at the entity, focus it with the keyboard, select it, or a journey step highlights it. Turn it off for a crowded layer, where the names would overlap |
 
 ## Remove a category
 

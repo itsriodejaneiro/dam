@@ -7,6 +7,7 @@ export interface NodeTypeInput {
 	color_slot?: number;
 	layer_order?: number;
 	base_size?: number;
+	show_labels?: boolean;
 }
 
 export interface NodeTypeTranslationInput {
@@ -34,7 +35,7 @@ export async function getNodeType(id: string): Promise<NodeType> {
 }
 
 export async function createNodeType(
-	data: { slug: string; color_slot: number; layer_order: number; base_size: number },
+	data: { slug: string; color_slot: number; layer_order: number; base_size: number; show_labels: boolean },
 	translations: Record<string, NodeTypeTranslationInput>
 ): Promise<NodeType> {
 	const created = await pb.collection('node_types').create<NodeType>(data);
