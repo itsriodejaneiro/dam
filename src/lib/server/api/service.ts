@@ -31,18 +31,28 @@ async function serviceAccountId(pb: PocketBase): Promise<string> {
 	return found.id;
 }
 
+async function impersonate(su: PocketBase): Promise<{ token: string; record: RecordModel }> {
+	const id = await serviceAccountId(su);
+	return su.send(`/api/collections/users/impersonate/${id}`, { method: 'POST', body: { duration: TOKEN_SECONDS } });
+}
+
 /** A client signed in as the service account, shared by every request while its token lasts. */
 export async function serviceClient(): Promise<PocketBase> {
 	if (cached && Date.now() < cached.until) return cached.client;
 	const su = await getSuperuserClient();
-	const id = await serviceAccountId(su);
-	const { token, record } = await su.send<{ token: string; record: RecordModel }>(`/api/collections/users/impersonate/${id}`, {
-		method: 'POST',
-		body: { duration: TOKEN_SECONDS }
-	});
+	let signed: { token: string; record: RecordModel };
+	try {
+		signed = await impersonate(su);
+	} catch (err) {
+		// a reset or a new setup while this process runs: the account this process remembers is
+		// gone, and the one the setup made again has another id
+		if ((err as { status?: number }).status !== 404) throw err;
+		accountId = null;
+		signed = await impersonate(su);
+	}
 	const client = new PocketBase(serverPbUrl());
 	client.autoCancellation(false);
-	client.authStore.save(token, record);
+	client.authStore.save(signed.token, signed.record);
 	cached = { client, until: Date.now() + KEEP_MS };
 	return client;
 }
