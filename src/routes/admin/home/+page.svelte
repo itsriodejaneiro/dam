@@ -458,7 +458,7 @@
 						</div>
 						<div class="admin-field">
 							<span class="field-label">{m('home_admin.field.lede')}</span>
-							<LocalizedInput id="top-lede" bind:value={top.lede} required={false} locales={shownLocales} />
+							<LocalizedInput id="top-lede" bind:value={top.lede} required={false} multiline locales={shownLocales} />
 						</div>
 					</div>
 				</article>

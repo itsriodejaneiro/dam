@@ -8,7 +8,7 @@ A new deployment starts with an example: a top, a text about the map, a picture 
 
 ## The top
 
-The **Top** card holds the title and the lede, in each language. The title takes italics, for the words that stand out, and line breaks: Enter starts a new line. The lede is plain text.
+The **Top** card holds the title and the lede, in each language. The title takes italics, for the words that stand out, and line breaks: Enter starts a new line. The lede is plain text, in a field that grows with it.
 
 A language left empty shows the default language. With the default language empty too, the page shows the generic text, "Digital Assets Map of the digital infrastructure" and its lede, so a deployment that writes nothing at the top reads as the product.
 
