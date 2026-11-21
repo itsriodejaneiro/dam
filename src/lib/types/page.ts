@@ -51,14 +51,28 @@ export interface LogosBlock {
 export type Block = TextBlock | ImageBlock | CardsBlock | LogosBlock;
 export type BlockType = Block['type'];
 
+/** The top of the page: the title, rich text with italic and line breaks, and the lede, plain. */
+export interface PageTop {
+	title: Localized;
+	lede: Localized;
+}
+
+/** What Publish writes in one go: the top and the blocks, as the visitor reads them. */
+export interface PageCopy extends PageTop {
+	blocks: Block[];
+}
+
 /**
- * A `pages` record. `blocks` is the edit; `published` is the copy the visitor reads, null
- * while the page is not published. `images` holds the files both point at.
+ * A `pages` record. `title`, `lede` and `blocks` are the edit; `published` is the copy the
+ * visitor reads, null while the page is not published. `images` holds the files both point
+ * at. A copy written before the top had fields holds the blocks alone (`parseCopy`).
  */
 export interface Page extends RecordModel {
 	slug: string;
+	title: Localized | null;
+	lede: Localized | null;
 	blocks: Block[] | null;
-	published: Block[] | null;
+	published: PageCopy | Block[] | null;
 	images: string[];
 }
 

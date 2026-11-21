@@ -1,16 +1,16 @@
 import { pb } from './pb';
 import { runPublishAction, type PublishAction } from './publishing';
 import { HOME } from '$lib/page';
-import type { Block, Page } from '$lib/types/page';
+import type { Page, PageCopy } from '$lib/types/page';
 
 /** The home: its edit, its copy and its files. */
 export async function getHome(): Promise<Page> {
 	return await pb.collection('pages').getFirstListItem<Page>(pb.filter('slug = {:slug}', { slug: HOME }));
 }
 
-/** Writes the edit; what the visitor reads changes only through `runHomeAction`. */
-export async function saveBlocks(id: string, blocks: Block[]): Promise<Page> {
-	return await pb.collection('pages').update<Page>(id, { blocks });
+/** Writes the edit, top and blocks; what the visitor reads changes only through `runHomeAction`. */
+export async function saveEdit(id: string, edit: PageCopy): Promise<Page> {
+	return await pb.collection('pages').update<Page>(id, edit);
 }
 
 /**
@@ -31,6 +31,6 @@ export function imageUrl(page: Pick<Page, 'id' | 'collectionId' | 'collectionNam
 }
 
 /** Runs one of the server's publishing actions on the home (`/admin/home`). */
-export function runHomeAction(action: PublishAction): Promise<Block[] | null> {
+export function runHomeAction(action: PublishAction): Promise<PageCopy | null> {
 	return runPublishAction('/admin/home', action, 'home_admin.error.save');
 }

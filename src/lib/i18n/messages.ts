@@ -55,7 +55,6 @@ export const messages = {
 	// ──────────────────────────────────────────────
 	// NAV (SiteHeader)
 	// ──────────────────────────────────────────────
-	'nav.brand': { pt: 'Digital Assets Map', en: 'Digital Assets Map', fr: 'Digital Assets Map', es: 'Digital Assets Map' },
 	'nav.start': { pt: 'início', en: 'start', fr: 'accueil', es: 'inicio' },
 	'nav.map': { pt: 'mapas', en: 'maps', fr: 'cartes', es: 'mapas' },
 	'nav.journeys': { pt: 'jornadas', en: 'journeys', fr: 'parcours', es: 'recorridos' },
@@ -532,30 +531,19 @@ export const messages = {
 	// ──────────────────────────────────────────────
 	// HOME
 	// ──────────────────────────────────────────────
+	// The generic top, two lines and a lede: what the home shows while the deploy writes none.
+	'home.title_a': { pt: 'Digital Assets Map', en: 'Digital Assets Map', fr: 'Digital Assets Map', es: 'Digital Assets Map' },
 	'home.title_b': {
-		pt: 'da infraestrutura digital de',
-		en: 'of the digital infrastructure of',
-		fr: "de l'infrastructure numérique de",
-		es: 'de la infraestructura digital de'
-	},
-	'home.title_b_generic': {
 		pt: 'da infraestrutura digital',
 		en: 'of the digital infrastructure',
 		fr: "de l'infrastructure numérique",
 		es: 'de la infraestructura digital'
 	},
-	'home.lede_generic': {
+	'home.lede': {
 		pt: 'Mapeamento do ecossistema de identidade, credenciais, sistemas de informação e serviços públicos.',
 		en: 'Mapping the ecosystem of identity, credentials, information systems and public services.',
 		fr: "Cartographie de l'écosystème d'identité, d'identifiants, de systèmes d'information et de services publics.",
 		es: 'Mapeo del ecosistema de identidad, credenciales, sistemas de información y servicios públicos.'
-	},
-	// {0} = the deploy's name (settings); with none, the *_generic key
-	'home.lede': {
-		pt: 'Mapeamento do ecossistema de identidade, credenciais, sistemas de informação e serviços públicos do Estado de {0}.',
-		en: 'Mapping the ecosystem of identity, credentials, information systems and public services of the State of {0}.',
-		fr: "Cartographie de l'écosystème d'identité, d'identifiants, de systèmes d'information et de services publics de l'État de {0}.",
-		es: 'Mapeo del ecosistema de identidad, credenciales, sistemas de información y servicios públicos del Estado de {0}.'
 	},
 
 	// ──────────────────────────────────────────────
@@ -1049,18 +1037,11 @@ export const messages = {
 	// MAP VIEW (/maps/[slug])
 	// ──────────────────────────────────────────────
 	'map_view.title': { pt: 'Mapas.', en: 'Maps.', fr: 'Cartes.', es: 'Mapas.' },
-	'map_view.lede_generic': {
+	'map_view.lede': {
 		pt: 'Cada mapa é um recorte temático do ecossistema digital: faixas horizontais agrupam entidades do mesmo tipo, da autoridade institucional no topo ao responsável humano embaixo, e as arestas que cruzam essas camadas revelam como órgãos, sistemas, credenciais e pessoas se sustentam mutuamente.',
 		en: 'Each map is a thematic slice of the digital ecosystem: horizontal bands group entities of the same type, from institutional authority at the top to human responsibility at the bottom, and the edges crossing these layers reveal how agencies, systems, credentials and people sustain each other.',
 		fr: "Chaque carte est une coupe thématique de l'écosystème numérique : des bandes horizontales regroupent les entités de même type, de l'autorité institutionnelle en haut au responsable humain en bas, et les arêtes qui traversent ces couches révèlent comment organismes, systèmes, identifiants et personnes se soutiennent mutuellement.",
 		es: 'Cada mapa es un recorte temático del ecosistema digital: franjas horizontales agrupan entidades del mismo tipo, desde la autoridad institucional arriba hasta el responsable humano abajo, y las aristas que cruzan esas capas revelan cómo organismos, sistemas, credenciales y personas se sostienen mutuamente.'
-	},
-	// {0} = the deploy's name (settings); with none, the *_generic key
-	'map_view.lede': {
-		pt: 'Cada mapa é um recorte temático do ecossistema digital de {0}: faixas horizontais agrupam entidades do mesmo tipo, da autoridade institucional no topo ao responsável humano embaixo, e as arestas que cruzam essas camadas revelam como órgãos, sistemas, credenciais e pessoas se sustentam mutuamente.',
-		en: 'Each map is a thematic slice of the digital ecosystem of {0}: horizontal bands group entities of the same type, from institutional authority at the top to human responsibility at the bottom, and the edges crossing these layers reveal how agencies, systems, credentials and people sustain each other.',
-		fr: "Chaque carte est une coupe thématique de l'écosystème numérique de {0} : des bandes horizontales regroupent les entités de même type, de l'autorité institutionnelle en haut au responsable humain en bas, et les arêtes qui traversent ces couches révèlent comment organismes, systèmes, identifiants et personnes se soutiennent mutuellement.",
-		es: 'Cada mapa es un recorte temático del ecosistema digital de {0}: franjas horizontales agrupan entidades del mismo tipo, desde la autoridad institucional arriba hasta el responsable humano abajo, y las aristas que cruzan esas capas revelan cómo organismos, sistemas, credenciales y personas se sostienen mutuamente.'
 	},
 	'map_view.loading': {
 		pt: 'Carregando mapa…',
@@ -1155,18 +1136,11 @@ export const messages = {
 	// JOURNEYS
 	// ──────────────────────────────────────────────
 	'journeys.title': { pt: 'Jornadas', en: 'Journeys', fr: 'Parcours', es: 'Recorridos' },
-	'journeys.lede_generic': {
+	'journeys.lede': {
 		pt: 'Percursos guiados pelo ecossistema digital — descubra como os cidadãos navegam pelos serviços públicos para alcançar objectivos concretos.',
 		en: 'Guided paths through the digital ecosystem — discover how citizens navigate public services to reach concrete objectives.',
 		fr: "Parcours guidés à travers l'écosystème numérique — découvrez comment les citoyens naviguent dans les services publics pour atteindre des objectifs concrets.",
 		es: 'Recorridos guiados por el ecosistema digital — descubra cómo los ciudadanos navegan por los servicios públicos para alcanzar objetivos concretos.'
-	},
-	// {0} = the deploy's name (settings); with none, the *_generic key
-	'journeys.lede': {
-		pt: 'Percursos guiados pelo ecossistema digital de {0} — descubra como os cidadãos navegam pelos serviços públicos para alcançar objectivos concretos.',
-		en: 'Guided paths through the digital ecosystem of {0} — discover how citizens navigate public services to reach concrete objectives.',
-		fr: "Parcours guidés à travers l'écosystème numérique de {0} — découvrez comment les citoyens naviguent dans les services publics pour atteindre des objectifs concrets.",
-		es: 'Recorridos guiados por el ecosistema digital de {0} — descubra cómo los ciudadanos navegan por los servicios públicos para alcanzar objetivos concretos.'
 	},
 	'journeys.empty': {
 		pt: 'Nenhuma jornada publicada ainda.',
@@ -1440,17 +1414,26 @@ export const messages = {
 	// ──────────────────────────────────────────────
 	'home_admin.title': { pt: 'Home', en: 'Home', fr: "Page d'accueil", es: 'Portada' },
 	'home_admin.lede': {
-		pt: 'O que a home mostra abaixo do título: blocos de texto, imagem, cartões e logotipos. O visitante lê a cópia publicada; salvar guarda a edição.',
-		en: 'What the home shows under its title: blocks of text, image, cards and logos. Visitors read the published copy; saving keeps the edit.',
-		fr: "Ce que la page d'accueil montre sous son titre : des blocs de texte, d'image, de cartes et de logos. Le visiteur lit la copie publiée ; enregistrer garde la modification.",
-		es: 'Lo que la portada muestra bajo su título: bloques de texto, imagen, tarjetas y logotipos. El visitante lee la copia publicada; guardar conserva la edición.'
+		pt: 'O que a home mostra: o título e a lede do topo, e abaixo deles blocos de texto, imagem, cartões e logotipos. O visitante lê a cópia publicada; salvar guarda a edição.',
+		en: 'What the home shows: the title and lede at the top, and under them blocks of text, image, cards and logos. Visitors read the published copy; saving keeps the edit.',
+		fr: "Ce que la page d'accueil montre : le titre et le chapeau en haut, et sous eux des blocs de texte, d'image, de cartes et de logos. Le visiteur lit la copie publiée ; enregistrer garde la modification.",
+		es: 'Lo que la portada muestra: el título y la entradilla arriba, y bajo ellos bloques de texto, imagen, tarjetas y logotipos. El visitante lee la copia publicada; guardar conserva la edición.'
 	},
 	'home_admin.filter': { pt: 'Idiomas exibidos', en: 'Languages shown', fr: 'Langues affichées', es: 'Idiomas mostrados' },
+	'home_admin.top': { pt: 'Topo', en: 'Top', fr: 'En-tête', es: 'Cabecera' },
+	'home_admin.top_hint': {
+		pt: 'Vazios num idioma, mostram o idioma padrão; vazios nele também, o texto genérico do Digital Assets Map.',
+		en: 'Empty in a language, they show the default language; empty there too, the generic Digital Assets Map text.',
+		fr: "Vides dans une langue, ils montrent la langue par défaut ; vides là aussi, le texte générique du Digital Assets Map.",
+		es: 'Vacíos en un idioma, muestran el idioma predeterminado; vacíos también ahí, el texto genérico del Digital Assets Map.'
+	},
+	'home_admin.field.title': { pt: 'Título', en: 'Title', fr: 'Titre', es: 'Título' },
+	'home_admin.field.lede': { pt: 'Lede', en: 'Lede', fr: 'Chapeau', es: 'Entradilla' },
 	'home_admin.empty': {
-		pt: 'Nenhum bloco ainda: a home mostra só o título.',
-		en: 'No blocks yet: the home shows its title alone.',
-		fr: "Aucun bloc pour l'instant : la page d'accueil ne montre que son titre.",
-		es: 'Aún no hay bloques: la portada muestra solo su título.'
+		pt: 'Nenhum bloco ainda: a home mostra só o topo.',
+		en: 'No blocks yet: the home shows its top alone.',
+		fr: "Aucun bloc pour l'instant : la page d'accueil ne montre que son en-tête.",
+		es: 'Aún no hay bloques: la portada muestra solo su cabecera.'
 	},
 	'home_admin.add_block': { pt: 'Adicionar bloco', en: 'Add block', fr: 'Ajouter un bloc', es: 'Añadir bloque' },
 	'home_admin.add_here': {
@@ -1550,11 +1533,11 @@ export const messages = {
 		fr: "Impossible d'enregistrer la page d'accueil.",
 		es: 'No se pudo guardar la portada.'
 	},
-	'home_admin.error.no_blocks': {
-		pt: 'Uma home sem blocos não se publica: para mostrar só o título, tire do ar.',
-		en: 'A home without blocks cannot be published: to show the title alone, unpublish it.',
-		fr: "Une page d'accueil sans bloc ne se publie pas : pour ne montrer que le titre, dépubliez-la.",
-		es: 'Una portada sin bloques no se publica: para mostrar solo el título, despublíquela.'
+	'home_admin.error.empty': {
+		pt: 'Uma home vazia não se publica: escreva um título, uma lede ou um bloco, ou tire do ar para mostrar o topo genérico.',
+		en: 'An empty home cannot be published: write a title, a lede or a block, or unpublish it to show the generic top.',
+		fr: "Une page d'accueil vide ne se publie pas : écrivez un titre, un chapeau ou un bloc, ou dépubliez-la pour montrer l'en-tête générique.",
+		es: 'Una portada vacía no se publica: escriba un título, una entradilla o un bloque, o despublíquela para mostrar la cabecera genérica.'
 	},
 	'home_admin.error.image': {
 		pt: 'O arquivo precisa ser PNG, JPEG, WebP ou SVG, até 400 KB.',

@@ -8,7 +8,7 @@
 	import DropdownMenu from './DropdownMenu.svelte';
 	import type { MenuItem } from './types';
 	import { auth } from '$lib/services/auth.svelte';
-	import { markUrl, placeName } from '$lib/settings';
+	import { deployName, markUrl } from '$lib/settings';
 	import { localesState, m, type MessageKey } from '$lib/i18n';
 
 	interface Props {
@@ -19,6 +19,8 @@
 
 	let settings = $derived(page.data.settings);
 	let mark = $derived(markUrl(settings));
+	// The deploy's own name beside its mark: a deploy of a state or a sector is called that.
+	let name = $derived(deployName(settings, localesState.current));
 
 	// The admin pages, in the order of the Admin menu. `exact` keeps a page's children
 	// (`/admin/journeys/<id>`) under their list; the others have none.
@@ -66,10 +68,10 @@
 <header class="site" class:menu-open={menuOpen}>
 	<a class="brand" href="/">
 		{#if mark}
-			<img class="mark" src={mark} alt={placeName(settings, localesState.current) ?? ''} />
+			<img class="mark" src={mark} alt={name} />
 		{/if}
 		<h1>
-			{m('nav.brand')}{#if subtitle}<span class="sub">/ {subtitle}</span>{/if}
+			{name}{#if subtitle}<span class="sub">/ {subtitle}</span>{/if}
 		</h1>
 	</a>
 

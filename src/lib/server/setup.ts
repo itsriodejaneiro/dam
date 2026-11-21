@@ -13,7 +13,7 @@
 import type PocketBase from 'pocketbase';
 import { LOCALE_CODES, type LocaleCode } from '../i18n/messages';
 import { laneCenter } from '../journey';
-import { HOME, IMAGES_MAX } from '../page';
+import { hasContent, HOME, IMAGES_MAX, parseBlocks, parseTop } from '../page';
 import { ACCOUNT_ROLES } from '../roles';
 import { DEFAULT_SETTINGS, LOGO_MAX_BYTES, LOGO_TYPES } from '../settings';
 import type { Block, Page } from '../types/page';
@@ -370,8 +370,9 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	});
 	if (flagged) await publishFlagged(pb, flagged, log);
 
-	// A page is a record: the home is the one the app has. Its files are the blocks'
-	// pictures, under the logo's limits; anyone with a file's address reads it.
+	// A page is a record: the home is the one the app has. Its top is a title and a lede per
+	// locale; its files are the blocks' pictures, under the logo's limits, and anyone with a
+	// file's address reads it.
 	await up('pages', {
 		name: 'pages',
 		type: 'base',
@@ -379,6 +380,8 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 		fields: [
 			...AUTODATE_FIELDS,
 			{ name: 'slug', type: 'text', required: true },
+			{ name: 'title', type: 'json', maxSize: 5000 },
+			{ name: 'lede', type: 'json', maxSize: 5000 },
 			{ name: 'blocks', type: 'json', maxSize: 2000000 },
 			{ name: 'published', type: 'json', maxSize: 2000000 },
 			{
@@ -688,10 +691,10 @@ async function seedExample(
 
 /** True once the home holds an edit or a copy: a project's own home is never seeded over. */
 const homeWritten = (home: Page | null): boolean =>
-	(Array.isArray(home?.blocks) && home.blocks.length > 0) || home?.published != null;
+	hasContent({ ...parseTop(home), blocks: parseBlocks(home?.blocks) }) || home?.published != null;
 
-/** Writes the home of the example, published: a text, a picture and cards to the main map
-    and to the journey. The picture goes first, since a block names its file. */
+/** Writes the home of the example, published: its top, a text, a picture and cards to the
+    main map and to the journey. The picture goes first, since a block names its file. */
 async function seedHome(
 	pb: PocketBase,
 	ids: { map: string; journey: string },
@@ -701,7 +704,7 @@ async function seedHome(
 	const home = await pageBySlug(pb, HOME);
 	if (!home) return;
 	const inDeploy = (byLocale: Record<LocaleCode, string>) => inLocales(byLocale, locales);
-	const { text, image, cards } = EXAMPLE_HOME;
+	const { title, lede, text, image, cards } = EXAMPLE_HOME;
 
 	const file = new File([image.svg], image.name, { type: 'image/svg+xml' });
 	const { images } = await pb.collection('pages').update<Page>(home.id, { images: [file] });
@@ -731,7 +734,9 @@ async function seedHome(
 			]
 		}
 	];
-	await pb.collection('pages').update(home.id, { blocks });
+	await pb
+		.collection('pages')
+		.update(home.id, { title: inDeploy(title), lede: inDeploy(lede), blocks });
 	await publishPage(pb, HOME);
 	log('  + home');
 }

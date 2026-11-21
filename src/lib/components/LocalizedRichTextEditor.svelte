@@ -9,6 +9,8 @@
 		resetKey?: string | number;
 		/** Section titles, h2 and h3, in the toolbar. */
 		headings?: boolean;
+		/** A title: italic and line breaks alone. */
+		inline?: boolean;
 		/** Locales to show. Default: the deploy's. */
 		locales?: Locale[];
 	}
@@ -18,6 +20,7 @@
 		placeholder = '',
 		resetKey,
 		headings = false,
+		inline = false,
 		locales
 	}: Props = $props();
 
@@ -40,6 +43,7 @@
 						bind:content={value[loc.code]}
 						placeholder={placeholder || loc.label}
 						{headings}
+						{inline}
 					/>
 				{/key}
 			</div>

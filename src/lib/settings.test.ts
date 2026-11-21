@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { DEFAULT_SETTINGS, knownLocales, placeName, storedName } from './settings';
+import { DEFAULT_NAME, DEFAULT_SETTINGS, deployName, knownLocales, storedName } from './settings';
 
 test('stored locales keep the known codes, each once, in their order', () => {
 	assert.deepEqual(knownLocales(['en', 'en']), ['en']);
@@ -21,7 +21,10 @@ test('a stored name that is not an object is no name', () => {
 	for (const value of [null, undefined, 5, 'A', []]) assert.deepEqual(storedName(value), {});
 });
 
-test('a name of numbers leaves the place name empty', () => {
-	const settings = { ...DEFAULT_SETTINGS, name: storedName({ en: 5 }) };
-	assert.equal(placeName(settings, 'en'), null);
+test('the deploy name falls back to the default locale, then to the product', () => {
+	const settings = { ...DEFAULT_SETTINGS, defaultLocale: 'en', name: { en: 'Exampleland', fr: ' Exemplie ' } };
+	assert.equal(deployName(settings, 'fr'), 'Exemplie');
+	assert.equal(deployName(settings, 'pt'), 'Exampleland');
+	assert.equal(deployName({ ...settings, name: { en: ' ' } }, 'en'), DEFAULT_NAME);
+	assert.equal(deployName({ ...settings, name: storedName({ en: 5 }) }, 'en'), DEFAULT_NAME);
 });

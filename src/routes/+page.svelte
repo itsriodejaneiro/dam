@@ -4,4 +4,4 @@
 	let { data } = $props();
 </script>
 
-<HomeView blocks={data.blocks} />
+<HomeView title={data.home.title} lede={data.home.lede} blocks={data.home.blocks} />
