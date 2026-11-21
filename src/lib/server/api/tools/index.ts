@@ -1,11 +1,14 @@
 /* The registry of the tools and the guide the MCP server hands the agent. */
+import { DELETE_TOOLS } from './delete';
+import { JOURNEY_TOOLS } from './journeys';
 import { READ_TOOLS } from './read';
 import type { Tool } from './types';
+import { WRITE_TOOLS } from './write';
 
 export type { Tool, ToolContext } from './types';
 export { ToolError } from './types';
 
-export const TOOLS: Tool[] = [...READ_TOOLS];
+export const TOOLS: Tool[] = [...READ_TOOLS, ...WRITE_TOOLS, ...JOURNEY_TOOLS, ...DELETE_TOOLS];
 
 export const toolByName = (name: string): Tool | undefined => TOOLS.find((t) => t.name === name);
 

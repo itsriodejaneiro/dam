@@ -1,67 +1,20 @@
 import assert from 'node:assert/strict';
 import { beforeEach, test } from 'node:test';
-import { DEFAULT_SETTINGS } from '$lib/settings';
-import { mcp } from './mcp';
-import type { WriteEntry } from './service';
-import { MemoryStore } from './store.memory';
-import type { ToolContext } from './tools';
+import { harness, ORIGIN, type Body, type Harness } from './testing';
 
 /* The MCP without PocketBase: each JSON-RPC method, in both eras of the specification, and
-   the read tools over a store in memory with a small map. */
+   the read tools over a store in memory with a small map (testing.ts). */
 
-const ORIGIN = 'https://dam.test';
-const TOKEN = { id: 'tok000000000001', name: 'Sheet', prefix: '0a1b2c3d', lastUsedAt: '' };
-
-let store: MemoryStore;
-let written: WriteEntry[];
-const context = (): ToolContext => ({
-	store,
-	settings: { ...DEFAULT_SETTINGS, locales: ['en', 'pt'], defaultLocale: 'en' },
-	token: TOKEN,
-	origin: ORIGIN,
-	record: async (entry) => void written.push(entry)
-});
-
-export function seedMap(store: MemoryStore) {
-	store.seed('node_types', { id: 'cat00000000agen', slug: 'agency', color_slot: 1, layer_order: 1, base_size: 26 });
-	store.seed('node_types', { id: 'cat00000000serv', slug: 'service', color_slot: 2, layer_order: 2, base_size: 24 });
-	store.seed('node_type_translations', { id: 'ctt0000000000a1', node_type: 'cat00000000agen', locale: 'en', label: 'Agency', label_plural: 'Agencies' });
-	store.seed('node_type_translations', { id: 'ctt0000000000a2', node_type: 'cat00000000agen', locale: 'pt', label: 'Órgão', label_plural: 'Órgãos' });
-	store.seed('node_type_translations', { id: 'ctt0000000000s1', node_type: 'cat00000000serv', locale: 'en', label: 'Service', label_plural: 'Services' });
-	store.seed('maps', { id: 'map00000000main', slug: 'main', order: 1 });
-	store.seed('map_translations', { id: 'mpt000000000001', map: 'map00000000main', locale: 'en', label: 'Main Map' });
-	store.seed('maps', { id: 'map0000000other', slug: 'other', order: 2 });
-	store.seed('nodes', { id: 'node00000000age', type: 'cat00000000agen', links: [], order: 1 });
-	store.seed('node_translations', { id: 'ntr000000000001', node: 'node00000000age', locale: 'en', label: 'Example Agency', label_full: 'Example Agency for Digital Services', description: '<p>The agency.</p>' });
-	store.seed('node_translations', { id: 'ntr000000000002', node: 'node00000000age', locale: 'pt', label: 'Órgão exemplo', label_full: '', description: '' });
-	store.seed('map_nodes', { id: 'mn0000000000001', map: 'map00000000main', node: 'node00000000age', x: 320, y: 120 });
-	store.seed('nodes', { id: 'node0000000port', type: 'cat00000000serv', links: [{ label: { en: 'Site' }, url: 'https://portal.example' }], order: 2 });
-	store.seed('node_translations', { id: 'ntr000000000003', node: 'node0000000port', locale: 'en', label: 'Citizen Portal', label_full: '', description: '' });
-	store.seed('map_nodes', { id: 'mn0000000000002', map: 'map00000000main', node: 'node0000000port', x: 0, y: 0 });
-	store.seed('edges', { id: 'edge00000000001', source: 'node00000000age', target: 'node0000000port' });
-	store.seed('journeys', { id: 'jour00000000001', slug: 'example-journey', map: 'map00000000main', title: { en: 'Who holds the keys' }, description: {}, phases: [{ number: 1, title: { en: 'Start' }, summary: {}, needed: [] }], documents: [], published: null });
-	store.seed('journey_steps', { id: 'step00000000001', journey: 'jour00000000001', order: 1, phase: 0, title: { en: 'Intro' }, body: { en: '<p>Hi</p>' }, duration: null, camera: null, highlight_nodes: [], highlight_edges: [] });
-	store.seed('journey_steps', { id: 'step00000000002', journey: 'jour00000000001', order: 2, phase: 1, title: { en: 'The agency' }, body: { en: '' }, duration: null, camera: null, highlight_nodes: ['node00000000age', 'node0000000port'], highlight_edges: ['edge00000000001'] });
-}
-
+let h: Harness;
 beforeEach(() => {
-	store = new MemoryStore();
-	written = [];
-	seedMap(store);
+	h = harness();
 });
 
-type Body = { jsonrpc: string; id?: unknown; result?: Record<string, any>; error?: { code: number; message: string; data?: any } };
-
-async function post(body: unknown, headers: Record<string, string> = {}) {
-	const request = new Request(`${ORIGIN}/api/v1/mcp`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: typeof body === 'string' ? body : JSON.stringify(body) });
-	const res = await mcp(request, context());
-	const text = await res.text();
-	return { status: res.status, body: (text ? JSON.parse(text) : null) as Body };
-}
+const post = (body: unknown, headers: Record<string, string> = {}): Promise<{ status: number; body: Body }> => h.post(body, headers);
+const call = (name: string, args: Record<string, unknown> = {}) => h.call(name, args);
 
 /** A request of the `initialize` era, with the version agreed in the header. */
 const legacy = (method: string, params?: unknown) => post({ jsonrpc: '2.0', id: 1, method, ...(params ? { params } : {}) }, { 'mcp-protocol-version': '2025-11-25' });
-export const call = async (name: string, args: Record<string, unknown> = {}) => (await legacy('tools/call', { name, arguments: args })).body.result!;
 
 const V = '2026-07-28';
 const META = { 'io.modelcontextprotocol/protocolVersion': V, 'io.modelcontextprotocol/clientCapabilities': {} };
@@ -188,7 +141,7 @@ test('get_entity, list_connections, list_journeys and get_journey read the rest'
 	assert.equal(journey.id, 'jour00000000001');
 	assert.deepEqual(journey.steps[1].entities, ['node00000000age', 'node0000000port']);
 	assert.deepEqual(journey.steps[1].connections, ['edge00000000001']);
-	assert.equal(written.length, 0);
+	assert.equal(h.written.length, 0);
 });
 
 test('arguments out of shape, unknown or missing: isError with what to fix; an unknown tool: -32602', async () => {
