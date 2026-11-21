@@ -1,12 +1,14 @@
 /**
  * PocketBase collections setup (CLI)
  *
- * Creates or updates the project's collections and seeds a new project in the
- * locales of its settings record. Safe to run repeatedly: new fields are added
- * without touching existing data, and the seed writes only into an empty project.
+ * Creates or updates the project's collections, writes the settings record when there
+ * is none and seeds a new project in the locales of that record. Safe to run repeatedly:
+ * new fields are added without touching existing data, and the seed writes only into an
+ * empty project.
  *
- * The schema and the seed live in src/lib/server/setup.ts, the single source also
- * used by the web endpoint.
+ * The schema and the seed live in src/lib/server/setup.ts, the single source also used
+ * by the web endpoint and by the app's boot, which runs the schema alone
+ * (src/lib/server/boot.ts): this script is for a terminal and a database to seed.
  *
  * Run: bun run scripts/setup-collections.ts
  *

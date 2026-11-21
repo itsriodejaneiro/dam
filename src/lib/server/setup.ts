@@ -3,12 +3,15 @@
    superuser; with no env dependency, it serves both the CLI
    (scripts/setup-collections.ts) and the web endpoint (/setup).
 
-   - setupCollections(pb): creates/updates every collection, the settings record and the
-     home page record, and turns on the rate limit of the auth routes (idempotent).
+   - setupSchema(pb): creates/updates every collection, with the data a change carries and
+     the home page record: what the app runs when it boots (boot.ts). Idempotent.
+   - setupCollections(pb): the schema, the rate limit of the auth routes, the settings
+     record and, in a project nobody set up, the removal of the accounts that came before
+     it: what /setup and the CLI run. Idempotent.
    - seedBaseData(pb, locales): fills a new project with the base categories (node_types),
      the main map, the example and the home (seed-example.ts), in the deploy's locales.
      The node_type slug comes from the label in the default locale (locales[0]).
-   - isConfigured(pb): true if the schema already exists. */
+   - isConfigured(pb): true once the project has its settings record. */
 
 import type PocketBase from 'pocketbase';
 import { LOCALE_CODES, type LocaleCode } from '../i18n/messages';
@@ -58,51 +61,93 @@ const EDITORIAL_RULES = {
    the API is always by token, and no edit goes to the anonymous REST. */
 const EDIT_RULES = { ...EDITORIAL_RULES, listRule: ADMIN_ONLY, viewRule: ADMIN_ONLY } as const;
 
-/** Creates the collection if missing; otherwise merges fields and indexes. Idempotent. */
+/** PocketBase's answer when a collection, or a record, is not there. */
+function is404(err: unknown): boolean {
+	return !!err && typeof err === 'object' && 'status' in err && (err as { status: unknown }).status === 404;
+}
+
+type Definition = Record<string, unknown>;
+type Field = { name: string } & Definition;
+const RULES = ['listRule', 'viewRule', 'createRule', 'updateRule', 'deleteRule', 'manageRule'] as const;
+
+/** The name in an index statement, as PocketBase writes it back, quoted or not. */
+function indexName(sql: string): string | undefined {
+	return sql.match(/INDEX\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"]?([^`"\s(]+)/i)?.[1];
+}
+
+/**
+ * What an update brings a collection: the payload, and a word per difference between the
+ * definition and what PocketBase holds; null when they agree, so a boot on a current
+ * database writes nothing and logs nothing. A field is compared on the keys the definition
+ * names, since PocketBase fills in the rest. A field or index the definition no longer
+ * names stays: a change of mind about one is a migration written here, as the swap of
+ * `journeys.published` is.
+ */
+export function collectionChanges(
+	existing: Definition,
+	definition: Definition
+): { payload: Definition; changes: string[] } | null {
+	const changes: string[] = [];
+
+	const fields = [...((existing.fields ?? []) as Field[])];
+	for (const field of (definition.fields ?? []) as Field[]) {
+		const idx = fields.findIndex((f) => f.name === field.name);
+		if (idx < 0) {
+			fields.push(field);
+			changes.push(`+${field.name}`);
+			continue;
+		}
+		const held = fields[idx];
+		const differs = Object.keys(field).some(
+			(key) => JSON.stringify(held[key] ?? null) !== JSON.stringify(field[key] ?? null)
+		);
+		if (differs) {
+			fields[idx] = field;
+			changes.push(`~${field.name}`);
+		}
+	}
+
+	const indexes = [...((existing.indexes ?? []) as string[])];
+	for (const index of (definition.indexes ?? []) as string[]) {
+		const name = indexName(index);
+		if (indexes.some((held) => indexName(held) === name)) continue;
+		indexes.push(index);
+		changes.push(`+${name ?? 'index'}`);
+	}
+
+	const payload: Definition = { fields, indexes };
+	for (const rule of RULES) {
+		if (!(rule in definition)) continue;
+		payload[rule] = definition[rule];
+		if ((existing[rule] ?? null) !== (definition[rule] ?? null)) changes.push(`~${rule}`);
+	}
+
+	return changes.length > 0 ? { payload, changes } : null;
+}
+
+/** Creates the collection if missing; otherwise updates it when the definition differs,
+    and says what changed. Idempotent. */
 async function upsertCollection(
 	pb: PocketBase,
 	name: string,
-	definition: Record<string, unknown>,
+	definition: Definition,
 	log: Logger = noop
 ): Promise<string> {
+	let existing;
 	try {
-		const existing = await pb.collections.getOne(name);
-
-		const existingFields = (existing.fields || []) as Array<{ name: string }>;
-		const newFields = (definition.fields || []) as Array<{ name: string }>;
-		const mergedFields = [...existingFields];
-		for (const field of newFields) {
-			const idx = mergedFields.findIndex((f) => f.name === field.name);
-			if (idx >= 0) mergedFields[idx] = field;
-			else mergedFields.push(field);
-		}
-
-		const existingIndexes = (existing.indexes || []) as string[];
-		const newIndexes = (definition.indexes || []) as string[];
-		const mergedIndexes = [...existingIndexes];
-		for (const idx of newIndexes) {
-			const newName = idx.match(/INDEX\s+(\S+)/i)?.[1];
-			const already = mergedIndexes.some(
-				(e) => e.match(/INDEX\s+(\S+)/i)?.[1] === newName
-			);
-			if (!already) mergedIndexes.push(idx);
-		}
-
-		const payload: Record<string, unknown> = { fields: mergedFields, indexes: mergedIndexes };
-		for (const rule of ['listRule', 'viewRule', 'createRule', 'updateRule', 'deleteRule', 'manageRule']) {
-			if (rule in definition) payload[rule] = definition[rule];
-		}
-		await pb.collections.update(existing.id, payload);
-		log(`  ~ ${name}`);
-		return existing.id;
+		existing = await pb.collections.getOne(name);
 	} catch (err: unknown) {
-		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
-			const created = await pb.collections.create(definition);
-			log(`  + ${name}`);
-			return created.id;
-		}
-		throw err;
+		if (!is404(err)) throw err;
+		const created = await pb.collections.create(definition);
+		log(`  + ${name}`);
+		return created.id;
 	}
+	const update = collectionChanges(existing, definition);
+	if (update) {
+		await pb.collections.update(existing.id, update.payload);
+		log(`  ~ ${name}: ${update.changes.join(', ')}`);
+	}
+	return existing.id;
 }
 
 /** The deploy's identity: one record, so only a superuser creates or deletes one. */
@@ -182,13 +227,27 @@ async function removeEarlySignups(pb: PocketBase, log: Logger): Promise<void> {
 	if (early.length > 0) log(`  - accounts from before the setup: ${early.length}`);
 }
 
-/** Creates/updates every project collection and the settings record. Idempotent. */
-export async function setupCollections(pb: PocketBase, log: Logger = noop): Promise<void> {
-	const up = (name: string, definition: Record<string, unknown>) =>
-		upsertCollection(pb, name, definition, log);
+/** A project nobody set up yet: no settings record and nothing of its own. A database from
+    before the settings collection has its maps, and keeps its accounts. */
+async function emptyProject(pb: PocketBase): Promise<boolean> {
+	return !(await isConfigured(pb)) && !(await hasOwnData(pb));
+}
 
+/** The schema and what a project needs around it: what /setup and `bun run db:setup` run.
+    Idempotent. */
+export async function setupCollections(pb: PocketBase, log: Logger = noop): Promise<void> {
 	await limitAuthRoutes(pb, log);
-	const empty = !(await isConfigured(pb));
+	const empty = await emptyProject(pb);
+	await setupSchema(pb, log);
+	if (empty) await removeEarlySignups(pb, log);
+	await ensureSettingsRecord(pb, log);
+}
+
+/** Creates/updates every collection, with the data a change carries (a field swapped, the
+    home record the editor opens). Idempotent, and what the app runs when it boots
+    (boot.ts), so a deploy on a new version has its schema before the first request. */
+export async function setupSchema(pb: PocketBase, log: Logger = noop): Promise<void> {
+	const up = (name: string, definition: Definition) => upsertCollection(pb, name, definition, log);
 
 	// A new PocketBase ships `users` open to public signup: these rules close it.
 	await up('users', {
@@ -200,7 +259,6 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 			{ name: 'role', type: 'select', required: true, maxSelect: 1, values: [...ACCOUNT_ROLES] }
 		]
 	});
-	if (empty) await removeEarlySignups(pb, log);
 
 	const nodeTypesId = await up('node_types', {
 		name: 'node_types',
@@ -328,7 +386,6 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	if (textLocale) {
 		await pb.collection('settings').update(textLocale.id, { default_locale: textLocale.code });
 	}
-	await ensureSettingsRecord(pb, log);
 
 	// Texts are JSON {code: text}: a journey is always read and edited whole.
 	const flagged = await journeysPublishedByFlag(pb);
@@ -411,9 +468,7 @@ async function journeysPublishedByFlag(pb: PocketBase): Promise<string[] | null>
 		const field = (fields as { name: string; type: string }[]).find((f) => f.name === 'published');
 		if (field?.type !== 'bool') return null;
 	} catch (err: unknown) {
-		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
-			return null;
-		}
+		if (is404(err)) return null;
 		throw err;
 	}
 	const flagged = await pb.collection('journeys').getFullList({ filter: 'published = true', fields: 'id' });
@@ -753,11 +808,9 @@ export async function seedBaseData(
 	locales: string[],
 	log: Logger = noop
 ): Promise<void> {
-	for (const collection of ['maps', 'nodes', 'journeys']) {
-		if ((await pb.collection(collection).getList(1, 1)).totalItems > 0) {
-			log('  ~ base data: this project already has its own');
-			return;
-		}
+	if (await hasOwnData(pb)) {
+		log('  ~ base data: this project already has its own');
+		return;
 	}
 	if (homeWritten(await pageBySlug(pb, HOME))) {
 		log('  ~ base data: this project already has its own home');
@@ -830,24 +883,33 @@ export async function resetProject(pb: PocketBase): Promise<void> {
 			const existing = await pb.collections.getOne(name);
 			await pb.collections.delete(existing.id);
 		} catch (err: unknown) {
-			if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
-				continue;
-			}
-			throw err;
+			if (!is404(err)) throw err;
 		}
 	}
 }
 
-/** True if the project already has a schema (the `maps` collection exists). */
+/** True once the project has its settings record, what /setup (or `db:setup`) writes. The
+    collections say nothing: the boot brings them to any database (boot.ts). */
 export async function isConfigured(pb: PocketBase): Promise<boolean> {
 	try {
 		// the record route and a public collection: any client can ask, signed in or not
-		await pb.collection('maps').getList(1, 1, { skipTotal: true });
-		return true;
+		const { items } = await pb.collection('settings').getList(1, 1, { skipTotal: true });
+		return items.length > 0;
 	} catch (err: unknown) {
-		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
-			return false;
-		}
+		if (is404(err)) return false;
 		throw err;
 	}
+}
+
+/** Whether the project has a map, a node or a journey of its own; a collection not there
+    yet holds none. */
+async function hasOwnData(pb: PocketBase): Promise<boolean> {
+	for (const collection of ['maps', 'nodes', 'journeys']) {
+		try {
+			if ((await pb.collection(collection).getList(1, 1)).totalItems > 0) return true;
+		} catch (err: unknown) {
+			if (!is404(err)) throw err;
+		}
+	}
+	return false;
 }

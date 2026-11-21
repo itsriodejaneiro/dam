@@ -5,16 +5,19 @@ import { DEPLOY_NAME, expect, screens, submitSignIn, superuserClient, test } fro
 // A fictional mark: a deployment's real logo or flag never reaches the manual.
 const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#C75A1A"/><g stroke="#fff" stroke-width="2"><path d="M10 10l12 6-12 6z" fill="none"/></g><g fill="#fff"><circle cx="10" cy="10" r="3"/><circle cx="22" cy="16" r="3"/><circle cx="10" cy="22" r="3"/></g></svg>`;
 
-/** The screens erase the stack they run on: only an empty database, or their own, may go on. */
+/** The screens erase the stack they run on: only an empty database, or their own, may go on.
+    The app's boot makes the collections on any database, so empty means no settings record
+    (nobody ran /setup) and no map. */
 async function refuseSomeoneElsesData(): Promise<'empty' | 'ours'> {
 	const pb = await superuserClient();
-	const maps = await pb.collections.getOne('maps').catch((err) => {
-		if (err.status === 404) return null;
-		throw err;
-	});
-	if (!maps) return 'empty';
-	const settings = await pb.collection('settings').getFirstListItem('');
-	if (settings.name?.en !== DEPLOY_NAME) {
+	const first = async (collection: string) =>
+		(await pb.collection(collection).getList(1, 1).catch((err) => {
+			if (err.status === 404) return { items: [] };
+			throw err;
+		})).items[0];
+	const settings = await first('settings');
+	if (!settings && !(await first('maps'))) return 'empty';
+	if (settings?.name?.en !== DEPLOY_NAME) {
 		throw new Error(
 			`This stack holds a project the screens did not create (${JSON.stringify(settings.name)}). ` +
 				'They show and then erase what is in the database they run on: empty it with `bun run db:reset --yes`, or use another stack.'

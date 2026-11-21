@@ -4,9 +4,9 @@ import { getSettings } from '$lib/server/settings';
 import type { LayoutServerLoad } from './$types';
 
 /**
- * Hands the deploy's settings to every page, and holds the first-boot gate: while
- * PocketBase has no schema, everything goes to /setup. /setup and /login must stay
- * reachable in that state.
+ * Hands the deploy's settings to every page, and holds the first-boot gate: while the
+ * project has no settings record (the boot made the collections, nobody ran /setup),
+ * everything goes to /setup. /setup and /login must stay reachable in that state.
  */
 export const load: LayoutServerLoad = async ({ url }) => {
 	const settings = await getSettings();
