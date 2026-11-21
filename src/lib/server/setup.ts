@@ -3,14 +3,17 @@
    superuser; with no env dependency, it serves both the CLI
    (scripts/setup-collections.ts) and the web endpoint (/setup).
 
-   - setupCollections(pb): creates/updates every collection, the settings record and the
-     home page record, and turns on the rate limit of the auth routes (idempotent).
+   - setupCollections(pb): creates/updates every collection, the settings record, the home
+     page record and the agents' API's service account, and writes PocketBase's own settings
+     (the rate limit of the auth routes, the batch on) (idempotent).
    - seedBaseData(pb, locales): fills a new project with the base categories (node_types),
      the main map, the example and the home (seed-example.ts), in the deploy's locales.
      The node_type slug comes from the label in the default locale (locales[0]).
    - isConfigured(pb): true if the schema already exists. */
 
+import { randomBytes } from 'node:crypto';
 import type PocketBase from 'pocketbase';
+import { SERVICE_ACCOUNT_EMAIL, WRITE_ACTIONS } from '../api';
 import { LOCALE_CODES, type LocaleCode } from '../i18n/messages';
 import { laneCenter } from '../journey';
 import { HOME, IMAGES_MAX } from '../page';
@@ -162,16 +165,60 @@ const AUTH_RATE_LIMITS = [
 	{ label: '*:requestVerification', audience: '', duration: 60, maxRequests: 5 }
 ];
 
+/** The agents' API writes an entity, its translations and its places on the maps in one
+    transactional `POST /api/batch` (server/api): the batch ships off, and this turns it on.
+    The size is one entity's: its record, a translation per locale and a row per map. */
+const BATCH = { enabled: true, maxRequests: 50, timeout: 10, maxBodySize: 0 };
+
 /** PocketBase ships with rate limits off, and its stock rule list would limit every route
     once on, so the list is written whole. A deploy sits behind one reverse proxy, the only
     way to reach PocketBase: without the header every visitor counts as the proxy's address,
     and the rightmost entry is the one that proxy wrote, while the rest is the client's word. */
-async function limitAuthRoutes(pb: PocketBase, log: Logger): Promise<void> {
+async function writePocketBaseSettings(pb: PocketBase, log: Logger): Promise<void> {
 	await pb.settings.update({
 		rateLimits: { enabled: true, rules: AUTH_RATE_LIMITS },
-		trustedProxy: { headers: ['X-Forwarded-For'], useLeftmostIP: false }
+		trustedProxy: { headers: ['X-Forwarded-For'], useLeftmostIP: false },
+		batch: BATCH
 	});
-	log('  ~ auth rate limit');
+	log('  ~ auth rate limit, batch on');
+}
+
+/** The tokens of the agents' API and the record of what each one wrote: an admin reads
+    them in /admin/tokens, and only the server writes them (server/api). */
+const SERVER_ONLY_RULES = {
+	listRule: ADMIN_ONLY,
+	viewRule: ADMIN_ONLY,
+	createRule: null,
+	updateRule: null,
+	deleteRule: null
+} as const;
+
+/**
+ * The account the agents' API writes as: an admin like any other to the collections'
+ * rules, with a password drawn here and kept nowhere, so nobody signs in as it. The server
+ * impersonates it from its superuser client. Idempotent: it finds the account by its e-mail.
+ */
+async function ensureServiceAccount(pb: PocketBase, log: Logger): Promise<void> {
+	const existing = await pb
+		.collection('users')
+		.getFirstListItem(pb.filter('email = {:email}', { email: SERVICE_ACCOUNT_EMAIL }), { fields: 'id,role' })
+		.catch((err: unknown) => {
+			if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) return null;
+			throw err;
+		});
+	if (existing) {
+		if (existing.role !== 'admin') await pb.collection('users').update(existing.id, { role: 'admin' });
+		return;
+	}
+	const password = randomBytes(32).toString('base64url');
+	await pb.collection('users').create({
+		email: SERVICE_ACCOUNT_EMAIL,
+		password,
+		passwordConfirm: password,
+		verified: true,
+		role: 'admin'
+	});
+	log('  + account: the agents\' api');
 }
 
 /** Until the first setup closes it, anyone can sign up in `users`. In an empty project an
@@ -187,7 +234,7 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 	const up = (name: string, definition: Record<string, unknown>) =>
 		upsertCollection(pb, name, definition, log);
 
-	await limitAuthRoutes(pb, log);
+	await writePocketBaseSettings(pb, log);
 	const empty = !(await isConfigured(pb));
 
 	// A new PocketBase ships `users` open to public signup: these rules close it.
@@ -395,6 +442,47 @@ export async function setupCollections(pb: PocketBase, log: Logger = noop): Prom
 		await pb.collection('pages').create({ slug: HOME, blocks: [], published: null });
 		log('  + page: home');
 	}
+
+	// The agents' API (server/api): a token is a name, a prefix and the hash of the whole
+	// token; `hidden` keeps the hash from every client but the superuser's. `created_by` is
+	// text, who created it, and a token outlives that account.
+	await up('api_tokens', {
+		name: 'api_tokens',
+		type: 'base',
+		...SERVER_ONLY_RULES,
+		fields: [
+			...AUTODATE_FIELDS,
+			{ name: 'name', type: 'text', required: true, max: 60 },
+			{ name: 'prefix', type: 'text', required: true, pattern: '^[0-9a-f]{8}$' },
+			{ name: 'hash', type: 'text', required: true, hidden: true },
+			{ name: 'created_by', type: 'text' },
+			{ name: 'last_used_at', type: 'date' }
+		],
+		indexes: ['CREATE UNIQUE INDEX idx_api_tokens_prefix ON api_tokens (prefix)']
+	});
+
+	// One row per write by a tool, written before the write, and one per token created or
+	// deleted. The token goes as text, so the history outlives the token. `previous` is the
+	// content an update or a delete replaced, for a recovery by hand.
+	await up('api_writes', {
+		name: 'api_writes',
+		type: 'base',
+		...SERVER_ONLY_RULES,
+		fields: [
+			...AUTODATE_FIELDS,
+			{ name: 'token_prefix', type: 'text', required: true },
+			{ name: 'token_name', type: 'text' },
+			{ name: 'tool', type: 'text' },
+			{ name: 'collection', type: 'text', required: true },
+			{ name: 'record', type: 'text', required: true },
+			{ name: 'action', type: 'select', required: true, maxSelect: 1, values: [...WRITE_ACTIONS] },
+			{ name: 'actor', type: 'text' },
+			{ name: 'previous', type: 'json', maxSize: 5000000 }
+		],
+		indexes: ['CREATE INDEX idx_api_writes_token ON api_writes (token_prefix)']
+	});
+
+	await ensureServiceAccount(pb, log);
 }
 
 /**
@@ -802,6 +890,8 @@ export async function seedBaseData(
 
 /** Deletion order: dependants before parents (avoids relation errors). */
 const RESET_ORDER = [
+	'api_writes',
+	'api_tokens',
 	'pages',
 	'journey_steps',
 	'journeys',

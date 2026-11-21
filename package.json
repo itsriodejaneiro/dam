@@ -43,6 +43,7 @@
 		"d3-force": "^3.0.0",
 		"d3-selection": "^3.0.0",
 		"pocketbase": "^0.26.8",
-		"svg-country-flags": "^1.2.10"
+		"svg-country-flags": "^1.2.10",
+		"zod": "^4.6.7"
 	}
 }
