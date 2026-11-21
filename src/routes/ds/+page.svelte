@@ -5,8 +5,8 @@
 	import { EllipsisVertical } from '@lucide/svelte';
 	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, CopyBlock, DropdownMenu, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph, PageBlocks, PublishBar, type MenuItem } from '$lib/components';
 	import type { ResolvedBlock } from '$lib/types/page';
-	import type { DocumentState, GraphHighlight, PhaseTransition, JourneyDocument, VisEdge, VisNode } from '$lib/types/journey';
-	import { fullCamera, laneCenter } from '$lib/journey';
+	import type { DocumentState, PhaseTransition, JourneyDocument, VisEdge, VisNode } from '$lib/types/journey';
+	import { fullCamera, laneCenter, stepHighlight } from '$lib/journey';
 	import { auth, requireAdmin, type NodeType } from '$lib/services';
 	import { m, type Localized } from '$lib/i18n';
 
@@ -146,10 +146,12 @@
 		source: mockNodes.find((n) => n.id === source)!,
 		target: mockNodes.find((n) => n.id === target)!
 	}));
-	const mockHighlight: GraphHighlight = {
-		nodes: new Set(['regulator', 'data-center', 'portal']),
-		edges: new Set(['regulator-data-center', 'data-center-portal'])
-	};
+	// Regulator and registry are connected; the portal is two hops from each, and the
+	// ways there light up in the secondary tone.
+	const mockHighlight = stepHighlight(
+		{ highlight_nodes: ['regulator', 'registry', 'portal'], highlight_edges: [] },
+		{ nodes: mockNodes, edges: mockEdges }
+	);
 
 	let rteContent = $state(m('ds.editor_content'));
 

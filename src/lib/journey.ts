@@ -12,6 +12,7 @@ import type {
 	PhaseTransition,
 	PublishedJourney,
 	PublishedStep,
+	VisEdge,
 	VisNode
 } from '$lib/types/journey';
 import type { Localized } from '$lib/i18n';
@@ -120,10 +121,85 @@ export function labelShown(type: Pick<NodeType, 'show_labels'>, state: LabelStat
 	return Boolean(state.hovered || state.focused || state.selected || state.highlighted || state.matched);
 }
 
-/** What a step lights up; null when it chooses nothing, and the whole graph shows. */
-export function stepHighlight(step: StepHighlight): GraphHighlight | null {
-	if (step.highlight_nodes.length === 0 && step.highlight_edges.length === 0) return null;
-	return { nodes: new Set(step.highlight_nodes), edges: new Set(step.highlight_edges) };
+/** The id of a connection's end, before or after the layout swaps the id for the node. */
+export const endId = (end: VisEdge['source']): string =>
+	typeof end === 'object' ? end.id : String(end);
+
+/** Steps from `start` to every node it reaches, along `next`. */
+function distances(start: string, next: Map<string, string[]>): Map<string, number> {
+	const dist = new Map([[start, 0]]);
+	const queue = [start];
+	for (const id of queue) {
+		for (const other of next.get(id) ?? []) {
+			if (dist.has(other)) continue;
+			dist.set(other, dist.get(id)! + 1);
+			queue.push(other);
+		}
+	}
+	return dist;
+}
+
+/**
+ * What a step lights up, worked out from the graph as it is drawn; null when the step
+ * chooses nothing, and the whole graph shows.
+ *
+ * - Every connection with both ends in the step lights up, as on the map: the step lists
+ *   entities, and a connection deleted and drawn again is still between them.
+ * - Two entities of the step with no connection between them light the shortest path that
+ *   follows the arrows from one to the other, whichever of the two it starts from, in the
+ *   secondary tone: the author lists the ends, the graph completes the way. Paths of the
+ *   same length all light up.
+ * - The connections stored in the step are the author's extras, lit as they are.
+ *
+ * A node taken off the map, and its connections, stay in the step's record and count for
+ * nothing here (liveHighlight).
+ */
+export function stepHighlight(
+	step: StepHighlight,
+	graph: Pick<JourneyGraphData, 'nodes' | 'edges'>
+): GraphHighlight | null {
+	const live = liveHighlight(step, graph);
+	if (live.highlight_nodes.length === 0 && live.highlight_edges.length === 0) return null;
+
+	const nodes = new Set(live.highlight_nodes);
+	const edges = new Set(live.highlight_edges);
+	const ends = graph.edges.map((e) => ({ id: e.id, from: endId(e.source), to: endId(e.target) }));
+
+	const out = new Map<string, string[]>();
+	const into = new Map<string, string[]>();
+	const joined = new Set<string>();
+	for (const { id, from, to } of ends) {
+		if (nodes.has(from) && nodes.has(to)) {
+			edges.add(id);
+			joined.add(`${from} ${to}`).add(`${to} ${from}`);
+		}
+		out.set(from, [...(out.get(from) ?? []), to]);
+		into.set(to, [...(into.get(to) ?? []), from]);
+	}
+
+	const secondary = { nodes: new Set<string>(), edges: new Set<string>() };
+	const ids = [...nodes];
+	const forward = new Map(ids.map((id) => [id, distances(id, out)]));
+	const backward = new Map(ids.map((id) => [id, distances(id, into)]));
+	for (const [i, a] of ids.entries()) {
+		for (const b of ids.slice(i + 1)) {
+			if (joined.has(`${a} ${b}`)) continue;
+			const there = forward.get(a)!.get(b) ?? Infinity;
+			const back = forward.get(b)!.get(a) ?? Infinity;
+			const length = Math.min(there, back);
+			if (length === Infinity) continue;
+			for (const [from, to] of [...(there === length ? [[a, b]] : []), ...(back === length ? [[b, a]] : [])]) {
+				const fromStart = forward.get(from)!;
+				const toEnd = backward.get(to)!;
+				for (const e of ends) {
+					if ((fromStart.get(e.from) ?? Infinity) + 1 + (toEnd.get(e.to) ?? Infinity) !== length) continue;
+					if (!edges.has(e.id)) secondary.edges.add(e.id);
+					for (const id of [e.from, e.to]) if (!nodes.has(id)) secondary.nodes.add(id);
+				}
+			}
+		}
+	}
+	return { nodes, edges, secondary };
 }
 
 const PHASE_COLORS = ['3', '6', '1'] as const;

@@ -18,7 +18,6 @@
 		fullCamera,
 		phaseColor,
 		phaseTransitions,
-		liveHighlight,
 		stepHighlight,
 		stepNumbers
 	} from '$lib/journey';
@@ -155,7 +154,7 @@
 	});
 
 	const highlight = $derived(
-		activeStep ? stepHighlight(liveHighlight(activeStep, { nodes: visNodes, edges: visEdges })) : null
+		activeStep ? stepHighlight(activeStep, { nodes: visNodes, edges: visEdges }) : null
 	);
 
 	function onStepChange(stepId: string) {

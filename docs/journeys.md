@@ -15,7 +15,7 @@ Scroll, and the page follows you. On a wide window it has three columns:
 | Column | What it shows |
 |---|---|
 | **left** | the timeline: the phases and steps, how far you have read, and a click to jump to any of them |
-| **middle** | the map, framed on what the step involves, with the rest faded. Above it, the documents |
+| **middle** | the map, framed on what the step involves, with the rest faded. Entities and connections in a fainter tone are the way between two entities of the step. Above it, the documents |
 | **right** | the steps, one after the other |
 
 ![A step of a journey, with the map framed on the entities it involves](/screens/journeys-3.png)
@@ -34,6 +34,6 @@ A phase can close with a card: what it achieved, the documents obtained during i
 
 ## Read about an entity
 
-Click a highlighted entity on the map to read its full name, category and description without leaving the journey.
+Click a highlighted entity on the map, or one on the way between two of them, to read its full name, category and description without leaving the journey.
 
 ![An entity opened from a journey](/screens/journeys-5.png)

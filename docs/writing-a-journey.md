@@ -30,12 +30,12 @@ A phase with steps stays until its steps move to another phase.
 
 On the left, the map belongs to the selected step:
 
-- **Highlight.** Click an entity to add it to the step, or to take it out. Adding one brings its connections with those already highlighted; click a connection to add or take out that line alone. With nothing highlighted, the step shows the whole map.
+- **Highlight.** Click an entity to add it to the step, or to take it out. Every connection between two entities of the step lights up by itself. Two entities of the step with no connection between them light the shortest way from one to the other along the arrows, entities and connections, in a fainter tone: list the two ends, and the map completes the path. Click a connection to light one more line, such as one that reaches an entity outside the step, or to take that extra out. With nothing highlighted, the step shows the whole map.
 - **Camera.** Drag to move and use the mouse wheel to zoom, then press **Record camera** to keep the framing. **Automatic** returns to the framing that fits the highlighted entities.
 
 ![A step with its highlight and recorded camera](/screens/writing-a-journey-4.png)
 
-The line under the map shows the state of the camera and how many entities and connections the step highlights.
+The line under the map shows the state of the camera and how many entities and connections the step highlights, the path in the fainter tone aside.
 
 ## Documents
 

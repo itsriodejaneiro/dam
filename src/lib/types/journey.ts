@@ -124,4 +124,6 @@ export interface JourneyGraphData {
 export interface GraphHighlight {
 	nodes: Set<string>;
 	edges: Set<string>;
+	/** The way between two highlighted nodes with no connection of their own: lit, in a lower tone. */
+	secondary: { nodes: Set<string>; edges: Set<string> };
 }

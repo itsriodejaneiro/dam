@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { fromPublished, labelShown, toPublished } from './journey';
+import { fromPublished, labelShown, stepHighlight, toPublished } from './journey';
 import { samePublished } from './publish';
-import type { Journey, JourneyStep } from './types/journey';
+import type { Journey, JourneyGraphData, JourneyStep } from './types/journey';
 
 const journey = {
 	id: 'j1',
@@ -108,4 +108,91 @@ test('labelShown: a category with the switch on names its nodes always; off, onl
 	for (const key of ['hovered', 'focused', 'selected', 'highlighted', 'matched'] as const) {
 		assert.equal(labelShown(onDemand, { [key]: true }), true, key);
 	}
+});
+
+/** A graph from arrows written "a>b"; a connection's id is its arrow. */
+const graphOf = (...arrows: string[]) => {
+	const ids = [...new Set(arrows.flatMap((arrow) => arrow.split('>')))];
+	return {
+		nodes: ids.map((id) => ({ id })),
+		edges: arrows.map((arrow) => ({ id: arrow, source: arrow.split('>')[0], target: arrow.split('>')[1] }))
+	} as unknown as Pick<JourneyGraphData, 'nodes' | 'edges'>;
+};
+
+const lit = (nodes: string[], graph: ReturnType<typeof graphOf>, stored: string[] = []) => {
+	const h = stepHighlight({ highlight_nodes: nodes, highlight_edges: stored }, graph);
+	const sorted = (set: Set<string>) => [...set].sort();
+	return h && {
+		nodes: sorted(h.nodes),
+		edges: sorted(h.edges),
+		secondaryNodes: sorted(h.secondary.nodes),
+		secondaryEdges: sorted(h.secondary.edges)
+	};
+};
+
+test('stepHighlight: a step that chooses nothing shows the whole graph', () => {
+	const graph = graphOf('a>b');
+	assert.equal(lit([], graph), null);
+	assert.equal(lit(['gone'], graph, ['gone>too']), null);
+});
+
+test('stepHighlight: every connection between two entities of the step lights up, stored or not', () => {
+	const graph = graphOf('a>b', 'b>a', 'b>c', 'c>d');
+	assert.deepEqual(lit(['a', 'b', 'c'], graph), {
+		nodes: ['a', 'b', 'c'],
+		edges: ['a>b', 'b>a', 'b>c'],
+		secondaryNodes: [],
+		secondaryEdges: []
+	});
+});
+
+test('stepHighlight: two entities with no connection light the shortest path along the arrows, in the secondary tone', () => {
+	// a reaches d in two hops by x, and in three by y and z; d reaches a only the long way round.
+	const graph = graphOf('a>x', 'x>d', 'a>y', 'y>z', 'z>d', 'd>p', 'p>q', 'q>a');
+	assert.deepEqual(lit(['a', 'd'], graph), {
+		nodes: ['a', 'd'],
+		edges: [],
+		secondaryNodes: ['x'],
+		secondaryEdges: ['a>x', 'x>d']
+	});
+	// The pair in the other order finds the same path.
+	assert.deepEqual(lit(['d', 'a'], graph)?.secondaryEdges, ['a>x', 'x>d']);
+});
+
+test('stepHighlight: paths of the same length all light up, whichever end they start from', () => {
+	assert.deepEqual(lit(['a', 'd'], graphOf('a>x', 'x>d', 'a>y', 'y>d')), {
+		nodes: ['a', 'd'],
+		edges: [],
+		secondaryNodes: ['x', 'y'],
+		secondaryEdges: ['a>x', 'a>y', 'x>d', 'y>d']
+	});
+	assert.deepEqual(lit(['a', 'd'], graphOf('a>x', 'x>d', 'd>y', 'y>a'))?.secondaryEdges, ['a>x', 'd>y', 'x>d', 'y>a']);
+});
+
+test('stepHighlight: a path through an entity of the step is made of what is already lit', () => {
+	assert.deepEqual(lit(['a', 'b', 'c'], graphOf('a>b', 'b>c')), {
+		nodes: ['a', 'b', 'c'],
+		edges: ['a>b', 'b>c'],
+		secondaryNodes: [],
+		secondaryEdges: []
+	});
+});
+
+test('stepHighlight: with no path along the arrows, nothing more lights up', () => {
+	// Both arrows arrive at x: neither end reaches the other.
+	assert.deepEqual(lit(['a', 'd'], graphOf('a>x', 'd>x')), {
+		nodes: ['a', 'd'],
+		edges: [],
+		secondaryNodes: [],
+		secondaryEdges: []
+	});
+});
+
+test('stepHighlight: a stored connection outside the step lights up as it is; one off the graph does not', () => {
+	assert.deepEqual(lit(['a', 'b'], graphOf('a>b', 'c>d'), ['c>d', 'gone']), {
+		nodes: ['a', 'b'],
+		edges: ['a>b', 'c>d'],
+		secondaryNodes: [],
+		secondaryEdges: []
+	});
 });

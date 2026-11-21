@@ -16,6 +16,7 @@
 	import { auth, requireAdmin, journeys, maps, type MapRecord } from '$lib/services';
 	import { localesState, localizedMap, m, t, type Localized } from '$lib/i18n';
 	import {
+		endId,
 		fitCamera,
 		fullCamera,
 		liveHighlight,
@@ -227,11 +228,12 @@
 		frameSelected();
 	}
 
-	const endId = (end: VisEdge['source']): string =>
-		typeof end === 'object' ? end.id : (end as string);
+	// What the graph lights for the selected step, the same the visitor sees.
+	const highlight = $derived(selected ? stepHighlight(selected, graph) : null);
 
-	// A node brings the connections to the nodes already lit: the usual case, one click.
-	// The author still takes any connection out, or lights one up, by clicking it.
+	// A node brings the connections to the nodes already lit into the step's record, and they
+	// light up with or without it (stepHighlight). A click on a connection stores or drops an
+	// extra: one that reaches outside the step's entities.
 	function toggleNode(node: VisNode) {
 		if (!selected) return;
 		if (selected.highlight_nodes.includes(node.id)) {
@@ -584,7 +586,7 @@
 								edges={graph.edges}
 								types={graph.types}
 								camera={view}
-								highlight={selected ? stepHighlight(selected) : null}
+								{highlight}
 								pickable={selected !== null}
 								onNodeClick={toggleNode}
 								onEdgeClick={selected ? toggleEdge : undefined}
@@ -604,7 +606,7 @@
 									{m(
 										'journeys_admin.highlight_count',
 										selected.highlight_nodes.length,
-										selected.highlight_edges.length
+										highlight?.edges.size ?? 0
 									)}
 								</span>
 								<span class="spacer"></span>

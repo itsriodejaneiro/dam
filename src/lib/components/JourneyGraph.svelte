@@ -152,6 +152,15 @@
 		return highlight === null || highlight.edges.has(e.id);
 	}
 
+	/** On the way between two highlighted nodes: lit, a tone below them. */
+	function isEdgeSecondary(e: VisEdge): boolean {
+		return highlight !== null && highlight.secondary.edges.has(e.id);
+	}
+
+	function isSecondary(n: VisNode): boolean {
+		return highlight !== null && highlight.secondary.nodes.has(n.id);
+	}
+
 	function isHighlighted(n: VisNode): boolean {
 		return highlight !== null && highlight.nodes.has(n.id);
 	}
@@ -250,7 +259,8 @@
 						<path
 							class="edge"
 							class:same-layer={s.type.id === tg.type.id}
-							class:dim={!isEdgeHighlighted(e)}
+							class:secondary={isEdgeSecondary(e)}
+							class:dim={!isEdgeHighlighted(e) && !isEdgeSecondary(e)}
 							d="M{sx},{sy} Q{mx},{my} {tx},{ty}"
 						/>
 						{#if onEdgeClick}
@@ -279,13 +289,15 @@
 			<g class="nodes">
 				{#each nodes as n (n.id)}
 					{@const hl = isHighlighted(n)}
-					{@const reacts = hl || pickable}
+					{@const sec = isSecondary(n)}
+					{@const reacts = hl || sec || pickable}
 					{@const v = viewByNodeId.get(n.id)}
 					{@const tv = typeViewById.get(n.type.id)}
 					<g
 						class="vis-node"
 						class:highlighted={hl}
-						class:dim={highlight !== null && !hl}
+						class:secondary={sec}
+						class:dim={highlight !== null && !hl && !sec}
 						class:interactive={reacts}
 						onclick={reacts ? () => onNodeClick?.(n) : undefined}
 						onpointerenter={reacts ? (ev: PointerEvent) => showTooltip(ev, n) : undefined}
@@ -321,7 +333,7 @@
 							class:named={labelShown(n.type, {
 								hovered: hoveredId === n.id,
 								focused: focusedId === n.id,
-								highlighted: hl
+								highlighted: hl || sec
 							})}
 							x={n.x ?? 0}
 							y={(n.y ?? 0) + sizeOf(n) + 14}
@@ -405,6 +417,9 @@
 	.edge.dim {
 		opacity: 0.06;
 	}
+	.edge.secondary {
+		opacity: 0.3;
+	}
 	.edge.same-layer {
 		stroke-dasharray: 6 4;
 	}
@@ -450,6 +465,12 @@
 	}
 	.vis-node.dim .node-label {
 		opacity: 0.15;
+	}
+	/* The way between two highlighted nodes: lit without the ring, between them and the dimmed. */
+	.vis-node.secondary .node-circle,
+	.vis-node.secondary .node-label,
+	.vis-node.secondary .node-label.on-demand.named {
+		opacity: 0.55;
 	}
 	/* A category with the labels switch off names a node only while someone looks at it. */
 	.vis-node .node-label.on-demand {
