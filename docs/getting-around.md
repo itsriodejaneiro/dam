@@ -28,12 +28,12 @@ The header adds an **Admin** menu, the **log out** button and a **⋮** menu.
 
 | Item of the Admin menu | Page |
 |---|---|
+| **home** | [The home page](./home.md) |
 | **entities** | [Entities](./entities.md) |
 | **connections** | [Connections](./connections.md) |
 | **maps** | [Maps](./maps.md) |
 | **journeys** | [Writing a journey](./writing-a-journey.md) |
 | **categories** | [Categories](./categories.md) |
-| **home** | [The home page](./home.md) |
 | **settings** | [Configure your deployment](./configure.md) |
 | **accounts** | [Accounts](./accounts.md) |
 

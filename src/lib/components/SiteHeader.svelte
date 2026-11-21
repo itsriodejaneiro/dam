@@ -23,12 +23,12 @@
 	// The admin pages, in the order of the Admin menu. `exact` keeps a page's children
 	// (`/admin/journeys/<id>`) under their list; the others have none.
 	const ADMIN_PAGES: { href: string; key: MessageKey; exact?: boolean }[] = [
+		{ href: '/admin/home', key: 'nav.home' },
 		{ href: '/admin/entities', key: 'nav.entities', exact: true },
 		{ href: '/admin/connections', key: 'nav.connections', exact: true },
 		{ href: '/admin/maps', key: 'nav.maps', exact: true },
 		{ href: '/admin/journeys', key: 'nav.journeys' },
 		{ href: '/admin/categories', key: 'nav.categories', exact: true },
-		{ href: '/admin/home', key: 'nav.home' },
 		{ href: '/admin/settings', key: 'nav.settings', exact: true },
 		{ href: '/admin/accounts', key: 'nav.accounts', exact: true }
 	];
