@@ -22,11 +22,11 @@ Your language and your mode stay in your browser for the next visit. On a narrow
 
 ## After you sign in
 
-The header adds the editing pages, the **log out** button and a **⋮** menu.
+The header adds an **Admin** menu, the **log out** button and a **⋮** menu.
 
-![The header of a signed-in person, with the editing links](/screens/getting-around-3.png)
+![The header of a signed-in person, with the Admin menu open](/screens/getting-around-3.png)
 
-| Link | Page |
+| Item of the Admin menu | Page |
 |---|---|
 | **entities** | [Entities](./entities.md) |
 | **connections** | [Connections](./connections.md) |
@@ -36,4 +36,9 @@ The header adds the editing pages, the **log out** button and a **⋮** menu.
 | **home** | [The home page](./home.md) |
 | **settings** | [Configure your deployment](./configure.md) |
 | **accounts** | [Accounts](./accounts.md) |
-| **⋮** | [Design system](./design-system.md) and, for a superuser, [Setup](./install.md#start-over) |
+
+On one of these pages the button names it, **Admin: journeys**, so you know where you are without opening the menu.
+
+![The header on the Journeys page](/screens/getting-around-4.png)
+
+The **⋮** menu opens the [design system](./design-system.md) and, for a superuser, [Setup](./install.md#start-over). On a narrow window, the Admin pages are a group inside the **☰** menu.
