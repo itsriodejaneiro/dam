@@ -69,7 +69,11 @@ export default defineConfig({
 			},
 			{
 				text: 'Administration',
-				items: [{ text: 'Accounts', link: '/accounts' }]
+				items: [
+					{ text: 'Accounts', link: '/accounts' },
+					{ text: 'API tokens', link: '/tokens' },
+					{ text: 'Connect an agent', link: '/connect-an-agent' }
+				]
 			},
 			{
 				text: 'Contributing',

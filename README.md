@@ -4,6 +4,8 @@ The Digital Assets Map (DAM) is an interactive map of a country's digital infras
 
 Each deployment runs its own app and its own PocketBase. A country is configuration and content, kept in that PocketBase and edited in the app.
 
+An AI agent (Claude Code, Codex, Cursor) can feed a deployment from a spreadsheet or a document: the app serves an MCP server at `/api/v1/mcp`, and an admin creates the token in `/admin/tokens`. The manual's [Connect an agent](https://itsriodejaneiro.github.io/dam/connect-an-agent) page has a recipe per client.
+
 **The manual:** <https://itsriodejaneiro.github.io/dam/>
 
 ## Stack

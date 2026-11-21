@@ -11,6 +11,7 @@ The Digital Assets Map (DAM) is an interactive map of a country's digital infras
 | explore a map someone published | [Getting around](./getting-around.md), [The map](./map.md), [Journeys for visitors](./journeys.md) |
 | keep a map's content up to date | [Sign in](./sign-in.md), [Entities](./entities.md), [Writing a journey](./writing-a-journey.md) |
 | install the map for a country | [Install](./install.md), [Configure your deployment](./configure.md), [Accounts](./accounts.md) |
+| feed the map with an AI agent, from a spreadsheet or a document | [API tokens](./tokens.md), [Connect an agent](./connect-an-agent.md) |
 | improve the code or this manual | [Contributing](./contributing.md) |
 
 ## The words the map uses
