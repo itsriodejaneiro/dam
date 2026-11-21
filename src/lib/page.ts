@@ -135,7 +135,8 @@ export function parseTop(value: unknown): PageTop {
 
 /**
  * The stored copy as the app reads it. A copy written before the top had fields is the
- * list of blocks alone: its top is empty, and the page shows the generic text.
+ * list of blocks alone: its top is empty until the boot writes the default into it
+ * (server/home-top.ts).
  */
 export function parseCopy(value: unknown): PageCopy {
 	if (Array.isArray(value)) return { title: {}, lede: {}, blocks: parseBlocks(value) };
@@ -143,7 +144,8 @@ export function parseCopy(value: unknown): PageCopy {
 }
 
 /** True when the copy shows something of its own: a title, a lede or a block. Publish
-    refuses an empty one, since unpublishing already shows the generic top alone. */
+    refuses an empty one: an admin account can write the record over the REST API, past the
+    editor, and the page shows the default top with no copy. */
 export function hasContent(copy: PageCopy): boolean {
 	return (
 		copy.blocks.length > 0 || Object.keys(copy.title).length > 0 || Object.keys(copy.lede).length > 0
@@ -198,6 +200,17 @@ export function cardUrl(url: string): string | null {
 
 /** A logo's site: a link with a scheme a stored link may use, or nothing. */
 export const logoUrl = (url: string): string | null => (url ? safeUrl(url) : null);
+
+/** Why the editor cannot save the top, as a message key; null when it can. */
+export type TopProblem = 'home_admin.problem.title' | 'home_admin.problem.lede';
+
+/** What keeps the top from being saved: the page needs a title and a lede, and the default
+    locale is the one every other falls back to. */
+export function topProblem(top: PageTop, defaultLocale: string): TopProblem | null {
+	if (isBlank(top.title[defaultLocale] ?? '', true)) return 'home_admin.problem.title';
+	if (isBlank(top.lede[defaultLocale] ?? '', false)) return 'home_admin.problem.lede';
+	return null;
+}
 
 /** Why the editor cannot save this block, as a message key; null when it can. */
 export type BlockProblem =

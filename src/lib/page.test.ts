@@ -13,6 +13,7 @@ import {
 	parseTop,
 	resolveBlocks,
 	topMissingByLocale,
+	topProblem,
 	unusedImages,
 	type Lookups
 } from './page';
@@ -203,4 +204,13 @@ test('the visitor gets addresses, and nothing that points at what is gone', () =
 	);
 	const stored = [{ id: 'u', type: 'cards', cards: [{ title: { en: 'X' }, text: {}, target: { kind: 'url', url: 'javascript:x' } }] }];
 	assert.deepEqual(resolveBlocks(stored as Block[], lookups), []);
+});
+
+test('topProblem: the default locale needs a title and a lede', () => {
+	const top = { title: { en: '<p>Ours.</p>' }, lede: { en: 'A line.' } };
+	assert.equal(topProblem(top, 'en'), null);
+	assert.equal(topProblem(top, 'fr'), 'home_admin.problem.title');
+	// TipTap's empty paragraph is no title
+	assert.equal(topProblem({ ...top, title: { en: '<p></p>' } }, 'en'), 'home_admin.problem.title');
+	assert.equal(topProblem({ ...top, lede: { en: ' ' } }, 'en'), 'home_admin.problem.lede');
 });

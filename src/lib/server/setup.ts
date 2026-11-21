@@ -19,11 +19,12 @@ import type PocketBase from 'pocketbase';
 import { SERVICE_ACCOUNT_EMAIL, WRITE_ACTIONS } from '../api';
 import { LOCALE_CODES, type LocaleCode } from '../i18n/messages';
 import { laneCenter } from '../journey';
-import { hasContent, HOME, IMAGES_MAX, parseBlocks, parseTop } from '../page';
+import { HOME, IMAGES_MAX, parseBlocks, parseTop } from '../page';
 import { ACCOUNT_ROLES } from '../roles';
 import { DEFAULT_SETTINGS, LOGO_MAX_BYTES, LOGO_TYPES } from '../settings';
 import type { Block, Page } from '../types/page';
 import { PACKS } from '../theme';
+import { defaultTop, isTopEmpty, seedHomeTop, topSettings } from './home-top';
 import { NoStepsError, publishJourney } from './journeys';
 import { pageBySlug, publishPage } from './pages';
 import {
@@ -498,10 +499,13 @@ export async function setupSchema(pb: PocketBase, log: Logger = noop): Promise<v
 		],
 		indexes: ['CREATE UNIQUE INDEX idx_pages_slug ON pages (slug)']
 	});
-	if (!(await pageBySlug(pb, HOME))) {
-		await pb.collection('pages').create({ slug: HOME, blocks: [], published: null });
+	let home = await pageBySlug(pb, HOME);
+	if (!home) {
+		home = await pb.collection('pages').create<Page>({ slug: HOME, blocks: [], published: null });
 		log('  + page: home');
 	}
+	// A deploy from before the top had a text: its empty top gets the default once (home-top.ts).
+	await seedHomeTop(pb, home, log);
 
 	// The agents' API (server/api): a token is a name, a prefix and the hash of the whole
 	// token; `hidden` keeps the hash from every client but the superuser's. `created_by` is
@@ -832,12 +836,14 @@ async function seedExample(
 	return journey.id;
 }
 
-/** True once the home holds an edit or a copy: a project's own home is never seeded over. */
+/** True once the home holds blocks or a copy: a project's own home is never seeded over. A
+    top alone, the default or a written one, stops nothing, and seedHome keeps it. */
 const homeWritten = (home: Page | null): boolean =>
-	hasContent({ ...parseTop(home), blocks: parseBlocks(home?.blocks) }) || home?.published != null;
+	parseBlocks(home?.blocks).length > 0 || home?.published != null;
 
-/** Writes the home of the example, published: its top, a text, a picture and cards to the
-    main map and to the journey. The picture goes first, since a block names its file. */
+/** Writes the home, published: the default top with the deploy's name (home-top.ts), unless
+    a top is already written, and the example's text, picture and cards to the main map and
+    to the journey. The picture goes first, since a block names its file. */
 async function seedHome(
 	pb: PocketBase,
 	ids: { map: string; journey: string },
@@ -847,7 +853,9 @@ async function seedHome(
 	const home = await pageBySlug(pb, HOME);
 	if (!home) return;
 	const inDeploy = (byLocale: Record<LocaleCode, string>) => inLocales(byLocale, locales);
-	const { title, lede, text, image, cards } = EXAMPLE_HOME;
+	const { text, image, cards } = EXAMPLE_HOME;
+	const settings = await topSettings(pb);
+	const top = isTopEmpty(parseTop(home)) && settings ? defaultTop(settings) : parseTop(home);
 
 	const file = new File([image.svg], image.name, { type: 'image/svg+xml' });
 	const { images } = await pb.collection('pages').update<Page>(home.id, { images: [file] });
@@ -877,9 +885,7 @@ async function seedHome(
 			]
 		}
 	];
-	await pb
-		.collection('pages')
-		.update(home.id, { title: inDeploy(title), lede: inDeploy(lede), blocks });
+	await pb.collection('pages').update(home.id, { ...top, blocks });
 	await publishPage(pb, HOME);
 	log('  + home');
 }

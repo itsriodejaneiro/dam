@@ -145,10 +145,10 @@ export const messages = {
 	},
 	'settings.field.name': { pt: 'Nome', en: 'Name', fr: 'Nom', es: 'Nombre' },
 	'settings.field.name_hint': {
-		pt: 'O país, cidade ou setor mapeado, em cada idioma. Em branco, o mapa usa textos genéricos.',
-		en: 'The country, city or sector being mapped, in each language. Left blank, the map uses generic texts.',
-		fr: 'Le pays, la ville ou le secteur cartographié, dans chaque langue. Laissé vide, la carte utilise des textes génériques.',
-		es: 'El país, ciudad o sector mapeado, en cada idioma. En blanco, el mapa usa textos genéricos.'
+		pt: 'O país, cidade ou setor mapeado, em cada idioma: aparece ao lado da marca e no texto com que a home nasce. Em branco, "Digital Assets Map".',
+		en: 'The country, city or sector being mapped, in each language: it shows next to the mark and in the text the home starts with. Left blank, "Digital Assets Map".',
+		fr: "Le pays, la ville ou le secteur cartographié, dans chaque langue : il apparaît à côté de la marque et dans le texte de départ de la page d'accueil. Laissé vide, « Digital Assets Map ».",
+		es: 'El país, ciudad o sector mapeado, en cada idioma: aparece junto a la marca y en el texto con el que nace la portada. En blanco, "Digital Assets Map".'
 	},
 	'settings.field.locales': { pt: 'Idiomas', en: 'Languages', fr: 'Langues', es: 'Idiomas' },
 	'settings.field.default_locale': {
@@ -634,24 +634,6 @@ export const messages = {
 		en: 'No translation in current locale — showing fallback',
 		fr: 'Pas de traduction dans la langue actuelle — affichage de la version de secours',
 		es: 'Sin traducción en el idioma actual — mostrando alternativa'
-	},
-
-	// ──────────────────────────────────────────────
-	// HOME
-	// ──────────────────────────────────────────────
-	// The generic top, two lines and a lede: what the home shows while the deploy writes none.
-	'home.title_a': { pt: 'Digital Assets Map', en: 'Digital Assets Map', fr: 'Digital Assets Map', es: 'Digital Assets Map' },
-	'home.title_b': {
-		pt: 'da infraestrutura digital',
-		en: 'of the digital infrastructure',
-		fr: "de l'infrastructure numérique",
-		es: 'de la infraestructura digital'
-	},
-	'home.lede': {
-		pt: 'Mapeamento do ecossistema de identidade, credenciais, sistemas de informação e serviços públicos.',
-		en: 'Mapping the ecosystem of identity, credentials, information systems and public services.',
-		fr: "Cartographie de l'écosystème d'identité, d'identifiants, de systèmes d'information et de services publics.",
-		es: 'Mapeo del ecosistema de identidad, credenciales, sistemas de información y servicios públicos.'
 	},
 
 	// ──────────────────────────────────────────────
@@ -1530,10 +1512,10 @@ export const messages = {
 	'home_admin.filter': { pt: 'Idiomas exibidos', en: 'Languages shown', fr: 'Langues affichées', es: 'Idiomas mostrados' },
 	'home_admin.top': { pt: 'Topo', en: 'Top', fr: 'En-tête', es: 'Cabecera' },
 	'home_admin.top_hint': {
-		pt: 'Vazios num idioma, mostram o idioma padrão; vazios nele também, o texto genérico do Digital Assets Map.',
-		en: 'Empty in a language, they show the default language; empty there too, the generic Digital Assets Map text.',
-		fr: "Vides dans une langue, ils montrent la langue par défaut ; vides là aussi, le texte générique du Digital Assets Map.",
-		es: 'Vacíos en un idioma, muestran el idioma predeterminado; vacíos también ahí, el texto genérico del Digital Assets Map.'
+		pt: 'O que a página abre: escritos no idioma padrão, e vazios num outro idioma, mostram o padrão.',
+		en: 'What the page opens with: written in the default language, and empty in another language, they show the default.',
+		fr: "Ce par quoi la page s'ouvre : écrits dans la langue par défaut, et vides dans une autre langue, ils montrent celle par défaut.",
+		es: 'Con lo que abre la página: escritos en el idioma predeterminado, y vacíos en otro idioma, muestran el predeterminado.'
 	},
 	'home_admin.field.title': { pt: 'Título', en: 'Title', fr: 'Titre', es: 'Título' },
 	'home_admin.field.lede': { pt: 'Lede', en: 'Lede', fr: 'Chapeau', es: 'Entradilla' },
@@ -1642,10 +1624,10 @@ export const messages = {
 		es: 'No se pudo guardar la portada.'
 	},
 	'home_admin.error.empty': {
-		pt: 'Uma home vazia não se publica: escreva um título, uma lede ou um bloco, ou tire do ar para mostrar o topo genérico.',
-		en: 'An empty home cannot be published: write a title, a lede or a block, or unpublish it to show the generic top.',
-		fr: "Une page d'accueil vide ne se publie pas : écrivez un titre, un chapeau ou un bloc, ou dépubliez-la pour montrer l'en-tête générique.",
-		es: 'Una portada vacía no se publica: escriba un título, una entradilla o un bloque, o despublíquela para mostrar la cabecera genérica.'
+		pt: 'Uma home vazia não se publica: escreva um título, uma lede ou um bloco.',
+		en: 'An empty home cannot be published: write a title, a lede or a block.',
+		fr: "Une page d'accueil vide ne se publie pas : écrivez un titre, un chapeau ou un bloc.",
+		es: 'Una portada vacía no se publica: escriba un título, una entradilla o un bloque.'
 	},
 	'home_admin.error.image': {
 		pt: 'O arquivo precisa ser PNG, JPEG, WebP ou SVG, até 400 KB.',
@@ -1661,6 +1643,18 @@ export const messages = {
 		es: 'La portada ya guarda {0} archivos. Publique para borrar los que ningún bloque usa.'
 	},
 	// {0} = the default locale's code: what a block needs there before saving
+	'home_admin.problem.title': {
+		pt: 'A home precisa do título em {0}.',
+		en: 'The home needs its title in {0}.',
+		fr: "La page d'accueil a besoin de son titre en {0}.",
+		es: 'La portada necesita su título en {0}.'
+	},
+	'home_admin.problem.lede': {
+		pt: 'A home precisa da lede em {0}.',
+		en: 'The home needs its lede in {0}.',
+		fr: "La page d'accueil a besoin de son chapeau en {0}.",
+		es: 'La portada necesita su entradilla en {0}.'
+	},
 	'home_admin.problem.text': {
 		pt: 'Um bloco de texto precisa do texto em {0}.',
 		en: 'A text block needs its text in {0}.',

@@ -61,7 +61,10 @@ export function storedName(stored: unknown): Record<string, string> {
 
 /** The deploy's name in that locale, for the header and the tab: the default locale's when
     that one is blank, and the product's name when the deploy has none. */
-export function deployName(settings: DeploySettings, locale: string): string {
+export function deployName(
+	settings: Pick<DeploySettings, 'name' | 'defaultLocale'>,
+	locale: string
+): string {
 	const name = (settings.name[locale] || settings.name[settings.defaultLocale] || '').trim();
 	return name || DEFAULT_NAME;
 }

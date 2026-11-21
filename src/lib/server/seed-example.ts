@@ -585,21 +585,9 @@ function examplePicture(): string {
 	);
 }
 
-/** The home of the example: its top, a text on what the map is, a picture and two cards.
-    The title is the editor's HTML: one paragraph, italic and line breaks. */
+/** The blocks of the example's home: a text on what the map is, a picture and two cards.
+    The top is the deploy's default, with its name (home-top.ts). */
 export const EXAMPLE_HOME = {
-	title: {
-		pt: '<p>A cadeia por trás<br>de um <em>serviço público digital</em>.</p>',
-		en: '<p>The chain behind<br>a <em>digital public service</em>.</p>',
-		fr: '<p>La chaîne derrière<br>un <em>service public numérique</em>.</p>',
-		es: '<p>La cadena detrás<br>de un <em>servicio público digital</em>.</p>'
-	} satisfies Translated,
-	lede: {
-		pt: 'Órgãos, domínios, sistemas, credenciais e as pessoas que guardam as chaves, num só mapa, com o que cada um depende. Este topo é um exemplo: escreva o seu em Home, no admin.',
-		en: 'Agencies, domains, systems, credentials and the people who hold the keys, on one map, with what each depends on. This top is an example: write yours under Home, in the admin.',
-		fr: "Organismes, domaines, systèmes, identifiants et les personnes qui détiennent les clés, sur une seule carte, avec ce dont chacun dépend. Cet en-tête est un exemple : écrivez le vôtre dans Page d'accueil, dans l'administration.",
-		es: 'Organismos, dominios, sistemas, credenciales y las personas que guardan las llaves, en un solo mapa, con aquello de lo que cada uno depende. Esta cabecera es un ejemplo: escriba la suya en Portada, en la administración.'
-	} satisfies Translated,
 	text: {
 		pt: '<h2>O que este mapa mostra</h2><p>Por trás de um serviço público digital há uma cadeia: o órgão que responde por ele, os domínios e a hospedagem onde ele roda, o código, as credenciais e as pessoas que guardam as chaves. Cada ponto do mapa é uma entidade, e cada linha, uma dependência.</p><p>Esta página é um exemplo. Troque os textos, a imagem e os cartões em Home, no admin.</p>',
 		en: '<h2>What this map shows</h2><p>Behind a digital public service there is a chain: the agency that answers for it, the domains and hosting it runs on, the code, the credentials and the people who hold the keys. Each point on the map is an entity, and each line a dependency.</p><p>This page is an example. Change its texts, picture and cards under Home, in the admin.</p>',

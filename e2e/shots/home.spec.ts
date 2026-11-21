@@ -42,7 +42,7 @@ async function walk(page: Page) {
 	await signIn(page);
 	await page.goto('/admin/home');
 	const top = page.locator('.block-card.top');
-	await s.shot(top.getByText('digital public service').first(), { of: top });
+	await s.shot(top.getByText('Exampleland').first(), { of: top });
 	const blocks = page.locator('.block-card:not(.top)');
 	await s.shot(blocks.filter({ hasText: 'Explore the map' }));
 

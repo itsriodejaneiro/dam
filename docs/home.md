@@ -4,13 +4,13 @@ The home page, at `/`, opens with a title and a lede, and under them come the bl
 
 ![The top of the home page, in the editor](/screens/home-1.png)
 
-A new deployment starts with an example: a top, a text about the map, a picture of the example entities and two cards, one to the map and one to the example journey. Change them or remove them.
+A new deployment starts with the default top, "Digital Assets Map of the digital infrastructure of *your deployment's name*" and its lede, in each of its languages, and under it an example: a text about the map, a picture of the example entities and two cards, one to the map and one to the example journey. Change them or remove them.
 
 ## The top
 
 The **Top** card holds the title and the lede, in each language. The title takes italics, for the words that stand out, and line breaks: Enter starts a new line. The lede is plain text, in a field that grows with it.
 
-A language left empty shows the default language. With the default language empty too, the page shows the generic text, "Digital Assets Map of the digital infrastructure" and its lede, so a deployment that writes nothing at the top reads as the product.
+The deployment starts with the default text, with its [name](./configure.md#the-fields) in italics, and edits it like any other: a page needs a title and a lede, so saving asks for both in the default language. A language left empty shows the default language. A deployment installed before the top was editable receives the same default text on its first start, in its edit and on the site, when its top is empty.
 
 ![The home editor with the example's blocks](/screens/home-2.png)
 
@@ -43,7 +43,7 @@ The top and every block hold all the deployment's languages. The buttons above t
 
 ![The French field of a text written in English alone](/screens/home-4.png)
 
-Visitors see the default language where a field is empty. Saving asks for the text of a text block and the title of each card in the default language.
+Visitors see the default language where a field is empty. Saving asks for the title and the lede of the top, the text of a text block and the title of each card in the default language.
 
 ## Save, preview, publish
 
@@ -53,7 +53,7 @@ The bar works as in [a journey](./writing-a-journey.md#save-preview-publish):
 - **Preview** saves and opens the home page with your edit. **← back to the editor** returns.
 - **Publish** saves, puts the edit on the site and deletes the files no block uses. It needs a title, a lede or a block.
 - **Discard edit** brings the edit back to what visitors read, after a confirmation.
-- **Unpublish** takes the top and the blocks off the site, so the home page shows the generic top alone, and keeps the edit.
+- **Unpublish** takes the top and the blocks off the site, so the home page shows the default top alone, and keeps the edit.
 
 ![The published home page, with the logos, in dark mode](/screens/home-5.png)
 

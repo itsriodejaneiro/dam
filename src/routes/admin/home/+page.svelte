@@ -37,7 +37,8 @@
 		parseBlocks,
 		parseCopy,
 		parseTop,
-		topMissingByLocale
+		topMissingByLocale,
+		topProblem
 	} from '$lib/page';
 	import { samePublished } from '$lib/publish';
 	import { PublishActionError, type PublishAction } from '$lib/services/publishing';
@@ -261,6 +262,8 @@
 
 	function validationError(): string | null {
 		const def = localesState.default;
+		const atTop = topProblem(top, def);
+		if (atTop) return m(atTop, def.toUpperCase());
 		for (const block of blocks) {
 			const problem = blockProblem(block, def);
 			if (problem) {
@@ -458,7 +461,7 @@
 						</div>
 						<div class="admin-field">
 							<span class="field-label">{m('home_admin.field.lede')}</span>
-							<LocalizedInput id="top-lede" bind:value={top.lede} required={false} multiline locales={shownLocales} />
+							<LocalizedInput id="top-lede" bind:value={top.lede} multiline locales={shownLocales} />
 						</div>
 					</div>
 				</article>
