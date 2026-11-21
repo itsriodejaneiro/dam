@@ -4,6 +4,7 @@ export { default as Tag } from './Tag.svelte';
 export { default as Pill } from './Pill.svelte';
 export { default as Dialog } from './Dialog.svelte';
 export { default as ConfirmDialog } from './ConfirmDialog.svelte';
+export { default as CopyBlock } from './CopyBlock.svelte';
 export { default as NodeDialog } from './NodeDialog.svelte';
 export { default as EdgeDialog } from './EdgeDialog.svelte';
 export { default as RichTextEditor } from './RichTextEditor.svelte';

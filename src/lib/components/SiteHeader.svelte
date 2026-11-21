@@ -30,7 +30,8 @@
 		{ href: '/admin/journeys', key: 'nav.journeys' },
 		{ href: '/admin/categories', key: 'nav.categories', exact: true },
 		{ href: '/admin/settings', key: 'nav.settings', exact: true },
-		{ href: '/admin/accounts', key: 'nav.accounts', exact: true }
+		{ href: '/admin/accounts', key: 'nav.accounts', exact: true },
+		{ href: '/admin/tokens', key: 'nav.tokens', exact: true }
 	];
 
 	let currentPath = $derived(page.url.pathname);

@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { EllipsisVertical } from '@lucide/svelte';
-	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, DropdownMenu, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph, PageBlocks, PublishBar, type MenuItem } from '$lib/components';
+	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, CopyBlock, DropdownMenu, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph, PageBlocks, PublishBar, type MenuItem } from '$lib/components';
 	import type { ResolvedBlock } from '$lib/types/page';
 	import type { DocumentState, GraphHighlight, PhaseTransition, JourneyDocument, VisEdge, VisNode } from '$lib/types/journey';
 	import { fullCamera, laneCenter } from '$lib/journey';
@@ -367,6 +367,14 @@
 					fromPhaseColor="3"
 					toPhaseColor="6"
 				/>
+			</div>
+
+			<div class="comp-card">
+				<h3>CopyBlock</h3>
+				<div class="stack-v">
+					<CopyBlock label={m('tokens.created_label')} text="dam_0a1b2c3d_7Qf3kZx9Lm2NpR8sT4vW6yB1cD5eF0gH3jK7nP9qS2uV" secret />
+					<CopyBlock label={m('tokens.mcp_label')} text="https://map.example.org/api/v1/mcp" />
+				</div>
 			</div>
 
 			<div class="comp-card">

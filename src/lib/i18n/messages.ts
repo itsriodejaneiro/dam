@@ -66,6 +66,7 @@ export const messages = {
 	'nav.home': { pt: 'home', en: 'home', fr: 'accueil', es: 'portada' },
 	'nav.settings': { pt: 'configurações', en: 'settings', fr: 'paramètres', es: 'configuración' },
 	'nav.accounts': { pt: 'contas', en: 'accounts', fr: 'comptes', es: 'cuentas' },
+	'nav.tokens': { pt: 'tokens', en: 'tokens', fr: 'jetons', es: 'tokens' },
 	'nav.locale': { pt: 'Idioma', en: 'Language', fr: 'Langue', es: 'Idioma' },
 	'nav.admin': { pt: 'Admin', en: 'Admin', fr: 'Admin', es: 'Admin' },
 	// The menu button on an admin page: {0} is the label of that page.
@@ -428,6 +429,113 @@ export const messages = {
 		en: 'The password needs at least 8 characters.',
 		fr: 'Le mot de passe doit comporter au moins 8 caractères.',
 		es: 'La contraseña necesita al menos 8 caracteres.'
+	},
+
+	// ──────────────────────────────────────────────
+	// TOKENS (/admin/tokens: the tokens of the agents' API)
+	// ──────────────────────────────────────────────
+	'tokens.title': { pt: 'Tokens da API', en: 'API tokens', fr: "Jetons de l'API", es: 'Tokens de la API' },
+	'tokens.lede': {
+		pt: 'Um token deixa um agente de IA (Claude Code, Codex, Cursor) ler e editar este mapa pela API. Todo token faz tudo o que a API faz; apagá-lo corta o acesso na hora. Cada escrita fica registrada aqui.',
+		en: 'A token lets an AI agent (Claude Code, Codex, Cursor) read and edit this map through the API. Any token does everything the API does; deleting it cuts the access at once. Every write it makes is recorded here.',
+		fr: "Un jeton permet à un agent d'IA (Claude Code, Codex, Cursor) de lire et de modifier cette carte par l'API. Tout jeton fait tout ce que l'API fait ; le supprimer coupe l'accès aussitôt. Chaque écriture est enregistrée ici.",
+		es: 'Un token permite a un agente de IA (Claude Code, Codex, Cursor) leer y editar este mapa por la API. Todo token hace todo lo que hace la API; borrarlo corta el acceso al instante. Cada escritura queda registrada aquí.'
+	},
+	'tokens.personal': {
+		pt: 'O que o agente lê, pessoas incluídas, vai ao provedor do modelo dele: quem o conecta responde por isso.',
+		en: 'What an agent reads, people included, goes to the provider of its model: whoever connects it answers for that.',
+		fr: "Ce que l'agent lit, personnes comprises, part chez le fournisseur de son modèle : qui le connecte en répond.",
+		es: 'Lo que el agente lee, personas incluidas, va al proveedor de su modelo: quien lo conecta responde por ello.'
+	},
+	'tokens.new': { pt: 'Novo token', en: 'New token', fr: 'Nouveau jeton', es: 'Nuevo token' },
+	'tokens.empty': {
+		pt: 'Nenhum token ainda. Crie um para conectar um agente.',
+		en: 'No token yet. Create one to connect an agent.',
+		fr: 'Aucun jeton pour le moment. Créez-en un pour connecter un agent.',
+		es: 'Ningún token todavía. Cree uno para conectar un agente.'
+	},
+	'tokens.field.name': { pt: 'Nome', en: 'Name', fr: 'Nom', es: 'Nombre' },
+	'tokens.field.name_hint': {
+		pt: 'Quem ou o que o usa: uma pessoa, uma equipe, um script.',
+		en: 'Who or what uses it: a person, a team, a script.',
+		fr: "Qui ou quoi l'utilise : une personne, une équipe, un script.",
+		es: 'Quién o qué lo usa: una persona, un equipo, un script.'
+	},
+	'tokens.col_token': { pt: 'Token', en: 'Token', fr: 'Jeton', es: 'Token' },
+	'tokens.col_created_by': { pt: 'Criado por', en: 'Created by', fr: 'Créé par', es: 'Creado por' },
+	'tokens.col_last_used': { pt: 'Último uso', en: 'Last use', fr: 'Dernier usage', es: 'Último uso' },
+	'tokens.never': { pt: 'nunca', en: 'never', fr: 'jamais', es: 'nunca' },
+	'tokens.created_title': { pt: 'Token criado', en: 'Token created', fr: 'Jeton créé', es: 'Token creado' },
+	'tokens.created_body': {
+		pt: 'Copie agora: ele aparece uma vez, e o servidor guarda só uma impressão dele.',
+		en: 'Copy it now: it shows once, and the server keeps only a fingerprint of it.',
+		fr: "Copiez-le maintenant : il n'apparaît qu'une fois, et le serveur n'en garde qu'une empreinte.",
+		es: 'Cópielo ahora: aparece una vez, y el servidor guarda solo una huella de él.'
+	},
+	'tokens.created_label': { pt: 'Token', en: 'Token', fr: 'Jeton', es: 'Token' },
+	'tokens.mcp_label': { pt: 'Endereço MCP', en: 'MCP address', fr: 'Adresse MCP', es: 'Dirección MCP' },
+	'tokens.created_next': {
+		pt: 'O manual tem a receita de cada cliente:',
+		en: 'The manual has a recipe per client:',
+		fr: 'Le manuel a la recette de chaque client :',
+		es: 'El manual tiene la receta de cada cliente:'
+	},
+	'tokens.connect_link': { pt: 'Conectar um agente', en: 'Connect an agent', fr: 'Connecter un agent', es: 'Conectar un agente' },
+	'tokens.done': { pt: 'Pronto', en: 'Done', fr: 'Terminé', es: 'Listo' },
+	'tokens.copy': { pt: 'Copiar', en: 'Copy', fr: 'Copier', es: 'Copiar' },
+	'tokens.copied': { pt: 'Copiado', en: 'Copied', fr: 'Copié', es: 'Copiado' },
+	'tokens.copy_failed': {
+		pt: 'Selecione o texto e copie.',
+		en: 'Select the text and copy it.',
+		fr: 'Sélectionnez le texte et copiez-le.',
+		es: 'Seleccione el texto y cópielo.'
+	},
+	'tokens.writes': { pt: 'escritas', en: 'writes', fr: 'écritures', es: 'escrituras' },
+	'tokens.writes_title': { pt: 'Escritas de {0}', en: 'Writes of {0}', fr: 'Écritures de {0}', es: 'Escrituras de {0}' },
+	'tokens.writes_empty': {
+		pt: 'Este token ainda não gravou nada.',
+		en: 'This token has written nothing yet.',
+		fr: "Ce jeton n'a encore rien écrit.",
+		es: 'Este token todavía no ha escrito nada.'
+	},
+	'tokens.writes_col_when': { pt: 'Quando', en: 'When', fr: 'Quand', es: 'Cuándo' },
+	'tokens.writes_col_what': { pt: 'O quê', en: 'What', fr: 'Quoi', es: 'Qué' },
+	'tokens.writes_col_record': { pt: 'Registro', en: 'Record', fr: 'Enregistrement', es: 'Registro' },
+	'tokens.writes_previous': { pt: 'conteúdo anterior', en: 'previous content', fr: 'contenu précédent', es: 'contenido anterior' },
+	'tokens.action.create': { pt: 'criou', en: 'created', fr: 'a créé', es: 'creó' },
+	'tokens.action.update': { pt: 'alterou', en: 'updated', fr: 'a modifié', es: 'modificó' },
+	'tokens.action.delete': { pt: 'apagou', en: 'deleted', fr: 'a supprimé', es: 'borró' },
+	'tokens.by_admin': { pt: 'por {0}, no admin', en: 'by {0}, in the admin', fr: "par {0}, dans l'admin", es: 'por {0}, en el admin' },
+	'tokens.confirm_remove_title': { pt: 'Apagar este token?', en: 'Delete this token?', fr: 'Supprimer ce jeton ?', es: '¿Borrar este token?' },
+	'tokens.confirm_remove_desc': {
+		pt: '{0} deixa de valer no próximo pedido. As escritas dele ficam registradas.',
+		en: '{0} stops working at the next request. Its writes stay recorded.',
+		fr: '{0} cesse de fonctionner à la prochaine requête. Ses écritures restent enregistrées.',
+		es: '{0} deja de funcionar en la próxima solicitud. Sus escrituras quedan registradas.'
+	},
+	'tokens.error.load': {
+		pt: 'Não foi possível carregar os tokens.',
+		en: 'Could not load the tokens.',
+		fr: 'Impossible de charger les jetons.',
+		es: 'No se pudieron cargar los tokens.'
+	},
+	'tokens.error.save': {
+		pt: 'Não foi possível criar o token.',
+		en: 'Could not create the token.',
+		fr: 'Impossible de créer le jeton.',
+		es: 'No se pudo crear el token.'
+	},
+	'tokens.error.name': {
+		pt: 'O nome tem de 1 a 60 caracteres.',
+		en: 'The name has 1 to 60 characters.',
+		fr: 'Le nom a de 1 à 60 caractères.',
+		es: 'El nombre tiene de 1 a 60 caracteres.'
+	},
+	'tokens.error.remove': {
+		pt: 'Não foi possível apagar o token.',
+		en: 'Could not delete the token.',
+		fr: 'Impossible de supprimer le jeton.',
+		es: 'No se pudo borrar el token.'
 	},
 
 	// ──────────────────────────────────────────────
