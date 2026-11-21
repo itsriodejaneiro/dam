@@ -100,6 +100,7 @@ test('every screen opens and works with no CSP violation', async ({ page }) => {
 		'/admin/maps',
 		'/admin/settings',
 		'/admin/accounts',
+		'/admin/tokens',
 		'/admin/journeys',
 		`/admin/journeys/${journey.id}/preview`,
 		'/admin/home/preview'
@@ -114,7 +115,8 @@ test('every screen opens and works with no CSP violation', async ({ page }) => {
 	await page.getByRole('group', { name: 'Languages shown' }).getByRole('button', { name: 'FR' }).click();
 	await page.locator('.ProseMirror').first().click();
 	await page.getByRole('button', { name: 'Subheading' }).first().click();
-	await page.getByRole('link', { name: 'entities', exact: true }).click();
+	await page.getByRole('button', { name: /^Admin/ }).click();
+	await page.getByRole('menuitem', { name: 'entities', exact: true }).click();
 	await page.getByRole('button', { name: 'Leave' }).click();
 	await page.waitForURL('**/admin/entities');
 
