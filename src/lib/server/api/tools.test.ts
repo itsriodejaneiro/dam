@@ -102,6 +102,17 @@ test('save_connections: a pair that exists comes back with its id; a loop and an
 	await refused('save_connections', { connections: [{ id: 'edge00000000new', source: IDS.portal, target: id }] }, 'conflict');
 });
 
+test('save_connections: a pair that points up a layer is written and warned about; the same layer and downward are quiet', async () => {
+	const same = 'srv000000000001';
+	await ok('save_entities', { entities: [{ id: same, category: 'service', label: { en: 'Tax Portal' }, maps: ['main'] }] });
+	const result = await ok('save_connections', { connections: [{ source: IDS.portal, target: IDS.agencyNode }, { source: IDS.portal, target: same }, { source: IDS.agencyNode, target: same }] });
+	assert.equal(result.items.length, 3);
+	assert.equal(rows('edges').length, 4);
+	assert.equal(result.warnings.length, 1);
+	assert.ok(result.warnings[0].includes(`"Citizen Portal" (${IDS.portal})`) && result.warnings[0].includes(`"Example Agency" (${IDS.agencyNode})`), result.warnings[0]);
+	assert.deepEqual((await ok('save_connections', { connections: [{ source: IDS.agencyNode, target: IDS.portal }] })).warnings, []);
+});
+
 test('save_category and save_map: the slug finds the record, the main map is not edited', async () => {
 	const created = await ok('save_category', { slug: 'domain', color_slot: 3, label: { en: 'Domain' } });
 	assert.equal(created.created, true);

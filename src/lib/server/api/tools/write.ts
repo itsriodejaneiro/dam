@@ -313,20 +313,27 @@ const ConnectionInput = z.strictObject({
 export const saveConnections = tool({
 	name: 'save_connections',
 	title: 'Save connections',
-	description: `Creates up to ${CONNECTIONS_PER_CALL} connections between entities, source to target. A pair that already exists comes back with its id and is not written again.`,
+	description: `Creates up to ${CONNECTIONS_PER_CALL} connections between entities, source to target. A pair that already exists comes back with its id and is not written again. A connection points from the upper layer to the lower one, in the order of the categories get_deployment returns (a document to its base, a base to its operator, the operator to its manager, the manager to the policy); every pair is written, and warnings lists the ones that point upward.`,
 	input: z.strictObject({ connections: z.array(ConnectionInput).min(1).max(CONNECTIONS_PER_CALL) }),
 	annotations: { idempotentHint: true },
 	async run(ctx, { connections }) {
-		const [nodes, edges] = await Promise.all([ctx.store.list('nodes', { fields: 'id' }), ctx.store.list('edges')]);
-		const known = new Set(nodes.map((n) => n.id));
+		const [set, edges] = await Promise.all([loadEntities(ctx.store), ctx.store.list('edges')]);
+		const entityById = new Map(set.entities.map((e) => [e.id, e]));
+		const layerOf = new Map(set.categories.map((c) => [c.id, c.layer_order]));
+		const defaultLocale = ctx.settings.defaultLocale;
+		const name = (id: string) => `"${entityById.get(id)!.label[defaultLocale] ?? Object.values(entityById.get(id)!.label)[0] ?? ''}" (${id})`;
+		const warnings: string[] = [];
 		const pairs = new Map(edges.map((e) => [`${e.source}>${e.target}`, e.id]));
 		const byId = new Map(edges.map((e) => [e.id, e]));
 		const items: { id: string; created: boolean }[] = [];
 		for (const [i, c] of connections.entries()) {
 			const at = `connections[${i}]`;
 			if (c.source === c.target) throw new ToolError('bad_request', `${at}: an entity does not connect to itself.`);
-			for (const end of [c.source, c.target]) if (!known.has(end)) throw notFound('entity', end);
+			for (const end of [c.source, c.target]) if (!entityById.has(end)) throw notFound('entity', end);
 			const key = `${c.source}>${c.target}`;
+			const from = entityById.get(c.source)!;
+			const to = entityById.get(c.target)!;
+			if ((layerOf.get(from.category) ?? 0) > (layerOf.get(to.category) ?? 0)) warnings.push(`${at}: ${name(c.source)} points up to ${name(c.target)}, a higher layer; connections point from the upper layer to the lower one. It is saved as given.`);
 			const existingId = pairs.get(key);
 			if (existingId && (!c.id || existingId === c.id)) {
 				items.push({ id: existingId, created: false });
@@ -343,7 +350,7 @@ export const saveConnections = tool({
 			pairs.set(key, id);
 			items.push({ id, created: !current });
 		}
-		return { items };
+		return { items, warnings };
 	}
 });
 

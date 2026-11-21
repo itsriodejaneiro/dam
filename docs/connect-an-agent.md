@@ -85,7 +85,7 @@ curl https://<app>/api/v1/mcp \
 | `get_settings`, `list_entities`, `get_entity`, `list_connections`, `list_journeys`, `get_journey` | reads the settings, the map and the journeys' edit |
 | `save_category`, `save_map`, `save_settings` | the lanes of the map, the maps and the deployment's identity (not the flag or logo) |
 | `save_entities` | up to 50 entities a call, each whole: category, texts per language, links, maps; with no id, an entity of the same category and label is updated, so a spreadsheet can run twice |
-| `place_entities`, `save_connections` | positions on a map, and up to 200 connections a call |
+| `place_entities`, `save_connections` | positions on a map, and up to 200 connections a call; a connection points from the upper layer to the lower one, and the result's `warnings` lists the pairs that point upward (they are saved anyway) |
 | `save_journey`, `save_journey_steps` | a journey's edit and the whole list of its steps, each with the entities it highlights |
 | `publish_journey` | copies the edit to the public site, after you said yes |
 | `delete_entity`, `delete_connection`, `delete_category`, `delete_map`, `delete_journey` | deletes, under the same rules as the admin screens |

@@ -20,5 +20,6 @@ export const INSTRUCTIONS = [
 	'Start with get_deployment: it gives the locales (every text is an object per locale code, and only those locales are accepted), the categories and the maps, and the main map, which is first.',
 	'Entities, connections, categories and maps go live on the public site the moment they are saved. A journey is different: the tools write its edit, and the public copy changes only with publish_journey, after the person has looked at the preview in /admin/journeys and said yes.',
 	'Saving is safe to repeat: with an existing id, save_* updates; with no id, save_entities finds an entity of the same category and label in the default locale, and save_connections finds the same pair.',
+	'A connection points from the upper layer to the lower one, in the order of the categories get_deployment returns (a document to its base, a base to its operator, the operator to its manager, the manager to the policy); save_connections writes every pair and warns about the ones that point upward.',
 	'Every write is recorded with what it replaced; an error comes back as a result with isError and a message that says what to fix.'
 ].join(' ');
