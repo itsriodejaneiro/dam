@@ -13,6 +13,7 @@ export { default as LocaleSwitch } from './LocaleSwitch.svelte';
 export { default as ThemeToggle } from './ThemeToggle.svelte';
 export { default as PackSwitch } from './PackSwitch.svelte';
 export { default as AuthButton } from './AuthButton.svelte';
+export { default as DropdownMenu } from './DropdownMenu.svelte';
 export { default as SettingsMenu } from './SettingsMenu.svelte';
 export { default as SettingsFields } from './SettingsFields.svelte';
 export { default as SiteHeader } from './SiteHeader.svelte';
@@ -27,4 +28,4 @@ export { default as LogoGrid } from './LogoGrid.svelte';
 export { default as PageBlocks } from './PageBlocks.svelte';
 export { default as HomeView } from './HomeView.svelte';
 
-export type { Status } from './types';
+export type { Status, MenuItem } from './types';

@@ -2,12 +2,20 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph, PageBlocks, PublishBar } from '$lib/components';
+	import { EllipsisVertical } from '@lucide/svelte';
+	import { AppMeta, Button, Tag, Pill, Dialog, ConfirmDialog, DropdownMenu, RichTextEditor, DocInventory, PhaseTransitionCard, PackSwitch, SettingsFields, ThemeToggle, JourneyGraph, PageBlocks, PublishBar, type MenuItem } from '$lib/components';
 	import type { ResolvedBlock } from '$lib/types/page';
 	import type { DocumentState, GraphHighlight, PhaseTransition, JourneyDocument, VisEdge, VisNode } from '$lib/types/journey';
 	import { fullCamera, laneCenter } from '$lib/journey';
 	import { auth, requireAdmin, type NodeType } from '$lib/services';
 	import { m, type Localized } from '$lib/i18n';
+
+	// The two triggers of the header's menus, over the same items.
+	let menuItems = $derived<MenuItem[]>([
+		{ href: '#entities', label: m('nav.entities') },
+		{ href: '#connections', label: m('nav.connections') },
+		{ href: '#journeys', label: m('nav.journeys'), active: true }
+	]);
 
 	requireAdmin();
 
@@ -312,6 +320,20 @@
 			<div class="comp-card">
 				<h3>{m('ds.card_editor')}</h3>
 				<RichTextEditor bind:content={rteContent} />
+			</div>
+
+			<div class="comp-card">
+				<h3>DropdownMenu</h3>
+				<div class="stack">
+					<DropdownMenu label={m('nav.admin')} items={menuItems} variant="nav" active chevron align="start">
+						{#snippet trigger()}{m('nav.admin_page', m('nav.journeys'))}{/snippet}
+					</DropdownMenu>
+					<DropdownMenu label={m('settings.menu')} items={menuItems}>
+						{#snippet trigger()}
+							<EllipsisVertical size={16} strokeWidth={1.75} />
+						{/snippet}
+					</DropdownMenu>
+				</div>
 			</div>
 
 			<div class="comp-card">

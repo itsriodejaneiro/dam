@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Menu, X } from '@lucide/svelte';
+	import { ChevronDown, Menu, X } from '@lucide/svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import LocaleSwitch from './LocaleSwitch.svelte';
 	import AuthButton from './AuthButton.svelte';
 	import SettingsMenu from './SettingsMenu.svelte';
+	import DropdownMenu from './DropdownMenu.svelte';
+	import type { MenuItem } from './types';
 	import { auth } from '$lib/services/auth.svelte';
 	import { markUrl, placeName } from '$lib/settings';
-	import { localesState, m } from '$lib/i18n';
+	import { localesState, m, type MessageKey } from '$lib/i18n';
 
 	interface Props {
 		subtitle?: string;
@@ -18,13 +20,40 @@
 	let settings = $derived(page.data.settings);
 	let mark = $derived(markUrl(settings));
 
+	// The admin pages, in the order of the Admin menu. `exact` keeps a page's children
+	// (`/admin/journeys/<id>`) under their list; the others have none.
+	const ADMIN_PAGES: { href: string; key: MessageKey; exact?: boolean }[] = [
+		{ href: '/admin/entities', key: 'nav.entities', exact: true },
+		{ href: '/admin/connections', key: 'nav.connections', exact: true },
+		{ href: '/admin/maps', key: 'nav.maps', exact: true },
+		{ href: '/admin/journeys', key: 'nav.journeys' },
+		{ href: '/admin/categories', key: 'nav.categories', exact: true },
+		{ href: '/admin/home', key: 'nav.home' },
+		{ href: '/admin/settings', key: 'nav.settings', exact: true },
+		{ href: '/admin/accounts', key: 'nav.accounts', exact: true }
+	];
+
+	let currentPath = $derived(page.url.pathname);
+	let adminItems = $derived<MenuItem[]>(
+		ADMIN_PAGES.map((p) => ({
+			href: p.href,
+			label: m(p.key),
+			active: p.exact ? currentPath === p.href : currentPath.startsWith(p.href)
+		}))
+	);
+	let activeAdmin = $derived(adminItems.find((item) => item.active));
+	// "Admin: journeys" on an admin page, so the person knows where they are without opening it.
+	let adminLabel = $derived(activeAdmin ? m('nav.admin_page', activeAdmin.label) : m('nav.admin'));
+
 	let menuOpen = $state(false);
+	// The drawer's Admin group starts open on an admin page, closed elsewhere.
+	let adminGroupOpen = $state(false);
 
 	// Closes the menu whenever the route changes (click on an internal link).
-	let currentPath = $derived(page.url.pathname);
 	$effect(() => {
 		currentPath;
 		menuOpen = false;
+		adminGroupOpen = !!activeAdmin;
 	});
 
 	function onKeydown(e: KeyboardEvent) {
@@ -54,30 +83,9 @@
 		{/if}
 		{#if auth.isAdmin}
 			<span class="nav-sep"></span>
-			<a href="/admin/entities" class:active={page.url.pathname === '/admin/entities'}>
-				{m('nav.entities')}
-			</a>
-			<a href="/admin/connections" class:active={page.url.pathname === '/admin/connections'}>
-				{m('nav.connections')}
-			</a>
-			<a href="/admin/maps" class:active={page.url.pathname === '/admin/maps'}>
-				{m('nav.maps')}
-			</a>
-			<a href="/admin/journeys" class:active={page.url.pathname.startsWith('/admin/journeys')}>
-				{m('nav.journeys')}
-			</a>
-			<a href="/admin/categories" class:active={page.url.pathname === '/admin/categories'}>
-				{m('nav.categories')}
-			</a>
-			<a href="/admin/home" class:active={page.url.pathname.startsWith('/admin/home')}>
-				{m('nav.home')}
-			</a>
-			<a href="/admin/settings" class:active={page.url.pathname === '/admin/settings'}>
-				{m('nav.settings')}
-			</a>
-			<a href="/admin/accounts" class:active={page.url.pathname === '/admin/accounts'}>
-				{m('nav.accounts')}
-			</a>
+			<DropdownMenu label={adminLabel} items={adminItems} variant="nav" active={!!activeAdmin} chevron align="start">
+				{#snippet trigger()}{adminLabel}{/snippet}
+			</DropdownMenu>
 		{/if}
 	</nav>
 
@@ -122,30 +130,24 @@
 				{/if}
 				{#if auth.isAdmin}
 					<div class="drawer-sep"></div>
-					<a href="/admin/entities" class:active={page.url.pathname === '/admin/entities'}>
-						{m('nav.entities')}
-					</a>
-					<a href="/admin/connections" class:active={page.url.pathname === '/admin/connections'}>
-						{m('nav.connections')}
-					</a>
-					<a href="/admin/maps" class:active={page.url.pathname === '/admin/maps'}>
-						{m('nav.maps')}
-					</a>
-					<a href="/admin/journeys" class:active={page.url.pathname.startsWith('/admin/journeys')}>
-						{m('nav.journeys')}
-					</a>
-					<a href="/admin/categories" class:active={page.url.pathname === '/admin/categories'}>
-						{m('nav.categories')}
-					</a>
-					<a href="/admin/home" class:active={page.url.pathname.startsWith('/admin/home')}>
-						{m('nav.home')}
-					</a>
-					<a href="/admin/settings" class:active={page.url.pathname === '/admin/settings'}>
-						{m('nav.settings')}
-					</a>
-					<a href="/admin/accounts" class:active={page.url.pathname === '/admin/accounts'}>
-						{m('nav.accounts')}
-					</a>
+					<button
+						type="button"
+						class="drawer-group"
+						class:active={!!activeAdmin}
+						aria-expanded={adminGroupOpen}
+						aria-controls="mobile-admin"
+						onclick={() => (adminGroupOpen = !adminGroupOpen)}
+					>
+						{adminLabel}
+						<span class="chevron" class:up={adminGroupOpen}><ChevronDown size={14} strokeWidth={2} /></span>
+					</button>
+					{#if adminGroupOpen}
+						<div id="mobile-admin" class="drawer-sub">
+							{#each adminItems as item (item.href)}
+								<a href={item.href} class:active={item.active}>{item.label}</a>
+							{/each}
+						</div>
+					{/if}
 				{/if}
 			</nav>
 			<div class="drawer-sep"></div>
@@ -304,6 +306,43 @@
 	.drawer-nav a.active {
 		color: var(--accent);
 	}
+	.drawer-group {
+		background: transparent;
+		border: 0;
+		border-bottom: 1px dashed var(--border);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		font-family: 'Fira Mono', monospace;
+		font-size: 0.78rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		padding: 0.75rem 0.25rem;
+		transition: color 0.15s;
+	}
+	.drawer-group:hover {
+		color: var(--text);
+	}
+	.drawer-group.active {
+		color: var(--accent);
+	}
+	.drawer-group .chevron {
+		display: inline-flex;
+		transition: transform 0.15s;
+	}
+	.drawer-group .chevron.up {
+		transform: rotate(180deg);
+	}
+	.drawer-sub {
+		display: flex;
+		flex-direction: column;
+		padding-left: 1rem;
+	}
+	.drawer-sub a:last-child {
+		border-bottom: 1px dashed var(--border);
+	}
 	.drawer-sep {
 		height: 1px;
 		background: var(--border);
@@ -317,8 +356,10 @@
 		padding-top: 0.5rem;
 	}
 
-	/* The signed-in nav is long: tighter first, the drawer when even that does not fit. */
-	@media (max-width: 1620px) {
+	/* Tighter first, the drawer when even that does not fit. Measured signed in, in French, on
+	   the admin page with the longest label: the loose layout fits down to 1002px and the tight
+	   one to 922px; the breakpoints keep a margin for Portuguese, two letters longer. */
+	@media (max-width: 1020px) {
 		.site {
 			padding-inline: 1.5rem;
 			gap: 1rem;
@@ -331,7 +372,7 @@
 		}
 	}
 
-	@media (max-width: 1435px) {
+	@media (max-width: 940px) {
 		.site {
 			grid-template-columns: 1fr auto;
 			padding: 0.9rem 1.2rem;

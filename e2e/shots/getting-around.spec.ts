@@ -11,6 +11,13 @@ test('the home page and the header', async ({ page }) => {
 	await s.shot(page.getByRole('group', { name: 'Language' }), { of: header });
 
 	await signIn(page);
-	await s.shot(page.getByRole('link', { name: 'accounts', exact: true }), { of: header });
+	await page.goto('/');
+	await page.getByRole('button', { name: 'Admin', exact: true }).click();
+	const menu = page.getByRole('menu');
+	await s.shot(menu.getByRole('menuitem', { name: 'accounts' }), { of: [header, menu] });
+
+	await menu.getByRole('menuitem', { name: 'journeys' }).click();
+	await page.waitForURL('**/admin/journeys');
+	await s.shot(page.getByRole('button', { name: 'Admin: journeys' }), { of: header });
 	s.end();
 });

@@ -51,14 +51,14 @@ export async function submitSignIn(page: Page) {
 export async function signIn(page: Page) {
 	await page.goto('/login');
 	await submitSignIn(page);
-	await expect(page.getByRole('link', { name: 'entities', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: /^Admin/ })).toBeVisible();
 }
 
 interface ShotOptions {
 	/** The whole page, not only the viewport. */
 	fullPage?: boolean;
-	/** Crops the picture to this element, so that the caption speaks of one thing. */
-	of?: Locator;
+	/** Crops the picture to this element, so that the caption speaks of one thing; several, to the box around them all (a header and the menu open under it). */
+	of?: Locator | Locator[];
 	/** Keeps the mouse where it is, for a hover state. */
 	hover?: boolean;
 }
@@ -75,7 +75,16 @@ export function screens(page: Page, name: string) {
 			taken += 1;
 			mkdirSync(DIR, { recursive: true });
 			const path = join(DIR, `${name}-${taken}.png`);
-			if (of) await of.screenshot({ path, animations: 'disabled' });
+			if (Array.isArray(of)) {
+				// a few pixels around, so that a shadow or a border is not cut at the box's edge
+				const pad = 6;
+				const boxes = await Promise.all(of.map((l) => l.boundingBox()));
+				const x = Math.max(0, Math.min(...boxes.map((b) => b!.x)) - pad);
+				const y = Math.max(0, Math.min(...boxes.map((b) => b!.y)) - pad);
+				const right = Math.max(...boxes.map((b) => b!.x + b!.width)) + pad;
+				const bottom = Math.max(...boxes.map((b) => b!.y + b!.height)) + pad;
+				await page.screenshot({ path, animations: 'disabled', clip: { x, y, width: right - x, height: bottom - y } });
+			} else if (of) await of.screenshot({ path, animations: 'disabled' });
 			else await page.screenshot({ path, fullPage, animations: 'disabled' });
 		},
 		/** Deletes the pictures of this page left by a longer run. */

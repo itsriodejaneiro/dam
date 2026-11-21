@@ -67,6 +67,9 @@ export const messages = {
 	'nav.settings': { pt: 'configurações', en: 'settings', fr: 'paramètres', es: 'configuración' },
 	'nav.accounts': { pt: 'contas', en: 'accounts', fr: 'comptes', es: 'cuentas' },
 	'nav.locale': { pt: 'Idioma', en: 'Language', fr: 'Langue', es: 'Idioma' },
+	'nav.admin': { pt: 'Admin', en: 'Admin', fr: 'Admin', es: 'Admin' },
+	// The menu button on an admin page: {0} is the label of that page.
+	'nav.admin_page': { pt: 'Admin: {0}', en: 'Admin: {0}', fr: 'Admin : {0}', es: 'Admin: {0}' },
 	'nav.menu_open': { pt: 'Abrir menu', en: 'Open menu', fr: 'Ouvrir le menu', es: 'Abrir menú' },
 	'nav.menu_close': { pt: 'Fechar menu', en: 'Close menu', fr: 'Fermer le menu', es: 'Cerrar menú' },
 
