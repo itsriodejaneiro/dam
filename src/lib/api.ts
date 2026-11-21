@@ -6,6 +6,8 @@ export const API_PATH = '/api/v1';
 /** The MCP server: one POST per JSON-RPC request. */
 export const MCP_PATH = `${API_PATH}/mcp`;
 
+export const isApiPath = (path: string) => path === API_PATH || path.startsWith(`${API_PATH}/`);
+
 /** A token: `dam_<8 hex>_<256-bit secret in base64url>`. The prefix finds the record. */
 export const TOKEN_PREFIX = 'dam';
 export const TOKEN_PATTERN = /^dam_([0-9a-f]{8})_[A-Za-z0-9_-]{43}$/;

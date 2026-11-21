@@ -1,5 +1,6 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
+import type { ApiToken } from '$lib/server/api/tokens';
 import type { DeploySettings } from '$lib/settings';
 
 declare global {
@@ -7,7 +8,10 @@ declare global {
 
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			/** The token behind a request to /api/v1, set by the guard in hooks.server.ts. */
+			apiToken?: ApiToken;
+		}
 		interface PageData {
 			/** The deploy's identity, from the root layout. */
 			settings: DeploySettings;
