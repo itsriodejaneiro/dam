@@ -82,7 +82,7 @@ curl https://<app>/api/v1/mcp \
 | Tool | What it does |
 |---|---|
 | `get_deployment` | the settings, the locales, the categories and the maps: where the agent starts |
-| `list_entities`, `get_entity`, `list_connections`, `list_journeys`, `get_journey` | reads the map and the journeys' edit |
+| `get_settings`, `list_entities`, `get_entity`, `list_connections`, `list_journeys`, `get_journey` | reads the settings, the map and the journeys' edit |
 | `save_category`, `save_map`, `save_settings` | the lanes of the map, the maps and the deployment's identity (not the flag or logo) |
 | `save_entities` | up to 50 entities a call, each whole: category, texts per language, links, maps; with no id, an entity of the same category and label is updated, so a spreadsheet can run twice |
 | `place_entities`, `save_connections` | positions on a map, and up to 200 connections a call |

@@ -79,7 +79,7 @@ test('the current era: server/discover, tools/list with a public cache, and the 
 test('tools/list shows every tool, with the zod schema as JSON Schema and no $schema key', async () => {
 	const tools = (await legacy('tools/list')).body.result?.tools as Record<string, any>[];
 	const names = tools.map((t) => t.name);
-	for (const name of ['get_deployment', 'list_entities', 'get_entity', 'list_connections', 'list_journeys', 'get_journey']) assert.ok(names.includes(name), name);
+	for (const name of ['get_deployment', 'get_settings', 'list_entities', 'get_entity', 'list_connections', 'list_journeys', 'get_journey']) assert.ok(names.includes(name), name);
 	const list = tools.find((t) => t.name === 'list_entities')!;
 	assert.equal(list.inputSchema.$schema, undefined);
 	assert.equal(list.inputSchema.additionalProperties, false);
@@ -101,6 +101,7 @@ test('get_deployment: settings, categories in lane order, maps with the main one
 	assert.deepEqual(s.token, { name: 'Sheet', prefix: '0a1b2c3d' });
 	assert.equal(s.admin, `${ORIGIN}/admin/journeys`);
 	assert.deepEqual(JSON.parse(result.content[0].text), s);
+	assert.deepEqual((await call('get_settings')).structuredContent, { settings: s.settings });
 });
 
 test('list_entities: whole entities, the filters by text, category and map, and the pages', async () => {

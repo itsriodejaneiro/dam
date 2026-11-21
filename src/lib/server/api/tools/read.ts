@@ -47,15 +47,31 @@ export const getDeployment = tool({
 	annotations: { readOnlyHint: true },
 	async run(ctx) {
 		const [categories, maps] = await Promise.all([loadCategories(ctx.store), loadMaps(ctx.store)]);
-		const { name, locales, defaultLocale, theme, flag, logo, journeys } = ctx.settings;
 		return {
-			settings: { name, locales, default_locale: defaultLocale, theme, flag, logo, journeys },
+			settings: settingsView(ctx),
 			categories,
 			maps,
 			token: { name: ctx.token.name, prefix: ctx.token.prefix },
 			site: ctx.origin,
 			admin: `${ctx.origin}/admin/journeys`
 		};
+	}
+});
+
+/** The settings as `save_settings` takes them, plus the files it leaves alone. */
+const settingsView = (ctx: import('./types').ToolContext) => {
+	const { name, locales, defaultLocale, theme, flag, logo, journeys } = ctx.settings;
+	return { name, locales, default_locale: defaultLocale, theme, flag, logo, journeys };
+};
+
+export const getSettings = tool({
+	name: 'get_settings',
+	title: 'The settings',
+	description: 'The deployment\'s settings alone: name per locale, locales and the default one, theme, flag, logo and whether the journeys section shows. save_settings changes them, files aside.',
+	input: z.strictObject({}),
+	annotations: { readOnlyHint: true },
+	async run(ctx) {
+		return { settings: settingsView(ctx) };
 	}
 });
 
@@ -156,4 +172,4 @@ export const getJourney = tool({
 	}
 });
 
-export const READ_TOOLS = [getDeployment, listEntities, getEntity, listConnections, listJourneys, getJourney];
+export const READ_TOOLS = [getDeployment, getSettings, listEntities, getEntity, listConnections, listJourneys, getJourney];
