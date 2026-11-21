@@ -133,24 +133,6 @@
 		padding: 0.3rem 0;
 		max-width: 22rem;
 	}
-	.check {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.92rem;
-	}
-	.check.soft {
-		color: var(--text-muted);
-		font-size: 0.82rem;
-	}
-	.check input {
-		accent-color: var(--accent);
-	}
-	.hint {
-		margin-top: 0.4rem;
-		color: var(--text-soft);
-		font-size: 0.8rem;
-	}
 	.flag-row {
 		display: flex;
 		align-items: center;

@@ -25,3 +25,20 @@
   display: block;
   margin-bottom: 0.4rem;
 }
+
+/* A checkbox with its text; .soft for a secondary one. */
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+}
+.check.soft { color: var(--text-muted); font-size: 0.82rem; }
+.check input { accent-color: var(--accent); }
+
+/* The line under a field that says what it takes. */
+.hint {
+  margin-top: 0.4rem;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
