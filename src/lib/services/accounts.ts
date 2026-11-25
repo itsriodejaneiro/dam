@@ -1,13 +1,9 @@
 import { pb } from './pb';
-import { SERVICE_ACCOUNT_EMAIL } from '$lib/api';
+import { listAccounts } from './accountList';
 import type { Account } from './types';
 
-/** The people's accounts: the agents' API's service account is nobody's, and stays out. */
 export async function getAccounts(): Promise<Account[]> {
-	return await pb.collection('users').getFullList<Account>({
-		sort: 'email',
-		filter: pb.filter('email != {:email}', { email: SERVICE_ACCOUNT_EMAIL })
-	});
+	return await listAccounts(pb.collection('users'));
 }
 
 export async function createAccount(email: string, password: string): Promise<Account> {
