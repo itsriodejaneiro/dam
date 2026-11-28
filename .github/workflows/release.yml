@@ -84,7 +84,9 @@ jobs:
         run: mkdir -p "$RUNNER_TEMP/digests" && touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
       - uses: actions/upload-artifact@v7
         with:
-          name: digest-${{ matrix.image }}-${{ matrix.arch }}
+          # The image comes last: the merge job's pattern ends at it, so `dam` never matches
+          # `dam-pocketbase`.
+          name: digest-${{ matrix.arch }}-${{ matrix.image }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -101,7 +103,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digest-${{ matrix.image }}-*
+          pattern: digest-*-${{ matrix.image }}
           merge-multiple: true
       - uses: docker/login-action@v4
         with:
