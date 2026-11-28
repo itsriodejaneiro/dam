@@ -1,6 +1,6 @@
 # Install
 
-The Digital Assets Map runs on [Bun](https://bun.sh) and [PocketBase](https://pocketbase.io). Install it by hand to develop or to keep control of each piece, with Docker to build everything from a clone, or from the published images to run it with no clone at all. All three end at the same place: the [setup wizard](#the-setup-wizard).
+The Digital Assets Map runs on [Bun](https://bun.sh) and [PocketBase](https://pocketbase.io). Install it by hand to develop or to keep control of each piece, with Docker to build everything from a clone, from the published images to run it with no clone at all, or with Dokploy on a server that has the panel. All four end at the same place: the [setup wizard](#the-setup-wizard).
 
 ## By hand
 
@@ -55,9 +55,43 @@ docker compose -f compose.deploy.yaml up -d
 
 The file publishes no port, like `compose.yaml`: on one machine, fetch `compose.local.yaml` too and add `-f compose.local.yaml`; on a server, a reverse proxy reaches the two services.
 
+## With Dokploy
+
+Point two DNS names at the server, one for the app and one for PocketBase. Then, in [Dokploy](https://dokploy.com):
+
+1. **Create Project**, and inside it **Create Service** > **Compose**: give it a name and **Create**.
+2. In **General**, under **Provider**, open the **Git** tab, fill it in and **Save**:
+
+   | Field | Value |
+   |---|---|
+   | Repository URL | `https://github.com/itsriodejaneiro/dam.git` |
+   | Branch | `main` |
+   | Compose Path | `./compose.yaml` |
+
+3. In **Environment**, set the variables, with your two names, and **Save**:
+
+   ```dotenv
+   ORIGIN=https://map.example.org
+   PUBLIC_POCKETBASE_URL=https://pb.map.example.org
+   PB_SUPERUSER_EMAIL=admin@example.com
+   PB_SUPERUSER_PASSWORD=a-long-password
+   ```
+
+4. In **Domains**, **Add Domain** once for each service, with **HTTPS** on and **Let's Encrypt** as the **Certificate Provider**:
+
+   | Service Name | Host | Container Port |
+   |---|---|---|
+   | `app` | `map.example.org` | 3000 |
+   | `dam-pocketbase` | `pb.map.example.org` | 8090 |
+
+   Before the first deploy the **Service Name** list is empty: the first icon beside it, **Fetch**, reads the services from the repository, and **Manual** takes the name typed.
+
+5. Back in **General**, **Deploy**. The first boot creates the superuser. A domain takes effect at a deploy: after adding or changing one, **Deploy** again.
+6. Open `https://map.example.org/setup`, sign in with that superuser and fill in the [setup wizard](#the-setup-wizard).
+
 ## On a server
 
-The [README](https://github.com/itsriodejaneiro/dam#install) has the steps for a server: the reverse proxy, Dokploy, and the backup of the database.
+The [README](https://github.com/itsriodejaneiro/dam#install) has the steps for a server with no panel: the reverse proxy and the backup of the database.
 
 The app sends a `Content-Security-Policy`, with a new nonce on every page, and the other security headers itself. A reverse proxy or CDN in front passes them on as they are, adds no policy of its own and injects no script into the pages. The policy lets the browser reach PocketBase at the origin of `PUBLIC_POCKETBASE_URL`, and needs nothing else from you.
 

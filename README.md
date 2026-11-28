@@ -108,9 +108,16 @@ Like `compose.yaml`, the file publishes no port: on a server, the reverse proxy 
 
 Point two DNS names at the server, one for the app and one for PocketBase. Then, in [Dokploy](https://dokploy.com):
 
-1. Create a project and add a **Compose** service.
-2. In **General**, choose this repository and its branch, with `./compose.yaml` as the **Compose Path**.
-3. In **Environment**, set the variables, with your two names:
+1. **Create Project**, and inside it **Create Service** > **Compose**: give it a name and **Create**.
+2. In **General**, under **Provider**, open the **Git** tab, fill it in and **Save**:
+
+   | Field | Value |
+   |---|---|
+   | Repository URL | `https://github.com/itsriodejaneiro/dam.git` |
+   | Branch | `main` |
+   | Compose Path | `./compose.yaml` |
+
+3. In **Environment**, set the variables, with your two names, and **Save**:
 
    ```dotenv
    ORIGIN=https://map.example.org
@@ -119,14 +126,16 @@ Point two DNS names at the server, one for the app and one for PocketBase. Then,
    PB_SUPERUSER_PASSWORD=a-long-password
    ```
 
-4. In **Domains**, add both, with HTTPS on:
+4. In **Domains**, **Add Domain** once for each service, with **HTTPS** on and **Let's Encrypt** as the **Certificate Provider**:
 
-   | Service | Host | Port |
+   | Service Name | Host | Container Port |
    |---|---|---|
    | `app` | `map.example.org` | 3000 |
    | `dam-pocketbase` | `pb.map.example.org` | 8090 |
 
-5. **Deploy**. The first boot creates the superuser.
+   Before the first deploy the **Service Name** list is empty: the first icon beside it, **Fetch**, reads the services from the repository, and **Manual** takes the name typed.
+
+5. Back in **General**, **Deploy**. The first boot creates the superuser. A domain takes effect at a deploy: after adding or changing one, **Deploy** again.
 6. Open `https://map.example.org/setup`, sign in with that superuser and fill in the wizard.
 
 Several deployments share one Dokploy with nothing else to set: Dokploy gives each Compose service its own project, and each deployment's internal PocketBase address comes from it.
