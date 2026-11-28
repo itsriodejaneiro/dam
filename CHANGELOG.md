@@ -4,6 +4,17 @@ All notable changes to the Digital Assets Map are in this file. The format follo
 
 ## Unreleased
 
+## 0.2.1 - 2026-11-28
+
+### Changed
+
+- spell out the dokploy recipe, in the readme and the manual
+
+### Fixed
+
+- list the accounts to an admin account
+- treat an expired session as no session
+
 ## 0.2.0 - 2026-11-22
 
 ### Added
